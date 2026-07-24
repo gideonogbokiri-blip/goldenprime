@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const UserSettings = require('../models/UserSettings');
-const { sendVerificationEmail, sendResetPasswordEmail } = require('../services/emailService');
+const Wallet = require('../models/Wallet');
 
 const SALT_ROUNDS = 12;
 
@@ -27,40 +27,74 @@ async function register({ email, password, firstName, lastName, referralCode }) 
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
   const user = await User.create({ email, passwordHash, firstName, lastName });
 
+  // Generate tokens immediately — user is created, registration is successful
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+
+  // Post-creation steps: best-effort, never fail registration
   const { generateReferralCode, creditReferrer } = require('../models/Referral');
-  const myRefCode = generateReferralCode(user.id);
+  let myRefCode;
+  try {
+    myRefCode = generateReferralCode(user.id);
+  } catch {
+    myRefCode = `GP-${user.id.slice(0, 8).toUpperCase()}`;
+  }
 
   let referredBy = null;
   if (referralCode) {
-    const referrerSetting = await UserSettings.getByReferralCode(referralCode);
-    if (referrerSetting && referrerSetting.user_id !== user.id) {
-      referredBy = referrerSetting.user_id;
+    try {
+      const referrerSetting = await UserSettings.getByReferralCode(referralCode);
+      if (referrerSetting && referrerSetting.user_id !== user.id) {
+        referredBy = referrerSetting.user_id;
+      }
+    } catch (err) {
+      console.error('Failed to look up referral code:', err.message);
     }
   }
 
-  await UserSettings.upsert(user.id, {
-    referral_code: myRefCode,
-    referred_by: referredBy,
-  });
+  try {
+    await UserSettings.upsert(user.id, {
+      referral_code: myRefCode,
+      referred_by: referredBy,
+    });
+  } catch (err) {
+    console.error('Failed to create user settings:', err.message);
+  }
 
   if (referredBy) {
     try {
+      const { creditReferrer } = require('../models/Referral');
       await creditReferrer(referredBy);
     } catch (err) {
       console.error('Failed to credit referrer:', err.message);
     }
   }
 
-  const verificationToken = await User.setVerificationToken(user.id);
-
+  // Create default wallets
   try {
-    await sendVerificationEmail(email, verificationToken);
+    await Wallet.getOrCreate(user.id, 'USD');
+    await Wallet.getOrCreate(user.id, 'GPG');
   } catch (err) {
-    console.error('Failed to send verification email:', err.message);
+    console.error('Failed to create default wallets:', err.message);
   }
 
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
+  // Set verification token (best-effort)
+  let verificationToken = null;
+  try {
+    verificationToken = await User.setVerificationToken(user.id);
+  } catch (err) {
+    console.error('Failed to set verification token:', err.message);
+  }
+
+  // Send verification email (best-effort, non-blocking)
+  if (verificationToken) {
+    try {
+      const { sendVerificationEmail } = require('../services/emailService');
+      await sendVerificationEmail(email, verificationToken);
+    } catch (err) {
+      console.error('Failed to send verification email:', err.message);
+    }
+  }
 
   return { user: { ...user, referralCode: myRefCode }, accessToken, refreshToken };
 }
@@ -100,6 +134,7 @@ async function forgotPassword(email) {
   const reset = await User.setResetToken(email);
   if (reset) {
     try {
+      const { sendResetPasswordEmail } = require('../services/emailService');
       await sendResetPasswordEmail(email, reset.token);
     } catch (err) {
       console.error('Failed to send reset email:', err.message);

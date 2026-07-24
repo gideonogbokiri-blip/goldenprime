@@ -48,8 +48,15 @@ function RegisterForm() {
       localStorage.setItem('refreshToken', res.data.refreshToken);
       router.push('/dashboard');
     } catch (err: any) {
-      const msg = err.response?.data?.errors?.[0]?.msg || err.response?.data?.error || 'Registration failed. Please try again.';
-      setError(msg);
+      const status = err.response?.status;
+      if (status === 409) {
+        setError('An account with this email already exists. Try signing in instead.');
+      } else if (!err.response) {
+        setError('Network error. Your account may have been created — try signing in.');
+      } else {
+        const msg = err.response?.data?.errors?.[0]?.msg || err.response?.data?.error || 'Registration failed. Please try again.';
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }

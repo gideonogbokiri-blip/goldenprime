@@ -5,6 +5,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
+  timeout: 15000,
 });
 
 api.interceptors.request.use((config) => {
@@ -20,12 +21,16 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      if (path !== '/login' && path !== '/register') {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         window.location.href = '/login';
       }
+    }
+    if (!error.response && typeof window !== 'undefined') {
+      error.message = 'Network error. Please check your connection and try again.';
     }
     return Promise.reject(error);
   }

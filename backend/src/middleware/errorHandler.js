@@ -1,5 +1,13 @@
 function errorHandler(err, req, res, next) {
-  console.error(err.stack);
+  const status = err.status || 500;
+  const message = err.message || 'Internal server error';
+
+  if (status >= 500) {
+    console.error(`[ERROR] ${req.method} ${req.path}:`, err.message);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(err.stack);
+    }
+  }
 
   if (err.name === 'ValidationError') {
     return res.status(400).json({ error: err.message });
@@ -13,8 +21,8 @@ function errorHandler(err, req, res, next) {
     return res.status(409).json({ error: 'Email already registered' });
   }
 
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal server error',
+  res.status(status).json({
+    error: status >= 500 ? 'Internal server error' : message,
   });
 }
 
