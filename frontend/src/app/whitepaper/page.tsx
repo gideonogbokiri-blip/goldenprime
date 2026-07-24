@@ -88,9 +88,9 @@ const TOKENOMICS = [
 ];
 
 const TEAM = [
-  { name: 'GoldenPrime Team', role: 'Core Development', avatar: '\u{1FA99}' },
-  { name: 'Community', role: 'Ecosystem Growth', avatar: '\u{1F30F}' },
-  { name: 'Partners', role: 'Strategic Advisors', avatar: '\u{1F3AF}' },
+  { name: 'GoldenPrime Team', role: 'Core Development', avatar: '🪙' },
+  { name: 'Community', role: 'Ecosystem Growth', avatar: '🌍' },
+  { name: 'Partners', role: 'Strategic Advisors', avatar: '🎯' },
 ];
 
 export default function WhitepaperPage() {
@@ -113,7 +113,7 @@ export default function WhitepaperPage() {
             transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
             className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gold-500 to-amber-600 rounded-full flex items-center justify-center text-5xl shadow-lg shadow-gold-500/30"
           >
-            \u{1FA99}
+            {'🪙'}
           </motion.div>
           <h1 className="text-5xl font-bold mb-4">
             <span className="text-gold-500">Golden</span>Prime Whitepaper
@@ -206,7 +206,7 @@ export default function WhitepaperPage() {
             {[
               {
                 title: 'Frontend',
-                icon: '\u{1F310}',
+                icon: '🌐',
                 items: ['Next.js 14 (React)', 'Tailwind CSS', 'Framer Motion', 'WebSocket Real-time'],
               },
               {
@@ -216,7 +216,7 @@ export default function WhitepaperPage() {
               },
               {
                 title: 'Blockchain',
-                icon: '\u{1F517}',
+                icon: '🔗',
                 items: ['Ethereum (ERC-20)', 'MetaMask Integration', 'Web3.js / Ethers', 'Smart Contracts'],
               },
             ].map((stack) => (

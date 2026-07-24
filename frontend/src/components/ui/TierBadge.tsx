@@ -63,7 +63,7 @@ export default function TierBadge({ tier, size = 'md', showLabel = true, classNa
 }
 
 export function TierProgress({ current, count, next, progress }: {
-  current: { name: string; color: string; icon: string; rewardPerReferral: number };
+  current: { name: string; color: string; icon: string; rewardPerReferral: number; minReferrals: number };
   count: number;
   next: { name: string; color: string; icon: string; minReferrals: number; referralsNeeded: number } | null;
   progress: number;

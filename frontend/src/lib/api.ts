@@ -48,6 +48,12 @@ export const walletAPI = {
     api.get('/wallet/transactions', { params: { limit, offset } }),
 };
 
+export const tradingAPI = {
+  getPortfolio: () => api.get('/trading/portfolio'),
+  buy: (coinId: string, amount: number) => api.post('/trading/buy', { coinId, amount }),
+  sell: (coinId: string, amount: number) => api.post('/trading/sell', { coinId, amount }),
+};
+
 export const goldAPI = {
   getCoinInfo: () => api.get('/gold/coin'),
   preorder: (data: { amount: number; paymentMethod: string; bankName?: string; accountNumber?: string; accountName?: string; cardHolder?: string; cardLast4?: string; expiryMonth?: string; expiryYear?: string }) =>

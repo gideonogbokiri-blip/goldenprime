@@ -30,7 +30,6 @@ export default function TradePage() {
   const [loading, setLoading] = useState(true);
   const [tradeLoading, setTradeLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
-  const [coinInfo, setCoinInfo] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
 
   const [orderType, setOrderType] = useState<'buy' | 'sell'>('buy');

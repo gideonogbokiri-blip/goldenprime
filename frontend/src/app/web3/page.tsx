@@ -63,7 +63,7 @@ export default function Web3Page() {
           className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-6">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-16 h-16 bg-orange-500/10 rounded-xl flex items-center justify-center text-3xl">
-              &#x1F43C;
+              🐵
             </div>
             <div>
               <h3 className="text-lg font-semibold">MetaMask</h3>
@@ -121,10 +121,10 @@ export default function Web3Page() {
           <h3 className="text-lg font-semibold mb-4">Supported Wallets</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { name: 'MetaMask', icon: '\x{1F43C}', available: true },
-              { name: 'WalletConnect', icon: '\x{1F50C}', available: false },
-              { name: 'Coinbase', icon: '\x{1F4B0}', available: false },
-              { name: 'Trust Wallet', icon: '\x{1F512}', available: false },
+              { name: 'MetaMask', icon: '🦊', available: true },
+              { name: 'WalletConnect', icon: '🔌', available: false },
+              { name: 'Coinbase', icon: '💰', available: false },
+              { name: 'Trust Wallet', icon: '🔒', available: false },
             ].map((w) => (
               <div key={w.name} className={`p-4 rounded-xl border text-center ${w.available ? 'border-zinc-700 bg-zinc-800/50' : 'border-zinc-800 opacity-50'}`}>
                 <div className="text-2xl mb-2">{w.icon}</div>

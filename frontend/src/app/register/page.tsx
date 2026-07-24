@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { authAPI } from '@/lib/api';
 import PasswordStrength from '@/components/ui/PasswordStrength';
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const refParam = searchParams.get('ref');
@@ -79,5 +79,13 @@ export default function RegisterPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen flex items-center justify-center bg-zinc-950"><div className="text-gold-500">Loading...</div></main>}>
+      <RegisterForm />
+    </Suspense>
   );
 }
