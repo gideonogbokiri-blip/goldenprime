@@ -96,15 +96,15 @@ const TEAM = [
 export default function WhitepaperPage() {
   return (
     <main className="min-h-screen bg-zinc-950">
-      <nav className="border-b border-zinc-800 px-6 py-4 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</Link>
+      <nav className="border-b border-zinc-800 px-4 md:px-6 py-4 flex justify-between items-center">
+        <Link href="/dashboard" className="text-xl md:text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</Link>
         <div className="flex gap-4">
           <Link href="/dashboard" className="text-gray-400 hover:text-white text-sm">Dashboard</Link>
           <Link href="/preorder" className="bg-gold-500 text-black px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gold-400">Preorder GPG</Link>
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12">
         {/* Hero */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
           <motion.div
@@ -115,10 +115,10 @@ export default function WhitepaperPage() {
           >
             {'🪙'}
           </motion.div>
-          <h1 className="text-5xl font-bold mb-4">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4">
             <span className="text-gold-500">Golden</span>Prime Whitepaper
           </h1>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+          <p className="text-base md:text-xl text-gray-400 max-w-2xl mx-auto">
             A comprehensive overview of the GoldenPrime Gold Coin (GPG) ecosystem,
             tokenomics, and roadmap for the future of tokenized gold investment.
           </p>
@@ -126,8 +126,8 @@ export default function WhitepaperPage() {
 
         {/* Executive Summary */}
         <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-16">
-          <h2 className="text-3xl font-bold mb-6">Executive Summary</h2>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8">
+          <h2 className="text-xl md:text-3xl font-bold mb-4 md:mb-6">Executive Summary</h2>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 md:p-8">
             <p className="text-gray-300 leading-relaxed mb-4">
               GoldenPrime (GP) is a next-generation crypto investment platform designed to democratize access to
               gold-backed digital assets. Our flagship product, the GoldenPrime Gold Coin (GPG), represents a new
@@ -149,10 +149,10 @@ export default function WhitepaperPage() {
 
         {/* Tokenomics */}
         <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mb-16">
-          <h2 className="text-3xl font-bold mb-6">GPG Tokenomics</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <h2 className="text-xl md:text-3xl font-bold mb-4 md:mb-6">GPG Tokenomics</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             {/* Distribution */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
               <h3 className="text-xl font-semibold mb-4">Token Distribution</h3>
               <div className="space-y-3">
                 {TOKENOMICS.map((t) => (
@@ -176,7 +176,7 @@ export default function WhitepaperPage() {
             </div>
 
             {/* Key Stats */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
               <h3 className="text-xl font-semibold mb-4">Key Metrics</h3>
               <div className="space-y-4">
                 {[
@@ -189,7 +189,7 @@ export default function WhitepaperPage() {
                   { label: 'Initial Market Cap', value: '$50,000,000' },
                   { label: 'Backing', value: 'Gold Reserves + USD Collateral' },
                 ].map((stat) => (
-                  <div key={stat.label} className="flex justify-between items-center py-2 border-b border-zinc-800/50 last:border-0">
+                  <div key={stat.label} className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-zinc-800/50 last:border-0 gap-1">
                     <span className="text-sm text-gray-400">{stat.label}</span>
                     <span className="text-sm font-semibold">{stat.value}</span>
                   </div>
@@ -201,8 +201,8 @@ export default function WhitepaperPage() {
 
         {/* Technology */}
         <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mb-16">
-          <h2 className="text-3xl font-bold mb-6">Technology Stack</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <h2 className="text-xl md:text-3xl font-bold mb-4 md:mb-6">Technology Stack</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {[
               {
                 title: 'Frontend',
@@ -220,7 +220,7 @@ export default function WhitepaperPage() {
                 items: ['Ethereum (ERC-20)', 'MetaMask Integration', 'Web3.js / Ethers', 'Smart Contracts'],
               },
             ].map((stack) => (
-              <div key={stack.title} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <div key={stack.title} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
                 <div className="text-3xl mb-3">{stack.icon}</div>
                 <h3 className="text-lg font-semibold mb-3">{stack.title}</h3>
                 <ul className="space-y-2">
@@ -236,8 +236,8 @@ export default function WhitepaperPage() {
         </motion.section>
 
         {/* Roadmap */}
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-16">
-          <h2 className="text-3xl font-bold mb-8">Roadmap</h2>
+        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-10 md:mb-16">
+          <h2 className="text-xl md:text-3xl font-bold mb-8">Roadmap</h2>
           <div className="relative">
             <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-zinc-800" />
             {ROADMAP.map((item, i) => (
@@ -250,7 +250,7 @@ export default function WhitepaperPage() {
                 className={`relative mb-8 flex ${i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}
               >
                 <div className={`w-full md:w-1/2 ${i % 2 === 0 ? 'md:pr-8 md:text-right' : 'md:pl-8'} pl-12 md:pl-0`}>
-                  <div className={`bg-zinc-900 border rounded-xl p-6 ${
+                  <div className={`bg-zinc-900 border rounded-xl p-4 md:p-6 ${
                     item.status === 'completed' ? 'border-green-500/30' :
                     item.status === 'upcoming' ? 'border-gold-500/30' : 'border-zinc-800'
                   }`}>
@@ -278,10 +278,10 @@ export default function WhitepaperPage() {
 
         {/* Team */}
         <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mb-16">
-          <h2 className="text-3xl font-bold mb-6">Team</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <h2 className="text-xl md:text-3xl font-bold mb-4 md:mb-6">Team</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {TEAM.map((member) => (
-              <div key={member.name} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-center">
+              <div key={member.name} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 text-center">
                 <div className="text-4xl mb-3">{member.avatar}</div>
                 <h3 className="text-lg font-semibold">{member.name}</h3>
                 <p className="text-sm text-gray-400">{member.role}</p>
@@ -292,12 +292,12 @@ export default function WhitepaperPage() {
 
         {/* CTA */}
         <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-          className="text-center bg-gradient-to-r from-gold-500/10 to-zinc-900 border border-gold-500/30 rounded-2xl p-12">
-          <h2 className="text-3xl font-bold mb-4">Join the GoldenPrime Revolution</h2>
+          className="text-center bg-gradient-to-r from-gold-500/10 to-zinc-900 border border-gold-500/30 rounded-2xl p-6 md:p-12">
+          <h2 className="text-xl md:text-3xl font-bold mb-4">Join the GoldenPrime Revolution</h2>
           <p className="text-gray-400 mb-8 max-w-lg mx-auto">
             Be part of the future of gold investment. Preorder GPG coins today and earn rewards by referring others.
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/preorder" className="bg-gold-500 text-black px-8 py-3 rounded-lg font-semibold hover:bg-gold-400 transition-colors">
               Preorder GPG
             </Link>

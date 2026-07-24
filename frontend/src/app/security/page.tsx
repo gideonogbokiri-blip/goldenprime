@@ -37,13 +37,13 @@ export default function SecurityPage() {
 
   return (
     <main className="min-h-screen bg-zinc-950">
-      <nav className="border-b border-zinc-800 px-6 py-4 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</Link>
+      <nav className="border-b border-zinc-800 px-4 md:px-6 py-4 flex justify-between items-center">
+        <Link href="/dashboard" className="text-xl md:text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</Link>
         <Link href="/dashboard" className="text-gray-400 hover:text-white text-sm">Back to Dashboard</Link>
       </nav>
 
-      <div className="max-w-2xl mx-auto px-6 py-10">
-        <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-3xl font-semibold mb-8">
+      <div className="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-10">
+        <motion.h2 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-2xl md:text-3xl font-semibold mb-6 md:mb-8">
           Security Settings
         </motion.h2>
 
@@ -55,18 +55,18 @@ export default function SecurityPage() {
 
         {/* Change Password */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-6">
-          <h3 className="text-lg font-semibold mb-4">Change Password</h3>
+          className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 mb-4 md:mb-6">
+          <h3 className="text-base md:text-lg font-semibold mb-4">Change Password</h3>
           <div className="space-y-4">
             <input type="password" placeholder="Current Password" value={passwordForm.current}
               onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
-              className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors" />
+              className="w-full px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors" />
             <input type="password" placeholder="New Password (min 8 chars)" value={passwordForm.newPass}
               onChange={(e) => setPasswordForm({ ...passwordForm, newPass: e.target.value })}
-              className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors" />
+              className="w-full px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors" />
             <input type="password" placeholder="Confirm New Password" value={passwordForm.confirm}
               onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
-              className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors" />
+              className="w-full px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors" />
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleChangePassword}
               className="bg-gold-500 text-black px-6 py-3 rounded-lg font-semibold hover:bg-gold-400 transition-colors">
               Update Password
@@ -76,10 +76,10 @@ export default function SecurityPage() {
 
         {/* 2FA */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-6">
-          <div className="flex justify-between items-start">
+          className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 mb-4 md:mb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
             <div>
-              <h3 className="text-lg font-semibold mb-2">Two-Factor Authentication</h3>
+              <h3 className="text-base md:text-lg font-semibold mb-2">Two-Factor Authentication</h3>
               <p className="text-sm text-gray-400">
                 {twoFAEnabled
                   ? '2FA is enabled. Your account has an extra layer of security.'
@@ -118,8 +118,8 @@ export default function SecurityPage() {
 
         {/* Active Sessions */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-          className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-6">
-          <h3 className="text-lg font-semibold mb-4">Active Sessions</h3>
+          className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 mb-4 md:mb-6">
+          <h3 className="text-base md:text-lg font-semibold mb-4">Active Sessions</h3>
           <div className="space-y-3">
             <div className="flex justify-between items-center p-3 bg-zinc-800/50 rounded-lg">
               <div>
@@ -134,8 +134,8 @@ export default function SecurityPage() {
 
         {/* Login History */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-          className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-          <h3 className="text-lg font-semibold mb-4">Security Tips</h3>
+          className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
+          <h3 className="text-base md:text-lg font-semibold mb-4">Security Tips</h3>
           <ul className="space-y-3 text-sm text-gray-400">
             <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">&#10003;</span> Use a strong, unique password with uppercase, lowercase, numbers, and symbols.</li>
             <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">&#10003;</span> Enable two-factor authentication for an extra layer of security.</li>

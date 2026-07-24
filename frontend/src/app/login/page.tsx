@@ -29,23 +29,23 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4">
+    <main className="min-h-screen flex items-center justify-center px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <h1 className="text-3xl font-bold text-center mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8">
           <span className="text-shimmer">Golden</span>Prime
         </h1>
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8">
-          <h2 className="text-2xl font-semibold mb-6">Sign In</h2>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 md:p-8">
+          <h2 className="text-xl md:text-2xl font-semibold mb-6">Sign In</h2>
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg mb-4"
+              className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg mb-4 text-sm"
             >
               {error}
             </motion.div>
@@ -79,9 +79,9 @@ export default function LoginPage() {
               {loading ? 'Signing in...' : 'Sign In'}
             </motion.button>
           </form>
-          <div className="flex justify-between mt-4 text-sm">
-            <Link href="/forgot-password" className="text-gold-500 hover:underline">Forgot Password?</Link>
-            <Link href="/register" className="text-gold-500 hover:underline">Create Account</Link>
+          <div className="flex flex-col sm:flex-row justify-between gap-2 mt-4 text-sm">
+            <Link href="/forgot-password" className="text-gold-500 hover:underline text-center sm:text-left">Forgot Password?</Link>
+            <Link href="/register" className="text-gold-500 hover:underline text-center sm:text-right">Create Account</Link>
           </div>
         </div>
       </motion.div>

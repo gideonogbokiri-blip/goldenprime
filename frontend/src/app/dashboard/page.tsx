@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { authAPI, goldAPI, walletAPI } from '@/lib/api';
 import CryptoPrices from '@/components/CryptoPrices';
 import CoinFlip from '@/components/ui/CoinFlip';
@@ -22,6 +22,7 @@ export default function DashboardPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -53,22 +54,22 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-zinc-950">
-        <nav className="border-b border-zinc-800 px-6 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</div>
+        <nav className="border-b border-zinc-800 px-4 md:px-6 py-4 flex justify-between items-center">
+          <div className="text-xl md:text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</div>
           <div className="skeleton h-4 w-32 rounded" />
         </nav>
-        <div className="max-w-7xl mx-auto px-6 py-10">
-          <div className="skeleton h-8 w-64 mb-8 rounded" />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10">
+          <div className="skeleton h-8 w-64 mb-6 md:mb-8 rounded" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
           </div>
-          <div className="skeleton h-48 rounded-xl mb-8" />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="skeleton h-48 rounded-xl mb-6 md:mb-8" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
             <div className="lg:col-span-2 skeleton h-64 rounded-xl" />
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               <div className="skeleton h-48 rounded-xl" />
               <div className="skeleton h-48 rounded-xl" />
             </div>
@@ -83,38 +84,63 @@ export default function DashboardPage() {
   const totalValue = portfolio?.totalValue || 0;
   const usd = usdBalance ? parseFloat(usdBalance.balance) : 0;
 
+  const navLinks = (
+    <>
+      <Link href="/preorder" className="bg-gold-500 text-black px-3 md:px-4 py-2 rounded-lg font-semibold hover:bg-gold-400 transition-colors text-xs md:text-sm whitespace-nowrap">Preorder GPG</Link>
+      <Link href="/trade" className="bg-zinc-800 border border-zinc-700 px-3 md:px-4 py-2 rounded-lg font-semibold hover:bg-zinc-700 transition-colors text-xs md:text-sm whitespace-nowrap">Trade</Link>
+      <Link href="/wallet" className="text-gray-400 hover:text-white text-xs md:text-sm whitespace-nowrap">Wallet</Link>
+      <Link href="/referrals" className="text-gray-400 hover:text-white text-xs md:text-sm whitespace-nowrap">Referrals</Link>
+      <Link href="/kyc" className="text-gray-400 hover:text-white text-xs md:text-sm whitespace-nowrap">KYC</Link>
+      <Link href="/web3" className="text-gray-400 hover:text-white text-xs md:text-sm whitespace-nowrap">Web3</Link>
+      <Link href="/security" className="text-gray-400 hover:text-white text-xs md:text-sm whitespace-nowrap">Security</Link>
+      <Link href="/profile" className="text-gray-400 hover:text-white text-xs md:text-sm whitespace-nowrap">Profile</Link>
+      {user?.role === 'admin' && <Link href="/admin" className="text-gold-500 font-semibold text-xs md:text-sm whitespace-nowrap">Admin</Link>}
+    </>
+  );
+
   return (
     <main className="min-h-screen bg-zinc-950">
-      <nav className="border-b border-zinc-800 px-6 py-4 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</Link>
-        <div className="flex items-center gap-5">
-          <Link href="/preorder" className="bg-gold-500 text-black px-4 py-2 rounded-lg font-semibold hover:bg-gold-400 transition-colors text-sm">Preorder GPG</Link>
-          <Link href="/trade" className="bg-zinc-800 border border-zinc-700 px-4 py-2 rounded-lg font-semibold hover:bg-zinc-700 transition-colors text-sm">Trade</Link>
-          <Link href="/wallet" className="text-gray-400 hover:text-white text-sm">Wallet</Link>
-          <Link href="/referrals" className="text-gray-400 hover:text-white text-sm">Referrals</Link>
-          <Link href="/kyc" className="text-gray-400 hover:text-white text-sm">KYC</Link>
-          <Link href="/web3" className="text-gray-400 hover:text-white text-sm">Web3</Link>
-          <Link href="/security" className="text-gray-400 hover:text-white text-sm">Security</Link>
-          <Link href="/profile" className="text-gray-400 hover:text-white text-sm">Profile</Link>
-          {user?.role === 'admin' && <Link href="/admin" className="text-gold-500 font-semibold text-sm">Admin</Link>}
+      <nav className="border-b border-zinc-800 px-4 md:px-6 py-4 flex justify-between items-center">
+        <Link href="/dashboard" className="text-xl md:text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</Link>
+        {/* Desktop nav */}
+        <div className="hidden lg:flex items-center gap-4">
+          {navLinks}
           <span className="text-gray-400 text-sm">{user?.email}</span>
           <button onClick={handleLogout} className="text-gray-400 hover:text-white transition-colors text-sm">Sign Out</button>
         </div>
+        {/* Mobile hamburger */}
+        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden text-gray-400 hover:text-white p-2">
+          <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2"><path d={mobileMenuOpen ? "M6 6l12 12M6 18L18 6" : "M4 6h16M4 12h16M4 18h16"} /></svg>
+        </button>
       </nav>
+      {/* Mobile menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            className="lg:hidden border-b border-zinc-800 bg-zinc-900 overflow-hidden">
+            <div className="px-4 py-4 flex flex-col gap-2">
+              {navLinks}
+              <div className="border-t border-zinc-800 mt-2 pt-2 flex items-center justify-between">
+                <span className="text-gray-400 text-sm truncate max-w-[60%]">{user?.email}</span>
+                <button onClick={handleLogout} className="text-gray-400 hover:text-white transition-colors text-sm">Sign Out</button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <div className="max-w-7xl mx-auto px-6 py-10">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-6 md:mb-8"
         >
-          <h2 className="text-3xl font-semibold mb-1">Welcome, {user?.first_name || 'Investor'}</h2>
-          <p className="text-gray-400">Your GoldenPrime portfolio</p>
+          <h2 className="text-2xl md:text-3xl font-semibold mb-1">Welcome, {user?.first_name || 'Investor'}</h2>
+          <p className="text-gray-400 text-sm md:text-base">Your GoldenPrime portfolio</p>
         </motion.div>
 
         {/* Portfolio Cards */}
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" stagger={0.08}>
-          {/* GPG Balance with Coin Flip */}
+        <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8" stagger={0.08}>
           <StaggerItem>
             <CoinFlip balance={gpgBalance ? gpgBalance.balance : 0} />
           </StaggerItem>
@@ -122,33 +148,33 @@ export default function DashboardPage() {
           <StaggerItem>
             <motion.div
               whileHover={{ y: -4 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 transition-shadow hover:shadow-lg hover:shadow-zinc-800/50"
+              className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 transition-shadow hover:shadow-lg hover:shadow-zinc-800/50"
             >
-              <p className="text-gray-400 text-sm mb-1">USD Balance</p>
-              <p className="text-3xl font-bold">${usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-              <Link href="/wallet" className="text-xs text-gold-500 hover:underline">Fund Wallet &rarr;</Link>
+              <p className="text-gray-400 text-xs md:text-sm mb-1">USD Balance</p>
+              <p className="text-xl md:text-3xl font-bold">${usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+              <Link href="/wallet" className="text-[10px] md:text-xs text-gold-500 hover:underline">Fund Wallet &rarr;</Link>
             </motion.div>
           </StaggerItem>
 
           <StaggerItem>
             <motion.div
               whileHover={{ y: -4 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 transition-shadow hover:shadow-lg hover:shadow-zinc-800/50"
+              className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 transition-shadow hover:shadow-lg hover:shadow-zinc-800/50"
             >
-              <p className="text-gray-400 text-sm mb-1">Portfolio Value</p>
-              <p className="text-3xl font-bold text-green-500">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-              <p className="text-xs text-gray-400">Total estimated</p>
+              <p className="text-gray-400 text-xs md:text-sm mb-1">Portfolio Value</p>
+              <p className="text-xl md:text-3xl font-bold text-green-500">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+              <p className="text-[10px] md:text-xs text-gray-400">Total estimated</p>
             </motion.div>
           </StaggerItem>
 
           <StaggerItem>
             <motion.div
               whileHover={{ y: -4 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 transition-shadow hover:shadow-lg hover:shadow-zinc-800/50"
+              className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 transition-shadow hover:shadow-lg hover:shadow-zinc-800/50"
             >
-              <p className="text-gray-400 text-sm mb-1">Referrals</p>
-              <p className="text-3xl font-bold text-gold-500">{referral?.referralCount || 0}</p>
-              <p className="text-xs text-gold-500">{referral?.earnings?.toFixed(4) || '0.0000'} GPG earned</p>
+              <p className="text-gray-400 text-xs md:text-sm mb-1">Referrals</p>
+              <p className="text-xl md:text-3xl font-bold text-gold-500">{referral?.referralCount || 0}</p>
+              <p className="text-[10px] md:text-xs text-gold-500">{referral?.earnings?.toFixed(4) || '0.0000'} GPG earned</p>
             </motion.div>
           </StaggerItem>
         </StaggerContainer>
@@ -159,18 +185,18 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-8"
+            className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 mb-6 md:mb-8"
           >
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold">GoldenPrime Gold Coin (GPG)</h3>
-              <Link href="/preorder" className="bg-gold-500 text-black px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gold-400">Preorder Now</Link>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+              <h3 className="text-lg md:text-xl font-semibold">GoldenPrime Gold Coin (GPG)</h3>
+              <Link href="/preorder" className="bg-gold-500 text-black px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gold-400 whitespace-nowrap">Preorder Now</Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-              <div><p className="text-sm text-gray-400">Price</p><p className="font-bold text-gold-500">${coinInfo.price}</p></div>
-              <div><p className="text-sm text-gray-400">Supply</p><p className="font-bold">{coinInfo.totalSupply?.toLocaleString()}</p></div>
-              <div><p className="text-sm text-gray-400">Sold</p><p className="font-bold">{coinInfo.totalSold?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p></div>
-              <div><p className="text-sm text-gray-400">Remaining</p><p className="font-bold">{coinInfo.remaining?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p></div>
-              <div><p className="text-sm text-gray-400">Launch</p><p className="font-bold text-gold-500">Oct 1, 2026</p></div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-4">
+              <div><p className="text-xs text-gray-400">Price</p><p className="font-bold text-gold-500">${coinInfo.price}</p></div>
+              <div><p className="text-xs text-gray-400">Supply</p><p className="font-bold">{coinInfo.totalSupply?.toLocaleString()}</p></div>
+              <div><p className="text-xs text-gray-400">Sold</p><p className="font-bold">{coinInfo.totalSold?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p></div>
+              <div><p className="text-xs text-gray-400">Remaining</p><p className="font-bold">{coinInfo.remaining?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p></div>
+              <div><p className="text-xs text-gray-400">Launch</p><p className="font-bold text-gold-500">Oct 1, 2026</p></div>
             </div>
             <div className="w-full bg-zinc-800 rounded-full h-3 overflow-hidden">
               <motion.div
@@ -184,17 +210,17 @@ export default function DashboardPage() {
           </motion.div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-6 md:mb-8">
+          <div className="lg:col-span-2 space-y-4 md:space-y-6">
             {/* Quick Actions */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl p-6"
+              className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6"
             >
-              <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <h3 className="text-lg md:text-xl font-semibold mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
                 {[
                   { href: '/preorder', label: 'Preorder GPG', gold: true },
                   { href: '/trade', label: 'Trade P2P', gold: false },
@@ -205,7 +231,7 @@ export default function DashboardPage() {
                   <motion.div key={action.href} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                     <Link
                       href={action.href}
-                      className={`block py-3 rounded-lg font-semibold transition-colors text-center text-sm ${
+                      className={`block py-3 rounded-lg font-semibold transition-colors text-center text-xs md:text-sm ${
                         action.gold
                           ? 'bg-gold-500 text-black hover:bg-gold-400'
                           : 'border border-zinc-700 hover:bg-zinc-800'
@@ -223,24 +249,24 @@ export default function DashboardPage() {
           </div>
 
           {/* Right sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {/* Referral Card */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-gradient-to-br from-gold-500/10 to-zinc-900 border border-gold-500/30 rounded-xl p-6"
+              className="bg-gradient-to-br from-gold-500/10 to-zinc-900 border border-gold-500/30 rounded-xl p-4 md:p-6"
             >
-              <h3 className="text-lg font-semibold mb-3">Referral Program</h3>
+              <h3 className="text-base md:text-lg font-semibold mb-3">Referral Program</h3>
               {tierInfo?.currentTier && (
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-sm">{tierInfo.currentTier.icon}</span>
-                  <span className="text-sm font-semibold" style={{ color: tierInfo.currentTier.color }}>{tierInfo.currentTier.name} Tier</span>
+                  <span className="text-xs md:text-sm font-semibold" style={{ color: tierInfo.currentTier.color }}>{tierInfo.currentTier.name} Tier</span>
                 </div>
               )}
-              <p className="text-sm text-gray-400 mb-3">Earn <span className="text-gold-500 font-bold">{referral?.rewardPerReferral || 0.0001} GPG</span> per referral</p>
+              <p className="text-xs md:text-sm text-gray-400 mb-3">Earn <span className="text-gold-500 font-bold">{referral?.rewardPerReferral || 0.0001} GPG</span> per referral</p>
               <button onClick={copyReferral}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2 px-3 text-xs font-mono text-gray-300 hover:border-gold-500/50 mb-3 text-left truncate">
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2 px-3 text-[10px] md:text-xs font-mono text-gray-300 hover:border-gold-500/50 mb-3 text-left truncate">
                 {copied ? 'Copied!' : referral?.referralCode || '...'}
               </button>
               <motion.button
@@ -259,9 +285,9 @@ export default function DashboardPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl p-6"
+              className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6"
             >
-              <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+              <h3 className="text-base md:text-lg font-semibold mb-4">Recent Activity</h3>
               {transactions.length === 0 ? (
                 <p className="text-gray-400 text-sm">No activity yet</p>
               ) : (
@@ -276,11 +302,11 @@ export default function DashboardPage() {
                         transition={{ delay: 0.7 + i * 0.05 }}
                         className="flex justify-between items-center py-2 border-b border-zinc-800/50 last:border-0"
                       >
-                        <div>
-                          <div className="text-sm font-semibold capitalize">{tx.type.replace('_', ' ')}</div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold capitalize truncate">{tx.type.replace('_', ' ')}</div>
                           <div className="text-xs text-gray-400">{tx.currency}</div>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right shrink-0 ml-2">
                           <div className={`text-sm font-mono ${isPos ? 'text-green-500' : 'text-red-500'}`}>
                             {isPos ? '+' : '-'}{tx.currency === 'GPG' ? parseFloat(tx.amount).toFixed(4) : '$' + parseFloat(tx.usd_value || tx.amount).toFixed(2)}
                           </div>

@@ -45,21 +45,21 @@ export default function KYCPage() {
 
   return (
     <main className="min-h-screen bg-zinc-950">
-      <nav className="border-b border-zinc-800 px-6 py-4 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</Link>
+      <nav className="border-b border-zinc-800 px-4 md:px-6 py-4 flex justify-between items-center">
+        <Link href="/dashboard" className="text-xl md:text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</Link>
         <Link href="/dashboard" className="text-gray-400 hover:text-white">Back to Dashboard</Link>
       </nav>
-      <div className="max-w-2xl mx-auto px-6 py-10">
-        <h2 className="text-3xl font-semibold mb-2">Identity Verification</h2>
+      <div className="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-10">
+        <h2 className="text-2xl md:text-3xl font-semibold mb-2">Identity Verification</h2>
         <p className="text-gray-400 mb-4">Complete KYC to unlock full trading features and secure your account</p>
-        <div className="bg-gold-500/10 border border-gold-500/30 rounded-lg p-4 mb-8 text-sm">
+        <div className="bg-gold-500/10 border border-gold-500/30 rounded-lg p-4 mb-6 md:mb-8 text-sm">
           <p className="text-gold-500 font-semibold mb-1">Why KYC?</p>
           <p className="text-gray-300">Your identity documents are securely stored for account recovery purposes. This helps us protect your investment and verify ownership in case you lose access to your account.</p>
         </div>
 
         {kyc ? (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <h3 className="text-xl font-semibold mb-4">Verification Status</h3>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
+            <h3 className="text-lg md:text-xl font-semibold mb-4">Verification Status</h3>
             <div className="flex items-center gap-3 mb-4">
               <span className={`text-2xl font-bold ${statusColors[kyc.status] || 'text-gray-400'}`}>
                 {kyc.status.charAt(0).toUpperCase() + kyc.status.slice(1)}
@@ -82,8 +82,8 @@ export default function KYCPage() {
             )}
           </div>
         ) : (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <h3 className="text-xl font-semibold mb-6">Submit Documents</h3>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
+            <h3 className="text-lg md:text-xl font-semibold mb-6">Submit Documents</h3>
             {message.text && (
               <div className={`px-4 py-3 rounded-lg mb-4 ${message.type === 'success' ? 'bg-green-500/10 border border-green-500/50 text-green-400' : 'bg-red-500/10 border border-red-500/50 text-red-400'}`}>
                 {message.text}
@@ -92,19 +92,19 @@ export default function KYCPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">Full Legal Name (as on document)</label>
-                <input type="text" placeholder="John Smith" required value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
+                <input type="text" placeholder="John Smith" required value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} className="w-full px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
               </div>
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">Date of Birth</label>
-                <input type="date" required value={form.dateOfBirth} onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
+                <input type="date" required value={form.dateOfBirth} onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })} className="w-full px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
               </div>
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">Country</label>
-                <input type="text" placeholder="e.g. US, NG, GB" required value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
+                <input type="text" placeholder="e.g. US, NG, GB" required value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="w-full px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
               </div>
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">Document Type</label>
-                <select value={form.documentType} onChange={(e) => setForm({ ...form, documentType: e.target.value })} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500">
+                <select value={form.documentType} onChange={(e) => setForm({ ...form, documentType: e.target.value })} className="w-full px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500">
                   <option value="passport">Passport</option>
                   <option value="drivers_license">Driver&apos;s License</option>
                   <option value="national_id">National ID</option>
@@ -112,12 +112,12 @@ export default function KYCPage() {
               </div>
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">Document Number</label>
-                <input type="text" placeholder="AB123456" required value={form.documentNumber} onChange={(e) => setForm({ ...form, documentNumber: e.target.value })} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
+                <input type="text" placeholder="AB123456" required value={form.documentNumber} onChange={(e) => setForm({ ...form, documentNumber: e.target.value })} className="w-full px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
               </div>
               <div className="bg-zinc-800 rounded-lg p-4 text-sm text-gray-400">
                 <p>Your document details are securely stored and used only for identity verification and account recovery purposes. We never share your data with third parties.</p>
               </div>
-              <button type="submit" disabled={submitting} className="w-full bg-gold-500 text-black py-3 rounded-lg font-semibold hover:bg-gold-400 transition-colors disabled:opacity-50">
+              <button type="submit" disabled={submitting} className="w-full bg-gold-500 text-black py-2.5 md:py-3 rounded-lg font-semibold hover:bg-gold-400 transition-colors disabled:opacity-50">
                 {submitting ? 'Submitting...' : 'Submit for Verification'}
               </button>
             </form>

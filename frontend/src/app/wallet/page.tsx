@@ -90,13 +90,13 @@ export default function WalletPage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-zinc-950">
-        <nav className="border-b border-zinc-800 px-6 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</div>
+        <nav className="border-b border-zinc-800 px-4 md:px-6 py-4 flex justify-between items-center">
+          <div className="text-xl md:text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</div>
           <div className="skeleton h-4 w-32 rounded" />
         </nav>
-        <div className="max-w-4xl mx-auto px-6 py-10">
-          <div className="skeleton h-8 w-48 mb-8 rounded" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-10">
+          <div className="skeleton h-8 w-48 mb-6 md:mb-8 rounded" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
@@ -114,15 +114,15 @@ export default function WalletPage() {
 
   return (
     <main className="min-h-screen bg-zinc-950">
-      <nav className="border-b border-zinc-800 px-6 py-4 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</Link>
-        <Link href="/dashboard" className="text-gray-400 hover:text-white">Back to Dashboard</Link>
+      <nav className="border-b border-zinc-800 px-4 md:px-6 py-4 flex justify-between items-center">
+        <Link href="/dashboard" className="text-xl md:text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</Link>
+        <Link href="/dashboard" className="text-gray-400 hover:text-white text-sm">Back to Dashboard</Link>
       </nav>
-      <div className="max-w-4xl mx-auto px-6 py-10">
+      <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-10">
         <motion.h2
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-semibold mb-8"
+          className="text-2xl md:text-3xl font-semibold mb-6 md:mb-8"
         >
           My Wallet
         </motion.h2>
@@ -131,25 +131,25 @@ export default function WalletPage() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`px-4 py-3 rounded-lg mb-6 ${message.type === 'success' ? 'bg-green-500/10 border border-green-500/50 text-green-400' : 'bg-red-500/10 border border-red-500/50 text-red-400'}`}
+            className={`px-4 py-3 rounded-lg mb-6 text-sm ${message.type === 'success' ? 'bg-green-500/10 border border-green-500/50 text-green-400' : 'bg-red-500/10 border border-red-500/50 text-red-400'}`}
           >
             {message.text}
           </motion.div>
         )}
 
         {/* Balances */}
-        <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" stagger={0.1}>
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8" stagger={0.1}>
           <StaggerItem>
             <CoinFlip balance={gpgBalance} />
           </StaggerItem>
           <StaggerItem>
             <motion.div
               whileHover={{ y: -4 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl p-6"
+              className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6"
             >
-              <p className="text-gray-400 text-sm mb-1">USD Balance</p>
-              <p className="text-4xl font-bold">${usdBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-              <p className="text-sm text-gray-400">Available for preorder</p>
+              <p className="text-gray-400 text-xs md:text-sm mb-1">USD Balance</p>
+              <p className="text-2xl md:text-4xl font-bold">${usdBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+              <p className="text-xs md:text-sm text-gray-400">Available for preorder</p>
             </motion.div>
           </StaggerItem>
           <StaggerItem className="flex items-center justify-center">
@@ -157,7 +157,7 @@ export default function WalletPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowFund(true)}
-              className="bg-gold-500 text-black px-8 py-3 rounded-lg font-semibold hover:bg-gold-400 transition-colors text-lg"
+              className="bg-gold-500 text-black px-6 md:px-8 py-3 rounded-lg font-semibold hover:bg-gold-400 transition-colors text-base md:text-lg w-full sm:w-auto"
             >
               Fund Wallet
             </motion.button>
@@ -171,18 +171,18 @@ export default function WalletPage() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden mb-8"
+              className="overflow-hidden mb-6 md:mb-8"
             >
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-                <h3 className="text-xl font-semibold mb-4">Fund Your Wallet</h3>
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
+                <h3 className="text-lg md:text-xl font-semibold mb-4">Fund Your Wallet</h3>
                 <div className="grid grid-cols-2 gap-3 mb-4">
-                  <motion.button whileHover={{ scale: 1.02 }} onClick={() => setFundMethod('bank_transfer')} className={`p-4 rounded-xl border-2 text-left ${fundMethod === 'bank_transfer' ? 'border-gold-500 bg-gold-500/5' : 'border-zinc-700'}`}>
-                    <div className="font-semibold">Bank Transfer</div>
-                    <div className="text-sm text-gray-400">Send from bank</div>
+                  <motion.button whileHover={{ scale: 1.02 }} onClick={() => setFundMethod('bank_transfer')} className={`p-3 md:p-4 rounded-xl border-2 text-left ${fundMethod === 'bank_transfer' ? 'border-gold-500 bg-gold-500/5' : 'border-zinc-700'}`}>
+                    <div className="font-semibold text-sm">Bank Transfer</div>
+                    <div className="text-xs text-gray-400">Send from bank</div>
                   </motion.button>
-                  <motion.button whileHover={{ scale: 1.02 }} onClick={() => setFundMethod('card')} className={`p-4 rounded-xl border-2 text-left ${fundMethod === 'card' ? 'border-gold-500 bg-gold-500/5' : 'border-zinc-700'}`}>
-                    <div className="font-semibold">Debit/Credit Card</div>
-                    <div className="text-sm text-gray-400">Pay with card</div>
+                  <motion.button whileHover={{ scale: 1.02 }} onClick={() => setFundMethod('card')} className={`p-3 md:p-4 rounded-xl border-2 text-left ${fundMethod === 'card' ? 'border-gold-500 bg-gold-500/5' : 'border-zinc-700'}`}>
+                    <div className="font-semibold text-sm">Debit/Credit Card</div>
+                    <div className="text-xs text-gray-400">Pay with card</div>
                   </motion.button>
                 </div>
                 <div className="relative mb-4">
@@ -192,27 +192,27 @@ export default function WalletPage() {
                 </div>
                 <div className="grid grid-cols-4 gap-2 mb-4">
                   {[50, 100, 500, 1000].map(v => (
-                    <motion.button key={v} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setFundAmount(v.toString())} className={`py-2 rounded-lg text-sm font-semibold ${fundAmount === v.toString() ? 'bg-gold-500 text-black' : 'bg-zinc-800 border border-zinc-700 hover:bg-zinc-700'}`}>${v}</motion.button>
+                    <motion.button key={v} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setFundAmount(v.toString())} className={`py-2 rounded-lg text-xs md:text-sm font-semibold ${fundAmount === v.toString() ? 'bg-gold-500 text-black' : 'bg-zinc-800 border border-zinc-700 hover:bg-zinc-700'}`}>${v}</motion.button>
                   ))}
                 </div>
 
                 <AnimatePresence mode="wait">
                   {fundMethod === 'bank_transfer' && (
                     <motion.div key="bank" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-3 mb-4">
-                      <p className="text-sm text-gray-400">Your bank details (saved for recovery)</p>
-                      <input type="text" placeholder="Bank Name" value={fundBankName} onChange={e => setFundBankName(e.target.value)} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors" />
-                      <input type="text" placeholder="Account Number" value={fundAccountNumber} onChange={e => setFundAccountNumber(e.target.value)} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors" />
-                      <input type="text" placeholder="Account Name" value={fundAccountName} onChange={e => setFundAccountName(e.target.value)} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors" />
+                      <p className="text-xs md:text-sm text-gray-400">Your bank details (saved for recovery)</p>
+                      <input type="text" placeholder="Bank Name" value={fundBankName} onChange={e => setFundBankName(e.target.value)} className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors text-sm" />
+                      <input type="text" placeholder="Account Number" value={fundAccountNumber} onChange={e => setFundAccountNumber(e.target.value)} className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors text-sm" />
+                      <input type="text" placeholder="Account Name" value={fundAccountName} onChange={e => setFundAccountName(e.target.value)} className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors text-sm" />
                     </motion.div>
                   )}
                   {fundMethod === 'card' && (
                     <motion.div key="card" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-3 mb-4">
-                      <p className="text-sm text-gray-400">Your card details (saved for recovery)</p>
-                      <input type="text" placeholder="Cardholder Name" value={fundCardHolder} onChange={e => setFundCardHolder(e.target.value)} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors" />
-                      <input type="text" placeholder="Last 4 digits" maxLength={4} value={fundCardLast4} onChange={e => setFundCardLast4(e.target.value.replace(/\D/g, ''))} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors" />
+                      <p className="text-xs md:text-sm text-gray-400">Your card details (saved for recovery)</p>
+                      <input type="text" placeholder="Cardholder Name" value={fundCardHolder} onChange={e => setFundCardHolder(e.target.value)} className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors text-sm" />
+                      <input type="text" placeholder="Last 4 digits" maxLength={4} value={fundCardLast4} onChange={e => setFundCardLast4(e.target.value.replace(/\D/g, ''))} className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors text-sm" />
                       <div className="grid grid-cols-2 gap-3">
-                        <input type="text" placeholder="MM" maxLength={2} value={fundExpiryMonth} onChange={e => setFundExpiryMonth(e.target.value.replace(/\D/g, ''))} className="px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors" />
-                        <input type="text" placeholder="YY" maxLength={2} value={fundExpiryYear} onChange={e => setFundExpiryYear(e.target.value.replace(/\D/g, ''))} className="px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors" />
+                        <input type="text" placeholder="MM" maxLength={2} value={fundExpiryMonth} onChange={e => setFundExpiryMonth(e.target.value.replace(/\D/g, ''))} className="px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors text-sm" />
+                        <input type="text" placeholder="YY" maxLength={2} value={fundExpiryYear} onChange={e => setFundExpiryYear(e.target.value.replace(/\D/g, ''))} className="px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors text-sm" />
                       </div>
                     </motion.div>
                   )}
@@ -220,10 +220,10 @@ export default function WalletPage() {
 
                 <div className="flex gap-3">
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleFund} disabled={funding || !fundAmount || parseFloat(fundAmount) < 10}
-                    className="flex-1 bg-gold-500 text-black py-3 rounded-lg font-semibold hover:bg-gold-400 disabled:opacity-50">
+                    className="flex-1 bg-gold-500 text-black py-3 rounded-lg font-semibold hover:bg-gold-400 disabled:opacity-50 text-sm">
                     {funding ? 'Processing...' : 'Submit Fund Request'}
                   </motion.button>
-                  <button onClick={() => setShowFund(false)} className="px-6 py-3 border border-zinc-700 rounded-lg font-semibold hover:bg-zinc-800">Cancel</button>
+                  <button onClick={() => setShowFund(false)} className="px-4 md:px-6 py-3 border border-zinc-700 rounded-lg font-semibold hover:bg-zinc-800 text-sm">Cancel</button>
                 </div>
               </div>
             </motion.div>
@@ -235,9 +235,9 @@ export default function WalletPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-zinc-900 border border-zinc-800 rounded-xl p-6"
+          className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6"
         >
-          <h3 className="text-xl font-semibold mb-4">Transaction History</h3>
+          <h3 className="text-lg md:text-xl font-semibold mb-4">Transaction History</h3>
           {transactions.length === 0 ? (
             <p className="text-gray-400 text-center py-8">No transactions yet</p>
           ) : (
@@ -251,21 +251,21 @@ export default function WalletPage() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.4 + i * 0.03 }}
-                    className="flex justify-between items-center py-3 border-b border-zinc-800/50 last:border-0"
+                    className="flex justify-between items-center py-3 border-b border-zinc-800/50 last:border-0 gap-2"
                   >
-                    <div>
-                      <div className="font-semibold capitalize">{tx.type.replace('_', ' ')}</div>
-                      <div className="text-sm text-gray-400">
+                    <div className="min-w-0">
+                      <div className="font-semibold text-sm capitalize truncate">{tx.type.replace('_', ' ')}</div>
+                      <div className="text-xs text-gray-400 truncate">
                         {tx.currency} {meta.paymentMethod ? `(${meta.paymentMethod === 'card' ? 'Card' : 'Bank Transfer'})` : ''}
                         {meta.gpgAmount ? ` - ${meta.gpgAmount} GPG` : ''}
                       </div>
-                      <div className="text-xs text-gray-500">{new Date(tx.created_at).toLocaleString()}</div>
+                      <div className="text-[10px] text-gray-500">{new Date(tx.created_at).toLocaleString()}</div>
                     </div>
-                    <div className="text-right">
-                      <div className={`font-mono ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+                    <div className="text-right shrink-0">
+                      <div className={`font-mono text-sm ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
                         {isPositive ? '+' : '-'}{tx.currency === 'GPG' ? parseFloat(tx.amount).toFixed(4) + ' GPG' : '$' + parseFloat(tx.usd_value || tx.amount).toFixed(2)}
                       </div>
-                      <div className={`text-xs ${tx.status === 'completed' ? 'text-green-500' : tx.status === 'rejected' ? 'text-red-500' : 'text-yellow-500'}`}>
+                      <div className={`text-[10px] md:text-xs ${tx.status === 'completed' ? 'text-green-500' : tx.status === 'rejected' ? 'text-red-500' : 'text-yellow-500'}`}>
                         {tx.status}
                       </div>
                     </div>

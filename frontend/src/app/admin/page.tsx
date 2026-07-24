@@ -125,12 +125,12 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-zinc-950">
-      <nav className="border-b border-zinc-800 px-6 py-4 flex justify-between items-center">
-        <Link href="/dashboard" className="text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime <span className="text-sm text-gray-500">Admin</span></Link>
+      <nav className="border-b border-zinc-800 px-4 md:px-6 py-4 flex justify-between items-center">
+        <Link href="/dashboard" className="text-xl md:text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime <span className="text-sm text-gray-500">Admin</span></Link>
         <Link href="/dashboard" className="text-gray-400 hover:text-white">Dashboard</Link>
       </nav>
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        <h2 className="text-3xl font-semibold mb-6">Admin Panel</h2>
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10">
+        <h2 className="text-2xl md:text-3xl font-semibold mb-4 md:mb-6">Admin Panel</h2>
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
           {tabs.map((t) => (
             <button key={t.id} onClick={() => loadTab(t.id)}
@@ -146,30 +146,32 @@ export default function AdminPage() {
           <>
             {/* OVERVIEW */}
             {tab === 'overview' && stats && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6"><p className="text-gray-400 text-sm mb-1">Total Users</p><p className="text-3xl font-bold text-gold-500">{stats.totalUsers}</p></div>
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6"><p className="text-gray-400 text-sm mb-1">Total Transactions</p><p className="text-3xl font-bold">{stats.totalTransactions}</p></div>
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6"><p className="text-gray-400 text-sm mb-1">Pending KYC</p><p className="text-3xl font-bold text-yellow-500">{stats.kycPending}</p></div>
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6"><p className="text-gray-400 text-sm mb-1">Approved KYC</p><p className="text-3xl font-bold text-green-500">{stats.kycApproved}</p></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6"><p className="text-gray-400 text-sm mb-1">Total Users</p><p className="text-2xl md:text-3xl font-bold text-gold-500">{stats.totalUsers}</p></div>
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6"><p className="text-gray-400 text-sm mb-1">Total Transactions</p><p className="text-2xl md:text-3xl font-bold">{stats.totalTransactions}</p></div>
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6"><p className="text-gray-400 text-sm mb-1">Pending KYC</p><p className="text-2xl md:text-3xl font-bold text-yellow-500">{stats.kycPending}</p></div>
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6"><p className="text-gray-400 text-sm mb-1">Approved KYC</p><p className="text-2xl md:text-3xl font-bold text-green-500">{stats.kycApproved}</p></div>
               </div>
             )}
 
             {/* USERS */}
             {tab === 'users' && (
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead><tr className="text-left text-gray-400 text-sm border-b border-zinc-800">
-                    <th className="p-4">Email</th><th className="p-4">Name</th><th className="p-4">Role</th><th className="p-4">Verified</th><th className="p-4">Joined</th><th className="p-4">Actions</th>
+                    <th className="p-4">Email</th><th className="p-4 hidden md:table-cell">Name</th><th className="p-4">Role</th><th className="p-4 hidden md:table-cell">Verified</th><th className="p-4 hidden md:table-cell">Joined</th><th className="p-4">Actions</th>
                   </tr></thead>
+
                   <tbody>
                     {users.map((u) => (
                       <tr key={u.id} className="border-b border-zinc-800/50">
                         <td className="p-4">{u.email}</td>
-                        <td className="p-4">{u.first_name} {u.last_name}</td>
+                        <td className="p-4 hidden md:table-cell">{u.first_name} {u.last_name}</td>
                         <td className="p-4"><span className={`px-2 py-1 rounded text-xs ${u.role === 'admin' ? 'bg-gold-500/20 text-gold-500' : 'bg-zinc-800 text-gray-400'}`}>{u.role}</span></td>
-                        <td className="p-4">{u.is_verified ? <span className="text-green-500">Yes</span> : <span className="text-yellow-500">No</span>}</td>
-                        <td className="p-4 text-gray-400">{new Date(u.created_at).toLocaleDateString()}</td>
-                        <td className="p-4 flex gap-2">
+                        <td className="p-4 hidden md:table-cell">{u.is_verified ? <span className="text-green-500">Yes</span> : <span className="text-yellow-500">No</span>}</td>
+                        <td className="p-4 text-gray-400 hidden md:table-cell">{new Date(u.created_at).toLocaleDateString()}</td>
+                        <td className="p-4 flex flex-wrap gap-2">
                           <select value={u.role} onChange={(e) => handleRoleChange(u.id, e.target.value)} className="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs">
                             <option value="user">User</option><option value="admin">Admin</option>
                           </select>
@@ -179,6 +181,7 @@ export default function AdminPage() {
                     ))}
                   </tbody>
                 </table>
+                </div>
                 {selectedUser && userDetails && (
                   <div className="p-6 border-t border-zinc-800 bg-zinc-800/50">
                     <div className="flex justify-between items-center mb-4">
@@ -203,12 +206,12 @@ export default function AdminPage() {
             {tab === 'preorders' && (
               <div className="space-y-4">
                 {preorders.length === 0 ? (
-                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-center text-gray-400">No preorders</div>
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 text-center text-gray-400">No preorders</div>
                 ) : preorders.map((p) => {
                   const meta = p.metadata || {};
                   return (
-                    <div key={p.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-                      <div className="flex justify-between items-start">
+                    <div key={p.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
                             <p className="text-2xl font-bold text-gold-500">{meta.gpgAmount || p.amount} GPG</p>
@@ -226,19 +229,19 @@ export default function AdminPage() {
                         {p.status === 'pending' && (
                           <div className="flex items-center gap-2">
                             {approveId === p.id ? (
-                              <div className="flex gap-2">
-                                <input type="text" placeholder="Notes" value={approveNotes} onChange={(e) => setApproveNotes(e.target.value)} className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm w-40" />
+                              <div className="flex flex-wrap gap-2">
+                                <input type="text" placeholder="Notes" value={approveNotes} onChange={(e) => setApproveNotes(e.target.value)} className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm w-full sm:w-40" />
                                 <button onClick={() => handleApprovePreorder(p.id)} className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">Confirm</button>
                                 <button onClick={() => { setApproveId(''); setApproveNotes(''); }} className="px-3 py-2 text-sm text-gray-400">Cancel</button>
                               </div>
                             ) : rejectId === p.id ? (
-                              <div className="flex gap-2">
-                                <input type="text" placeholder="Reason" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm w-40" />
+                              <div className="flex flex-wrap gap-2">
+                                <input type="text" placeholder="Reason" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm w-full sm:w-40" />
                                 <button onClick={handleRejectPreorder} className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">Confirm</button>
                                 <button onClick={() => { setRejectId(''); setRejectReason(''); }} className="px-3 py-2 text-sm text-gray-400">Cancel</button>
                               </div>
                             ) : (
-                              <div className="flex gap-2">
+                              <div className="flex flex-wrap gap-2">
                                 <button onClick={() => setApproveId(p.id)} className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-600">Approve</button>
                                 <button onClick={() => setRejectId(p.id)} className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-600">Reject</button>
                               </div>
@@ -256,12 +259,12 @@ export default function AdminPage() {
             {tab === 'deposits' && (
               <div className="space-y-4">
                 {deposits.length === 0 ? (
-                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-center text-gray-400">No deposit requests</div>
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 text-center text-gray-400">No deposit requests</div>
                 ) : deposits.map((d) => {
                   const meta = d.metadata || {};
                   return (
-                    <div key={d.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-                      <div className="flex justify-between items-start">
+                    <div key={d.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
                             <p className="text-2xl font-bold text-gold-500">${parseFloat(d.amount).toFixed(2)}</p>
@@ -275,19 +278,19 @@ export default function AdminPage() {
                         {d.status === 'pending' && (
                           <div className="flex items-center gap-2">
                             {approveId === d.id ? (
-                              <div className="flex gap-2">
-                                <input type="text" placeholder="Notes" value={approveNotes} onChange={(e) => setApproveNotes(e.target.value)} className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm w-40" />
+                              <div className="flex flex-wrap gap-2">
+                                <input type="text" placeholder="Notes" value={approveNotes} onChange={(e) => setApproveNotes(e.target.value)} className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm w-full sm:w-40" />
                                 <button onClick={() => handleApproveDeposit(d.id)} className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">Confirm</button>
                                 <button onClick={() => { setApproveId(''); setApproveNotes(''); }} className="px-3 py-2 text-sm text-gray-400">Cancel</button>
                               </div>
                             ) : rejectId === d.id ? (
-                              <div className="flex gap-2">
-                                <input type="text" placeholder="Reason" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm w-40" />
+                              <div className="flex flex-wrap gap-2">
+                                <input type="text" placeholder="Reason" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm w-full sm:w-40" />
                                 <button onClick={handleRejectDeposit} className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">Confirm</button>
                                 <button onClick={() => { setRejectId(''); setRejectReason(''); }} className="px-3 py-2 text-sm text-gray-400">Cancel</button>
                               </div>
                             ) : (
-                              <div className="flex gap-2">
+                              <div className="flex flex-wrap gap-2">
                                 <button onClick={() => setApproveId(d.id)} className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">Approve</button>
                                 <button onClick={() => setRejectId(d.id)} className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">Reject</button>
                               </div>
@@ -304,24 +307,26 @@ export default function AdminPage() {
             {/* TRANSACTIONS */}
             {tab === 'transactions' && (
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead><tr className="text-left text-gray-400 text-sm border-b border-zinc-800">
-                    <th className="p-4">User</th><th className="p-4">Type</th><th className="p-4">Currency</th><th className="p-4">Amount</th><th className="p-4">USD</th><th className="p-4">Status</th><th className="p-4">Date</th>
+                    <th className="p-4">User</th><th className="p-4">Type</th><th className="p-4 hidden md:table-cell">Currency</th><th className="p-4">Amount</th><th className="p-4 hidden md:table-cell">USD</th><th className="p-4">Status</th><th className="p-4 hidden md:table-cell">Date</th>
                   </tr></thead>
                   <tbody>
                     {transactions.map((tx) => (
                       <tr key={tx.id} className="border-b border-zinc-800/50">
                         <td className="p-4">{tx.users?.email || 'N/A'}</td>
                         <td className="p-4 capitalize">{tx.type.replace('_', ' ')}</td>
-                        <td className="p-4">{tx.currency}</td>
+                        <td className="p-4 hidden md:table-cell">{tx.currency}</td>
                         <td className="p-4 font-mono">{tx.currency === 'GPG' ? parseFloat(tx.amount).toFixed(4) : parseFloat(tx.amount).toFixed(6)}</td>
-                        <td className="p-4">${tx.usd_value || 'N/A'}</td>
+                        <td className="p-4 hidden md:table-cell">${tx.usd_value || 'N/A'}</td>
                         <td className="p-4"><span className={`px-2 py-1 rounded text-xs ${tx.status === 'completed' ? 'bg-green-500/20 text-green-500' : tx.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-red-500/20 text-red-500'}`}>{tx.status}</span></td>
-                        <td className="p-4 text-gray-400">{new Date(tx.created_at).toLocaleDateString()}</td>
+                        <td className="p-4 text-gray-400 hidden md:table-cell">{new Date(tx.created_at).toLocaleDateString()}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             )}
 
@@ -329,10 +334,10 @@ export default function AdminPage() {
             {tab === 'kyc' && (
               <div className="space-y-4">
                 {kycList.length === 0 ? (
-                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-center text-gray-400">No KYC requests</div>
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 text-center text-gray-400">No KYC requests</div>
                 ) : kycList.map((k) => (
-                  <div key={k.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-                    <div className="flex justify-between items-start">
+                  <div key={k.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                       <div>
                         <p className="font-semibold">{k.full_name}</p>
                         <p className="text-sm text-gray-400">{k.users?.email}</p>
@@ -342,7 +347,7 @@ export default function AdminPage() {
                       <div className="flex items-center gap-3">
                         <span className={`px-3 py-1 rounded text-sm font-semibold ${k.status === 'approved' ? 'bg-green-500/20 text-green-500' : k.status === 'rejected' ? 'bg-red-500/20 text-red-500' : 'bg-yellow-500/20 text-yellow-500'}`}>{k.status}</span>
                         {k.status === 'pending' && (
-                          <div className="flex gap-2">
+                          <div className="flex flex-wrap gap-2">
                             <button onClick={() => handleApproveKYC(k.id)} className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">Approve</button>
                             <button onClick={() => setRejectId(k.id)} className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">Reject</button>
                           </div>
@@ -350,7 +355,7 @@ export default function AdminPage() {
                       </div>
                     </div>
                     {rejectId === k.id && (
-                      <div className="mt-4 flex gap-2">
+                      <div className="mt-4 flex flex-wrap gap-2">
                         <input type="text" placeholder="Rejection reason" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} className="flex-1 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm" />
                         <button onClick={handleRejectKYC} className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">Submit</button>
                         <button onClick={() => { setRejectId(''); setRejectReason(''); }} className="px-4 py-2 rounded-lg text-sm text-gray-400">Cancel</button>
@@ -365,22 +370,24 @@ export default function AdminPage() {
             {/* LOGS */}
             {tab === 'logs' && (
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead><tr className="text-left text-gray-400 text-sm border-b border-zinc-800">
-                    <th className="p-4">Admin</th><th className="p-4">Action</th><th className="p-4">Target</th><th className="p-4">Details</th><th className="p-4">Time</th>
+                    <th className="p-4">Admin</th><th className="p-4">Action</th><th className="p-4 hidden md:table-cell">Target</th><th className="p-4 hidden md:table-cell">Details</th><th className="p-4 hidden md:table-cell">Time</th>
                   </tr></thead>
                   <tbody>
                     {logs.map((log) => (
                       <tr key={log.id} className="border-b border-zinc-800/50">
                         <td className="p-4">{log.users?.email || 'System'}</td>
                         <td className="p-4"><span className="bg-zinc-800 px-2 py-1 rounded text-xs">{log.action}</span></td>
-                        <td className="p-4 text-gray-400">{log.target_type}: {log.target_id?.slice(0, 8)}...</td>
-                        <td className="p-4 text-gray-400 text-xs font-mono">{log.details ? JSON.stringify(log.details) : '-'}</td>
-                        <td className="p-4 text-gray-400">{new Date(log.created_at).toLocaleString()}</td>
+                        <td className="p-4 text-gray-400 hidden md:table-cell">{log.target_type}: {log.target_id?.slice(0, 8)}...</td>
+                        <td className="p-4 text-gray-400 text-xs font-mono hidden md:table-cell">{log.details ? JSON.stringify(log.details) : '-'}</td>
+                        <td className="p-4 text-gray-400 hidden md:table-cell">{new Date(log.created_at).toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             )}
           </>

@@ -45,35 +45,35 @@ function RegisterForm() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 bg-zinc-950">
+    <main className="min-h-screen flex items-center justify-center px-4 py-8 bg-zinc-950">
       <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8">
           <span className="text-gold-500">Golden</span>Prime
         </h1>
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8">
-          <h2 className="text-2xl font-semibold mb-2">Create Account</h2>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 md:p-8">
+          <h2 className="text-xl md:text-2xl font-semibold mb-2">Create Account</h2>
           <p className="text-gray-400 text-sm mb-6">Start investing in GoldenPrime Gold Coin</p>
-          {error && <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg mb-4">{error}</div>}
+          {error && <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg mb-4 text-sm">{error}</div>}
           {refParam && (
             <div className="bg-gold-500/10 border border-gold-500/30 rounded-lg px-4 py-3 mb-4 text-sm text-gold-500">
               Referred by: <span className="font-bold">{refParam}</span> — You&apos;ll both earn rewards!
             </div>
           )}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <input type="text" placeholder="First Name" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
-              <input type="text" placeholder="Last Name" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
+          <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              <input type="text" placeholder="First Name" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 text-sm" />
+              <input type="text" placeholder="Last Name" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 text-sm" />
             </div>
-            <input type="email" placeholder="Email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
-            <input type="password" placeholder="Password (min 8 chars)" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
+            <input type="email" placeholder="Email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 text-sm" />
+            <input type="password" placeholder="Password (min 8 chars)" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 text-sm" />
             <PasswordStrength password={form.password} />
-            <input type="password" placeholder="Confirm Password" required value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
-            <input type="text" placeholder="Referral Code (optional)" value={form.referralCode} onChange={(e) => setForm({ ...form, referralCode: e.target.value })} className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
-            <button type="submit" disabled={loading} className="w-full bg-gold-500 text-black py-3 rounded-lg font-semibold hover:bg-gold-400 transition-colors disabled:opacity-50">
+            <input type="password" placeholder="Confirm Password" required value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 text-sm" />
+            <input type="text" placeholder="Referral Code (optional)" value={form.referralCode} onChange={(e) => setForm({ ...form, referralCode: e.target.value })} className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 text-sm" />
+            <button type="submit" disabled={loading} className="w-full bg-gold-500 text-black py-3 rounded-lg font-semibold hover:bg-gold-400 transition-colors disabled:opacity-50 text-sm">
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
-          <p className="text-center text-gray-400 mt-6">
+          <p className="text-center text-gray-400 mt-6 text-sm">
             Already have an account? <Link href="/login" className="text-gold-500 hover:underline">Sign In</Link>
           </p>
         </div>
