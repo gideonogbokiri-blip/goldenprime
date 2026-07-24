@@ -99,7 +99,7 @@ router.post('/withdraw', authenticate, walletController.createWithdraw);
  * /wallet/dev-deposit:
  *   post:
  *     tags: [Wallet]
- *     summary: Dev-only: simulate a deposit (no auth required in dev)
+ *     summary: "Dev-only: simulate a deposit (no auth required in dev)"
  *     security:
  *       - bearerAuth: []
  *     requestBody:
