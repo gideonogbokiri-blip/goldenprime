@@ -1,38 +1,7 @@
-const fs = require('fs');
-const path = require('path');
+const supabase = require('../config/supabase');
 const { v4: uuidv4 } = require('uuid');
 
-const ORDERS_FILE = path.join(__dirname, '../../data/p2p_orders.json');
-const TRADES_FILE = path.join(__dirname, '../../data/trade_history.json');
-
-function ensureDataDir() {
-  const dir = path.dirname(ORDERS_FILE);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  if (!fs.existsSync(ORDERS_FILE)) fs.writeFileSync(ORDERS_FILE, '{}');
-  if (!fs.existsSync(TRADES_FILE)) fs.writeFileSync(TRADES_FILE, '{}');
-}
-
-function loadOrders() {
-  ensureDataDir();
-  try { return JSON.parse(fs.readFileSync(ORDERS_FILE, 'utf8')); } catch { return {}; }
-}
-
-function saveOrders(data) {
-  ensureDataDir();
-  fs.writeFileSync(ORDERS_FILE, JSON.stringify(data, null, 2));
-}
-
-function loadTrades() {
-  ensureDataDir();
-  try { return JSON.parse(fs.readFileSync(TRADES_FILE, 'utf8')); } catch { return {}; }
-}
-
-function saveTrades(data) {
-  ensureDataDir();
-  fs.writeFileSync(TRADES_FILE, JSON.stringify(data, null, 2));
-}
-
-function createOrder({ userId, type, coin, amount, pricePerUnit, paymentMethod, notes }) {
+async function createOrder({ userId, type, coin, amount, pricePerUnit, paymentMethod, notes }) {
   const id = uuidv4();
   const order = {
     id,
@@ -46,59 +15,58 @@ function createOrder({ userId, type, coin, amount, pricePerUnit, paymentMethod, 
     notes: notes || '',
     status: 'open',
     filled_amount: 0,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
   };
-  const all = loadOrders();
-  all[id] = order;
-  saveOrders(all);
-  return order;
+  const { data, error } = await supabase.from('p2p_orders').insert(order).select().single();
+  if (error) throw error;
+  return data;
 }
 
-function getOrder(orderId) {
-  const all = loadOrders();
-  return all[orderId] || null;
+async function getOrder(orderId) {
+  const { data, error } = await supabase.from('p2p_orders').select('*').eq('id', orderId).maybeSingle();
+  if (error) throw error;
+  return data;
 }
 
-function getOpenOrders({ coin, type, excludeUserId, limit = 50 } = {}) {
-  const all = loadOrders();
-  let orders = Object.values(all).filter(o => o.status === 'open');
-  if (coin) orders = orders.filter(o => o.coin === coin);
-  if (type) orders = orders.filter(o => o.type === type);
-  if (excludeUserId) orders = orders.filter(o => o.user_id !== excludeUserId);
-  orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  return orders.slice(0, limit);
+async function getOpenOrders({ coin, type, excludeUserId, limit = 50 } = {}) {
+  let query = supabase.from('p2p_orders').select('*').eq('status', 'open');
+  if (coin) query = query.eq('coin', coin);
+  if (type) query = query.eq('type', type);
+  if (excludeUserId) query = query.neq('user_id', excludeUserId);
+  query = query.order('created_at', { ascending: false }).limit(limit);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
 }
 
-function getUserOrders(userId, { status, limit = 50 } = {}) {
-  const all = loadOrders();
-  let orders = Object.values(all).filter(o => o.user_id === userId);
-  if (status) orders = orders.filter(o => o.status === status);
-  orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  return orders.slice(0, limit);
+async function getUserOrders(userId, { status, limit = 50 } = {}) {
+  let query = supabase.from('p2p_orders').select('*').eq('user_id', userId);
+  if (status) query = query.eq('status', status);
+  query = query.order('created_at', { ascending: false }).limit(limit);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
 }
 
-function updateOrder(orderId, updates) {
-  const all = loadOrders();
-  if (!all[orderId]) return null;
-  all[orderId] = { ...all[orderId], ...updates, updated_at: new Date().toISOString() };
-  saveOrders(all);
-  return all[orderId];
+async function updateOrder(orderId, updates) {
+  const { data, error } = await supabase
+    .from('p2p_orders')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', orderId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }
 
-function cancelOrder(orderId, userId) {
-  const all = loadOrders();
-  const order = all[orderId];
+async function cancelOrder(orderId, userId) {
+  const order = await getOrder(orderId);
   if (!order) return { error: 'Order not found' };
   if (order.user_id !== userId) return { error: 'Not your order' };
   if (order.status !== 'open') return { error: 'Order is not open' };
-  all[orderId].status = 'cancelled';
-  all[orderId].updated_at = new Date().toISOString();
-  saveOrders(all);
-  return all[orderId];
+  return updateOrder(orderId, { status: 'cancelled' });
 }
 
-function createTrade({ orderId, buyerId, sellerId, coin, amount, pricePerUnit, totalUsd, paymentMethod }) {
+async function createTrade({ orderId, buyerId, sellerId, coin, amount, pricePerUnit, totalUsd, paymentMethod }) {
   const id = uuidv4();
   const trade = {
     id,
@@ -115,109 +83,115 @@ function createTrade({ orderId, buyerId, sellerId, coin, amount, pricePerUnit, t
     seller_confirmed: false,
     dispute_reason: null,
     messages: [],
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
   };
-  const all = loadTrades();
-  all[id] = trade;
-  saveTrades(all);
-  return trade;
+  const { data, error } = await supabase.from('p2p_trades').insert(trade).select().single();
+  if (error) throw error;
+  return data;
 }
 
-function getTrade(tradeId) {
-  const all = loadTrades();
-  return all[tradeId] || null;
+async function getTrade(tradeId) {
+  const { data, error } = await supabase.from('p2p_trades').select('*').eq('id', tradeId).maybeSingle();
+  if (error) throw error;
+  return data;
 }
 
-function getUserTrades(userId, { status, limit = 50 } = {}) {
-  const all = loadTrades();
-  let trades = Object.values(all).filter(t => t.buyer_id === userId || t.seller_id === userId);
-  if (status) trades = trades.filter(t => t.status === status);
-  trades.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  return trades.slice(0, limit);
+async function getUserTrades(userId, { status, limit = 50 } = {}) {
+  let query = supabase.from('p2p_trades').select('*').or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
+  if (status) query = query.eq('status', status);
+  query = query.order('created_at', { ascending: false }).limit(limit);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
 }
 
-function updateTrade(tradeId, updates) {
-  const all = loadTrades();
-  if (!all[tradeId]) return null;
-  all[tradeId] = { ...all[tradeId], ...updates, updated_at: new Date().toISOString() };
-  saveTrades(all);
-  return all[tradeId];
+async function updateTrade(tradeId, updates) {
+  const { data, error } = await supabase
+    .from('p2p_trades')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', tradeId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }
 
-function addTradeMessage(tradeId, senderId, message) {
-  const all = loadTrades();
-  const trade = all[tradeId];
+async function addTradeMessage(tradeId, senderId, message) {
+  const trade = await getTrade(tradeId);
   if (!trade) return null;
-  trade.messages.push({
+  const messages = trade.messages || [];
+  messages.push({
     id: uuidv4(),
     sender_id: senderId,
     message,
     created_at: new Date().toISOString(),
   });
-  trade.updated_at = new Date().toISOString();
-  saveTrades(all);
-  return trade;
+  return updateTrade(tradeId, { messages });
 }
 
-function confirmTrade(tradeId, userId) {
-  const all = loadTrades();
-  const trade = all[tradeId];
+async function confirmTrade(tradeId, userId) {
+  const trade = await getTrade(tradeId);
   if (!trade) return { error: 'Trade not found' };
   if (trade.buyer_id !== userId && trade.seller_id !== userId) return { error: 'Not your trade' };
   if (trade.status !== 'escrow') return { error: 'Trade not in escrow' };
 
-  if (trade.buyer_id === userId) trade.buyer_confirmed = true;
-  if (trade.seller_id === userId) trade.seller_confirmed = true;
-  trade.updated_at = new Date().toISOString();
+  const updates = {};
+  if (trade.buyer_id === userId) updates.buyer_confirmed = true;
+  if (trade.seller_id === userId) updates.seller_confirmed = true;
 
-  if (trade.buyer_confirmed && trade.seller_confirmed) {
-    trade.status = 'completed';
+  const buyerConfirmed = trade.buyer_id === userId ? true : trade.buyer_confirmed;
+  const sellerConfirmed = trade.seller_id === userId ? true : trade.seller_confirmed;
+
+  if (buyerConfirmed && sellerConfirmed) {
+    updates.status = 'completed';
   }
 
-  saveTrades(all);
-  return trade;
+  return updateTrade(tradeId, updates);
 }
 
-function disputeTrade(tradeId, userId, reason) {
-  const all = loadTrades();
-  const trade = all[tradeId];
+async function disputeTrade(tradeId, userId, reason) {
+  const trade = await getTrade(tradeId);
   if (!trade) return { error: 'Trade not found' };
   if (trade.buyer_id !== userId && trade.seller_id !== userId) return { error: 'Not your trade' };
   if (trade.status !== 'escrow') return { error: 'Trade not in escrow' };
-
-  trade.status = 'disputed';
-  trade.dispute_reason = reason;
-  trade.updated_at = new Date().toISOString();
-  saveTrades(all);
-  return trade;
+  return updateTrade(tradeId, { status: 'disputed', dispute_reason: reason });
 }
 
-function getOrderBook(coin) {
-  const all = loadOrders();
-  const openOrders = Object.values(all).filter(o => o.status === 'open' && o.coin === coin);
-  const buyOrders = openOrders
+async function getOrderBook(coin) {
+  const { data: openOrders, error } = await supabase
+    .from('p2p_orders')
+    .select('*')
+    .eq('status', 'open')
+    .eq('coin', coin);
+  if (error) throw error;
+
+  const buyOrders = (openOrders || [])
     .filter(o => o.type === 'buy')
     .sort((a, b) => b.price_per_unit - a.price_per_unit);
-  const sellOrders = openOrders
+  const sellOrders = (openOrders || [])
     .filter(o => o.type === 'sell')
     .sort((a, b) => a.price_per_unit - b.price_per_unit);
   return { buyOrders, sellOrders };
 }
 
-function getTradeStats(coin) {
-  const all = loadTrades();
-  const trades = Object.values(all).filter(t => t.coin === coin && t.status === 'completed');
-  if (trades.length === 0) return { totalTrades: 0, totalVolume: 0, avgPrice: 0, high24h: 0, low24h: 0 };
+async function getTradeStats(coin) {
+  const { data: trades, error } = await supabase
+    .from('p2p_trades')
+    .select('*')
+    .eq('coin', coin)
+    .eq('status', 'completed');
+  if (error) throw error;
 
-  const totalVolume = trades.reduce((sum, t) => sum + t.total_usd, 0);
-  const avgPrice = totalVolume / trades.reduce((sum, t) => sum + t.amount, 0);
+  if (!trades || trades.length === 0) return { totalTrades: 0, totalVolume: 0, avgPrice: 0, high24h: 0, low24h: 0 };
+
+  const totalVolume = trades.reduce((sum, t) => sum + parseFloat(t.total_usd), 0);
+  const totalAmount = trades.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+  const avgPrice = totalVolume / totalAmount;
 
   const now = Date.now();
   const oneDayAgo = now - 24 * 60 * 60 * 1000;
   const recentTrades = trades.filter(t => new Date(t.created_at).getTime() > oneDayAgo);
-  const high24h = recentTrades.length > 0 ? Math.max(...recentTrades.map(t => t.price_per_unit)) : 0;
-  const low24h = recentTrades.length > 0 ? Math.min(...recentTrades.map(t => t.price_per_unit)) : 0;
+  const high24h = recentTrades.length > 0 ? Math.max(...recentTrades.map(t => parseFloat(t.price_per_unit))) : 0;
+  const low24h = recentTrades.length > 0 ? Math.min(...recentTrades.map(t => parseFloat(t.price_per_unit))) : 0;
 
   return { totalTrades: trades.length, totalVolume, avgPrice: Math.round(avgPrice * 100) / 100, high24h, low24h };
 }

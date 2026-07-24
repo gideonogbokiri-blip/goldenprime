@@ -1,13 +1,8 @@
 {
-  "name": "goldenprime-backend",
+  "name": "goldenprime",
   "version": "1.0.0",
-  "description": "GoldenPrime Crypto Investment Platform - Backend",
-  "main": "src/app.js",
-  "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
-    "migrate": "node src/config/migrate.js"
-  },
+  "private": true,
+  "description": "GoldenPrime Crypto Investment Platform - Monorepo",
   "dependencies": {
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.6",
@@ -26,8 +21,5 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^14.0.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.4"
   }
 }

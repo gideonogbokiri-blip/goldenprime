@@ -1,74 +1,78 @@
-const fs = require('fs');
-const path = require('path');
 const supabase = require('../config/supabase');
 
-const DATA_FILE = path.join(__dirname, '../../data/user_settings.json');
-
-function ensureDataDir() {
-  const dir = path.dirname(DATA_FILE);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, '{}');
+async function get(userId) {
+  const { data, error } = await supabase
+    .from('user_settings')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
 }
 
-function loadAll() {
-  ensureDataDir();
-  try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-  } catch {
-    return {};
+async function upsert(userId, updates) {
+  const existing = await get(userId);
+  const payload = { user_id: userId, ...updates, updated_at: new Date().toISOString() };
+
+  if (existing) {
+    const { data, error } = await supabase
+      .from('user_settings')
+      .update(payload)
+      .eq('user_id', userId)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  } else {
+    const { data, error } = await supabase
+      .from('user_settings')
+      .insert(payload)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
   }
 }
 
-function saveAll(data) {
-  ensureDataDir();
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-}
-
-function get(userId) {
-  const all = loadAll();
-  return all[userId] || null;
-}
-
-function upsert(userId, updates) {
-  const all = loadAll();
-  all[userId] = { ...(all[userId] || {}), ...updates, updated_at: new Date().toISOString() };
-  saveAll(all);
-  return all[userId];
-}
-
-function getByReferralCode(code) {
-  const all = loadAll();
-  for (const [userId, settings] of Object.entries(all)) {
-    if (settings.referral_code === code) return { user_id: userId };
-  }
-  return null;
+async function getByReferralCode(code) {
+  const { data, error } = await supabase
+    .from('user_settings')
+    .select('user_id, referral_code')
+    .eq('referral_code', code)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
 }
 
 async function getReferralCount(userId) {
-  const all = loadAll();
-  let count = 0;
-  for (const [_, settings] of Object.entries(all)) {
-    if (settings.referred_by === userId) count++;
-  }
-  return count;
+  const { count, error } = await supabase
+    .from('user_settings')
+    .select('*', { count: 'exact', head: true })
+    .eq('referred_by', userId);
+  if (error) throw error;
+  return count || 0;
 }
 
 async function getLeaderboard(limit = 20) {
   const { getTierInfo } = require('./Referral');
-  const all = loadAll();
+  const { data: allSettings, error } = await supabase
+    .from('user_settings')
+    .select('user_id, referral_code')
+    .not('referral_code', 'is', null);
+  if (error) throw error;
+
   const entries = [];
-  for (const [userId, settings] of Object.entries(all)) {
-    if (!settings.referral_code) continue;
-    const count = await getReferralCount(userId);
+  for (const settings of allSettings || []) {
+    const count = await getReferralCount(settings.user_id);
     if (count > 0) {
       const { data: user } = await supabase
         .from('users')
         .select('email, first_name, last_name')
-        .eq('id', userId)
-        .single();
+        .eq('id', settings.user_id)
+        .maybeSingle();
       const tierInfo = getTierInfo(count);
       entries.push({
-        id: userId,
+        id: settings.user_id,
         email: user?.email || '',
         name: `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || user?.email || '',
         referralCount: count,
