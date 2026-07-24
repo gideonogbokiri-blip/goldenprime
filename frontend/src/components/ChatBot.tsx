@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Message {
@@ -25,9 +25,9 @@ const FAQ: Record<string, string> = {
   'price': 'GPG is currently priced at $50 per coin during the pre-order phase. After launch on October 1, 2026, the price will be determined by market demand.',
   'launch': 'GoldenPrime Gold Coin (GPG) launches on October 1, 2026. Preorders are open now at $50 per coin.',
   'help': 'I can help with: GPG info, how to buy/trade, referrals, deposits, KYC, security, and general platform questions. Just ask!',
-  'hello': 'Hello! Welcome to GoldenPrime. I\'m here to help you with any questions about the platform. How can I assist you?',
+  'hello': "Hello! Welcome to GoldenPrime. I'm here to help you with any questions about the platform. How can I assist you?",
   'hi': 'Hey there! How can I help you with GoldenPrime today?',
-  'thanks': 'You\'re welcome! Is there anything else I can help you with?',
+  'thanks': "You're welcome! Is there anything else I can help you with?",
   'thank you': 'My pleasure! Feel free to ask if you have more questions.',
 };
 
@@ -36,37 +36,60 @@ function findAnswer(input: string): string {
   for (const [key, answer] of Object.entries(FAQ)) {
     if (lower.includes(key)) return answer;
   }
-  if (lower.includes('gpg') || lower.includes('coin') || lower.includes('gold')) {
-    return FAQ['what is gpg'];
-  }
-  if (lower.includes('buy') || lower.includes('purchase') || lower.includes('invest')) {
-    return FAQ['how to buy'];
-  }
-  if (lower.includes('trade') || lower.includes('sell') || lower.includes('swap')) {
-    return FAQ['how to trade'];
-  }
-  if (lower.includes('refer') || lower.includes('invite') || lower.includes('friend')) {
-    return FAQ['referral'];
-  }
-  if (lower.includes('tier') || lower.includes('level') || lower.includes('rank')) {
-    return FAQ['tiers'];
-  }
-  if (lower.includes('depos') || lower.includes('fund') || lower.includes('add money')) {
-    return FAQ['deposit'];
-  }
-  if (lower.includes('kyc') || lower.includes('verify') || lower.includes('identity')) {
-    return FAQ['kyc'];
-  }
-  if (lower.includes('safe') || lower.includes('security') || lower.includes('2fa') || lower.includes('password')) {
-    return FAQ['security'];
-  }
-  if (lower.includes('price') || lower.includes('worth') || lower.includes('value')) {
-    return FAQ['price'];
-  }
-  if (lower.includes('when') || lower.includes('launch') || lower.includes('date')) {
-    return FAQ['launch'];
-  }
+  if (lower.includes('gpg') || lower.includes('coin') || lower.includes('gold')) return FAQ['what is gpg'];
+  if (lower.includes('buy') || lower.includes('purchase') || lower.includes('invest')) return FAQ['how to buy'];
+  if (lower.includes('trade') || lower.includes('sell') || lower.includes('swap')) return FAQ['how to trade'];
+  if (lower.includes('refer') || lower.includes('invite') || lower.includes('friend')) return FAQ['referral'];
+  if (lower.includes('tier') || lower.includes('level') || lower.includes('rank')) return FAQ['tiers'];
+  if (lower.includes('depos') || lower.includes('fund') || lower.includes('add money')) return FAQ['deposit'];
+  if (lower.includes('kyc') || lower.includes('verify') || lower.includes('identity')) return FAQ['kyc'];
+  if (lower.includes('safe') || lower.includes('security') || lower.includes('2fa') || lower.includes('password')) return FAQ['security'];
+  if (lower.includes('price') || lower.includes('worth') || lower.includes('value')) return FAQ['price'];
+  if (lower.includes('when') || lower.includes('launch') || lower.includes('date')) return FAQ['launch'];
   return 'I\'m not sure about that. Try asking about GPG, buying, trading, referrals, deposits, KYC, security, or the platform launch. Type "help" to see what I can assist with!';
+}
+
+function SendIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="22" y1="2" x2="11" y2="13" />
+      <polygon points="22 2 15 22 11 13 2 9 22 2" />
+    </svg>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+function GPLogo({ size = 32 }: { size?: number }) {
+  return (
+    <div
+      className="rounded-full flex items-center justify-center font-bold text-black shrink-0"
+      style={{
+        width: size,
+        height: size,
+        background: 'linear-gradient(135deg, #FFD700 0%, #D4AF37 50%, #B8960F 100%)',
+        boxShadow: '0 0 12px rgba(212,175,55,0.4)',
+        fontSize: size * 0.3,
+      }}
+    >
+      GP
+    </div>
+  );
 }
 
 export default function ChatBot() {
@@ -75,30 +98,36 @@ export default function ChatBot() {
     {
       id: '1',
       role: 'bot',
-      text: 'Hi! I\'m the GoldenPrime assistant. How can I help you today?',
+      text: "Hi! I'm the GoldenPrime assistant. How can I help you today?",
       timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState('');
   const messagesEnd = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     messagesEnd.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 300);
+    }
+  }, [isOpen]);
+
+  const processMessage = useCallback((text: string) => {
+    if (!text.trim()) return;
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
-      text: input,
+      text: text.trim(),
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, userMsg]);
-    setInput('');
 
     setTimeout(() => {
-      const answer = findAnswer(input);
+      const answer = findAnswer(text);
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'bot',
@@ -106,23 +135,44 @@ export default function ChatBot() {
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, botMsg]);
-    }, 500);
+    }, 600);
+  }, []);
+
+  const sendMessage = () => {
+    processMessage(input);
+    setInput('');
+  };
+
+  const handleQuickReply = (question: string) => {
+    setInput('');
+    processMessage(question);
   };
 
   return (
     <>
       {/* Floating Button */}
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 w-12 h-12 md:w-14 md:h-14 bg-gold-500 rounded-full shadow-lg shadow-gold-500/30 flex items-center justify-center text-black text-xl md:text-2xl font-bold hover:bg-gold-400 transition-colors"
+        className="fixed bottom-5 right-5 z-[9999] w-14 h-14 rounded-full flex items-center justify-center text-black shadow-lg transition-all"
+        style={{
+          background: 'linear-gradient(135deg, #FFD700 0%, #D4AF37 50%, #B8960F 100%)',
+          boxShadow: '0 4px 20px rgba(212,175,55,0.4), 0 0 40px rgba(212,175,55,0.15)',
+        }}
+        aria-label={isOpen ? 'Close chat' : 'Open chat'}
       >
-        {isOpen ? '\u2715' : (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-        )}
+        <AnimatePresence mode="wait">
+          {isOpen ? (
+            <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
+              <CloseIcon />
+            </motion.div>
+          ) : (
+            <motion.div key="chat" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
+              <ChatIcon />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.button>
 
       {/* Chat Window */}
@@ -132,56 +182,92 @@ export default function ChatBot() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-18 right-2 left-2 md:left-auto md:bottom-24 md:right-6 z-50 md:w-96 md:max-w-[calc(100vw-3rem)] bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden flex flex-col max-h-[70vh] md:max-h-[32rem]"
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="fixed z-[9998] bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col
+              bottom-24 right-4 left-4
+              md:bottom-24 md:right-6 md:left-auto md:w-[400px]"
+            style={{ maxHeight: 'min(75vh, 560px)' }}
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-gold-500/20 to-zinc-900 border-b border-zinc-800 px-4 py-3 flex items-center gap-3 shrink-0">
-              <div className="w-8 h-8 bg-gold-500/20 rounded-full flex items-center justify-center text-sm font-bold text-gold-500">GP</div>
-              <div>
-                <p className="text-sm font-semibold">GoldenPrime Assistant</p>
-                <p className="text-xs text-green-500">Online</p>
+            <div className="px-4 py-3 flex items-center gap-3 shrink-0 border-b border-zinc-800"
+              style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.08) 0%, #09090b 100%)' }}>
+              <GPLogo size={36} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white">GoldenPrime Assistant</p>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <p className="text-xs text-emerald-400">Online</p>
+                </div>
               </div>
+              <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white transition-colors p-1">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 min-h-0">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
               {messages.map((msg) => (
-                <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] md:max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  {msg.role === 'bot' && (
+                    <div className="shrink-0 mr-2 mt-1">
+                      <GPLogo size={22} />
+                    </div>
+                  )}
+                  <div className={`max-w-[80%] px-3.5 py-2.5 text-sm leading-relaxed ${
                     msg.role === 'user'
-                      ? 'bg-gold-500/20 text-gold-500 rounded-br-sm'
-                      : 'bg-zinc-800 text-gray-300 rounded-bl-sm'
+                      ? 'bg-gold-500/15 text-gold-200 rounded-2xl rounded-br-md border border-gold-500/20'
+                      : 'bg-zinc-900 text-gray-300 rounded-2xl rounded-bl-md border border-zinc-800'
                   }`}>
                     {msg.text}
                   </div>
-                </div>
+                </motion.div>
               ))}
               <div ref={messagesEnd} />
             </div>
 
             {/* Quick Replies */}
-            <div className="px-3 md:px-4 pb-2 flex gap-1.5 md:gap-2 flex-wrap shrink-0">
+            <div className="px-3 pb-2 flex gap-1.5 flex-wrap shrink-0">
               {['What is GPG?', 'How to buy?', 'Referrals', 'Help'].map((q) => (
-                <button key={q} onClick={() => { setInput(q); setTimeout(sendMessage, 100); }}
-                  className="text-[10px] md:text-xs bg-zinc-800 border border-zinc-700 px-2 md:px-3 py-1 rounded-full text-gray-400 hover:text-white hover:border-gold-500/50 transition-colors whitespace-nowrap">
+                <button
+                  key={q}
+                  onClick={() => handleQuickReply(q)}
+                  className="text-xs bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-full text-zinc-400 hover:text-gold-400 hover:border-gold-500/40 transition-all whitespace-nowrap"
+                >
                   {q}
                 </button>
               ))}
             </div>
 
             {/* Input */}
-            <div className="border-t border-zinc-800 p-2.5 md:p-3 flex gap-2 shrink-0">
+            <div className="border-t border-zinc-800 p-3 flex gap-2 shrink-0">
               <input
+                ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                 placeholder="Ask me anything..."
-                className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-3 md:px-4 py-2 text-sm focus:outline-none focus:border-gold-500 transition-colors min-w-0"
+                className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-gold-500/50 transition-colors min-w-0"
               />
-              <button onClick={sendMessage}
-                className="bg-gold-500 text-black w-9 h-9 rounded-xl flex items-center justify-center font-bold hover:bg-gold-400 transition-colors shrink-0">
-                &#8593;
+              <button
+                onClick={sendMessage}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-black shrink-0 transition-all hover:scale-105 active:scale-95"
+                style={{
+                  background: input.trim()
+                    ? 'linear-gradient(135deg, #FFD700 0%, #D4AF37 100%)'
+                    : '#27272a',
+                  color: input.trim() ? 'black' : '#52525b',
+                }}
+              >
+                <SendIcon />
               </button>
             </div>
           </motion.div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { adminAPI } from '@/lib/api';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 type Tab = 'overview' | 'users' | 'preorders' | 'transactions' | 'deposits' | 'kyc' | 'logs';
 
@@ -125,8 +126,8 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-zinc-950">
-      <nav className="border-b border-zinc-800 px-4 md:px-6 py-4 flex justify-between items-center">
-        <Link href="/dashboard" className="text-xl md:text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime <span className="text-sm text-gray-500">Admin</span></Link>
+      <nav className="sticky top-0 z-50 border-b border-zinc-800/60 backdrop-blur-xl bg-zinc-950/80 px-4 md:px-6 py-4 flex justify-between items-center">
+        <BrandLogo size={32} href="/dashboard" showAdmin />
         <Link href="/dashboard" className="text-gray-400 hover:text-white">Dashboard</Link>
       </nav>
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10">

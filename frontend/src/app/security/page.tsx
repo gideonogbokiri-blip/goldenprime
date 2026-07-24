@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { authAPI } from '@/lib/api';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 export default function SecurityPage() {
   const router = useRouter();
@@ -37,8 +38,8 @@ export default function SecurityPage() {
 
   return (
     <main className="min-h-screen bg-zinc-950">
-      <nav className="border-b border-zinc-800 px-4 md:px-6 py-4 flex justify-between items-center">
-        <Link href="/dashboard" className="text-xl md:text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</Link>
+      <nav className="sticky top-0 z-50 border-b border-zinc-800/60 backdrop-blur-xl bg-zinc-950/80 px-4 md:px-6 py-4 flex justify-between items-center">
+        <BrandLogo size={32} href="/dashboard" />
         <Link href="/dashboard" className="text-gray-400 hover:text-white text-sm">Back to Dashboard</Link>
       </nav>
 

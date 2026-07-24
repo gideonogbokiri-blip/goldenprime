@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { authAPI } from '@/lib/api';
 import PasswordStrength from '@/components/ui/PasswordStrength';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 function RegisterForm() {
   const router = useRouter();
@@ -47,9 +48,9 @@ function RegisterForm() {
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-8 bg-zinc-950">
       <div className="w-full max-w-md">
-        <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8">
-          <span className="text-gold-500">Golden</span>Prime
-        </h1>
+        <div className="flex justify-center mb-6 md:mb-8">
+          <BrandLogo size={48} />
+        </div>
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 md:p-8">
           <h2 className="text-xl md:text-2xl font-semibold mb-2">Create Account</h2>
           <p className="text-gray-400 text-sm mb-6">Start investing in GoldenPrime Gold Coin</p>

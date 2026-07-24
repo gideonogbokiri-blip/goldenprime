@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { authAPI } from '@/lib/api';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,9 +37,9 @@ export default function LoginPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8">
-          <span className="text-shimmer">Golden</span>Prime
-        </h1>
+        <div className="flex justify-center mb-6 md:mb-8">
+          <BrandLogo size={48} />
+        </div>
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 md:p-8">
           <h2 className="text-xl md:text-2xl font-semibold mb-6">Sign In</h2>
           {error && (

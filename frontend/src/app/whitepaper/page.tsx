@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 const ROADMAP = [
   {
@@ -96,8 +97,8 @@ const TEAM = [
 export default function WhitepaperPage() {
   return (
     <main className="min-h-screen bg-zinc-950">
-      <nav className="border-b border-zinc-800 px-4 md:px-6 py-4 flex justify-between items-center">
-        <Link href="/dashboard" className="text-xl md:text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</Link>
+      <nav className="sticky top-0 z-50 border-b border-zinc-800/60 backdrop-blur-xl bg-zinc-950/80 px-4 md:px-6 py-4 flex justify-between items-center">
+        <BrandLogo size={32} href="/dashboard" />
         <div className="flex gap-4">
           <Link href="/dashboard" className="text-gray-400 hover:text-white text-sm">Dashboard</Link>
           <Link href="/preorder" className="bg-gold-500 text-black px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gold-400">Preorder GPG</Link>
@@ -111,9 +112,9 @@ export default function WhitepaperPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
-            className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gold-500 to-amber-600 rounded-full flex items-center justify-center text-5xl shadow-lg shadow-gold-500/30"
+            className="mx-auto mb-6"
           >
-            {'🪙'}
+            <BrandLogo size={96} />
           </motion.div>
           <h1 className="text-3xl md:text-5xl font-bold mb-4">
             <span className="text-gold-500">Golden</span>Prime Whitepaper

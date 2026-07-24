@@ -8,6 +8,7 @@ import { goldAPI } from '@/lib/api';
 import { StaggerContainer, StaggerItem } from '@/components/ui/Animations';
 import { fireReferralConfetti } from '@/lib/confetti';
 import TierBadge, { TierProgress, TierCard } from '@/components/ui/TierBadge';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 export default function ReferralsPage() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export default function ReferralsPage() {
     return (
       <main className="min-h-screen bg-zinc-950">
         <nav className="border-b border-zinc-800 px-4 md:px-6 py-4 flex justify-between items-center">
-          <div className="text-xl md:text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</div>
+          <BrandLogo size={32} />
           <div className="skeleton h-4 w-32 rounded" />
         </nav>
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-10">
@@ -70,8 +71,8 @@ export default function ReferralsPage() {
 
   return (
     <main className="min-h-screen bg-zinc-950">
-      <nav className="border-b border-zinc-800 px-4 md:px-6 py-4 flex justify-between items-center">
-        <Link href="/dashboard" className="text-xl md:text-2xl font-bold"><span className="text-gold-500">Golden</span>Prime</Link>
+      <nav className="sticky top-0 z-50 border-b border-zinc-800/60 backdrop-blur-xl bg-zinc-950/80 px-4 md:px-6 py-4 flex justify-between items-center">
+        <BrandLogo size={32} href="/dashboard" />
         <Link href="/dashboard" className="text-gray-400 hover:text-white text-sm">Back to Dashboard</Link>
       </nav>
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-10">
