@@ -1,0 +1,103 @@
+import axios from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+const api = axios.create({
+  baseURL: API_URL,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+api.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const authAPI = {
+  register: (data: { email: string; password: string; firstName?: string; lastName?: string; referralCode?: string }) =>
+    api.post('/auth/register', data),
+  login: (data: { email: string; password: string }) => api.post('/auth/login', data),
+  verifyEmail: (token: string) => api.get(`/auth/verify-email?token=${token}`),
+  forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (token: string, password: string) =>
+    api.post('/auth/reset-password', { token, password }),
+  getMe: () => api.get('/auth/me'),
+};
+
+export const walletAPI = {
+  getWallets: () => api.get('/wallet'),
+  getTransactions: (limit?: number, offset?: number) =>
+    api.get('/wallet/transactions', { params: { limit, offset } }),
+};
+
+export const goldAPI = {
+  getCoinInfo: () => api.get('/gold/coin'),
+  preorder: (data: { amount: number; paymentMethod: string; bankName?: string; accountNumber?: string; accountName?: string; cardHolder?: string; cardLast4?: string; expiryMonth?: string; expiryYear?: string }) =>
+    api.post('/gold/preorder', data),
+  getMyPreorders: (limit?: number) => api.get('/gold/my', { params: { limit } }),
+  getPortfolio: () => api.get('/gold/portfolio'),
+  getReferralInfo: () => api.get('/gold/referral'),
+  getLeaderboard: () => api.get('/gold/leaderboard'),
+  getBankDetails: () => api.get('/gold/bank-details'),
+  getCardDetails: () => api.get('/gold/card-details'),
+  getTierInfo: () => api.get('/gold/tier'),
+  getAllTiers: () => api.get('/gold/tiers'),
+};
+
+export const kycAPI = {
+  submit: (data: any) => api.post('/kyc/submit', data),
+  getStatus: () => api.get('/kyc/status'),
+};
+
+export const adminAPI = {
+  getDashboard: () => api.get('/admin/dashboard'),
+  getUsers: (search?: string) => api.get('/admin/users', { params: { search } }),
+  updateUserRole: (id: string, role: string) => api.put(`/admin/users/${id}/role`, { role }),
+  getTransactions: (status?: string, type?: string) => api.get('/admin/transactions', { params: { status, type } }),
+  updateTransactionStatus: (id: string, status: string) => api.put(`/admin/transactions/${id}/status`, { status }),
+  getKYC: (status?: string) => api.get('/admin/kyc', { params: { status } }),
+  approveKYC: (id: string) => api.put(`/admin/kyc/${id}/approve`),
+  rejectKYC: (id: string, reason: string) => api.put(`/admin/kyc/${id}/reject`, { reason }),
+  getLogs: () => api.get('/admin/logs'),
+  getDeposits: (status?: string) => api.get('/admin/deposits', { params: { status } }),
+  approveDeposit: (id: string, notes?: string) => api.put(`/admin/deposits/${id}/approve`, { notes }),
+  rejectDeposit: (id: string, reason: string) => api.put(`/admin/deposits/${id}/reject`, { reason }),
+  getPreorders: (status?: string) => api.get('/admin/preorders', { params: { status } }),
+  approvePreorder: (id: string, notes?: string) => api.put(`/admin/preorders/${id}/approve`, { notes }),
+  rejectPreorder: (id: string, reason: string) => api.put(`/admin/preorders/${id}/reject`, { reason }),
+  getUserPaymentDetails: (userId: string) => api.get(`/admin/user/${userId}/payment-details`),
+};
+
+export const p2pAPI = {
+  getOrderBook: (coin: string) => api.get(`/p2p/orderbook/${coin}`),
+  createOrder: (data: { type: string; coin: string; amount: number; pricePerUnit: number; paymentMethod?: string; notes?: string }) =>
+    api.post('/p2p/orders', data),
+  cancelOrder: (id: string) => api.delete(`/p2p/orders/${id}`),
+  takeOrder: (id: string, amount: number) => api.post(`/p2p/orders/${id}/take`, { amount }),
+  getMyOrders: (status?: string) => api.get('/p2p/my-orders', { params: { status } }),
+  getMyTrades: (status?: string) => api.get('/p2p/my-trades', { params: { status } }),
+  getTrade: (id: string) => api.get(`/p2p/trades/${id}`),
+  confirmTrade: (id: string) => api.post(`/p2p/trades/${id}/confirm`),
+  disputeTrade: (id: string, reason: string) => api.post(`/p2p/trades/${id}/dispute`, { reason }),
+  sendMessage: (id: string, message: string) => api.post(`/p2p/trades/${id}/message`, { message }),
+};
+
+export default api;

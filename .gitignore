@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.local
+.env.production
+.next/
+out/
+dist/
+build/
+*.log
+.DS_Store
+Thumbs.db
+backend/data/user_settings.json
+backend/data/p2p_orders.json
+backend/data/trade_history.json
