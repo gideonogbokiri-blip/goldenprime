@@ -487,14 +487,16 @@ export default function Home() {
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto mb-8">
               {[
-                { tier: 'Bronze', reward: '0.0001', req: '1-4 refs', icon: '🥉' },
-                { tier: 'Silver', reward: '0.0002', req: '5-14 refs', icon: '🥈' },
-                { tier: 'Gold', reward: '0.0005', req: '15-49 refs', icon: '🥇' },
-                { tier: 'Platinum', reward: '0.001', req: '50+ refs', icon: '💎' },
+                { tier: 'Bronze', reward: '0.0001', req: '1-4 refs', color: '#CD7F32', bgColor: 'rgba(205,127,50,0.12)' },
+                { tier: 'Silver', reward: '0.0002', req: '5-14 refs', color: '#C0C0C0', bgColor: 'rgba(192,192,192,0.12)' },
+                { tier: 'Gold', reward: '0.0005', req: '15-49 refs', color: '#FFD700', bgColor: 'rgba(255,215,0,0.12)' },
+                { tier: 'Platinum', reward: '0.001', req: '50+ refs', color: '#E5E4E2', bgColor: 'rgba(229,228,226,0.12)' },
               ].map(t => (
                 <motion.div key={t.tier} whileHover={{ y: -4, scale: 1.02 }} className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 text-center">
-                  <div className="text-2xl mb-1">{t.icon}</div>
-                  <div className="text-xs font-semibold text-gold-400">{t.tier}</div>
+                  <div className="w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center" style={{ background: t.bgColor, border: `1.5px solid ${t.color}30` }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={t.color} strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  </div>
+                  <div className="text-xs font-semibold" style={{ color: t.color }}>{t.tier}</div>
                   <div className="text-base md:text-lg font-bold text-white mt-1">{t.reward} GPG</div>
                   <div className="text-[9px] text-gray-500">{t.req}</div>
                 </motion.div>

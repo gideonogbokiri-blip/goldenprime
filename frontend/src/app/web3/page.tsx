@@ -63,8 +63,8 @@ export default function Web3Page() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
           className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 mb-4 md:mb-6">
           <div className="flex items-center gap-3 md:gap-4 mb-6">
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-orange-500/10 rounded-xl flex items-center justify-center text-2xl md:text-3xl">
-              🐵
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-orange-500/10 rounded-xl flex items-center justify-center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
             </div>
             <div>
               <h3 className="text-base md:text-lg font-semibold">MetaMask</h3>
@@ -122,13 +122,15 @@ export default function Web3Page() {
           <h3 className="text-base md:text-lg font-semibold mb-4">Supported Wallets</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { name: 'MetaMask', icon: '🦊', available: true },
-              { name: 'WalletConnect', icon: '🔌', available: false },
-              { name: 'Coinbase', icon: '💰', available: false },
-              { name: 'Trust Wallet', icon: '🔒', available: false },
+              { name: 'MetaMask', color: '#F97316', available: true },
+              { name: 'WalletConnect', color: '#3B99FC', available: false },
+              { name: 'Coinbase', color: '#0052FF', available: false },
+              { name: 'Trust Wallet', color: '#3375FF', available: false },
             ].map((w) => (
               <div key={w.name} className={`p-4 rounded-xl border text-center ${w.available ? 'border-zinc-700 bg-zinc-800/50' : 'border-zinc-800 opacity-50'}`}>
-                <div className="text-2xl mb-2">{w.icon}</div>
+                <div className="w-10 h-10 rounded-lg mx-auto mb-2 flex items-center justify-center" style={{ background: `${w.color}15` }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={w.color} strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
                 <p className="text-sm font-semibold">{w.name}</p>
                 {!w.available && <p className="text-xs text-gray-500 mt-1">Coming soon</p>}
               </div>

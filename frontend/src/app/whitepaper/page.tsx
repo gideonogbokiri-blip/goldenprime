@@ -89,9 +89,9 @@ const TOKENOMICS = [
 ];
 
 const TEAM = [
-  { name: 'GoldenPrime Team', role: 'Core Development', avatar: '🪙' },
-  { name: 'Community', role: 'Ecosystem Growth', avatar: '🌍' },
-  { name: 'Partners', role: 'Strategic Advisors', avatar: '🎯' },
+  { name: 'GoldenPrime Team', role: 'Core Development', color: '#D4AF37' },
+  { name: 'Community', role: 'Ecosystem Growth', color: '#3b82f6' },
+  { name: 'Partners', role: 'Strategic Advisors', color: '#22c55e' },
 ];
 
 export default function WhitepaperPage() {
@@ -207,22 +207,32 @@ export default function WhitepaperPage() {
             {[
               {
                 title: 'Frontend',
-                icon: '🌐',
+                color: '#3b82f6',
                 items: ['Next.js 14 (React)', 'Tailwind CSS', 'Framer Motion', 'WebSocket Real-time'],
               },
               {
                 title: 'Backend',
-                icon: '\u2699\uFE0F',
+                color: '#22c55e',
                 items: ['Node.js / Express', 'PostgreSQL (Supabase)', 'JWT Authentication', 'RESTful API'],
               },
               {
                 title: 'Blockchain',
-                icon: '🔗',
+                color: '#D4AF37',
                 items: ['Ethereum (ERC-20)', 'MetaMask Integration', 'Web3.js / Ethers', 'Smart Contracts'],
               },
             ].map((stack) => (
               <div key={stack.title} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
-                <div className="text-3xl mb-3">{stack.icon}</div>
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: `${stack.color}15` }}>
+                  {stack.title === 'Frontend' && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                  )}
+                  {stack.title === 'Backend' && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  )}
+                  {stack.title === 'Blockchain' && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="1.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                  )}
+                </div>
                 <h3 className="text-lg font-semibold mb-3">{stack.title}</h3>
                 <ul className="space-y-2">
                   {stack.items.map((item) => (
@@ -283,7 +293,11 @@ export default function WhitepaperPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {TEAM.map((member) => (
               <div key={member.name} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6 text-center">
-                <div className="text-4xl mb-3">{member.avatar}</div>
+                <div className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: `${member.color}15`, border: `1.5px solid ${member.color}30` }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={member.color} strokeWidth="1.5">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                </div>
                 <h3 className="text-lg font-semibold">{member.name}</h3>
                 <p className="text-sm text-gray-400">{member.role}</p>
               </div>

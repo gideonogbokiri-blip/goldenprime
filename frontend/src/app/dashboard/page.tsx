@@ -13,15 +13,30 @@ import { StaggerContainer, StaggerItem } from '@/components/ui/Animations';
 import ChatBot from '@/components/ChatBot';
 import BrandLogo from '@/components/ui/BrandLogo';
 
-const TX_ICONS: Record<string, string> = {
-  deposit: '💵',
-  withdrawal: '🏦',
-  purchase: '🪙',
-  preorder: '🪙',
-  sell: '📊',
-  referral_reward: '🎁',
-  trade: '🔄',
-};
+function TxIcon({ type }: { type: string }) {
+  const iconClass = "w-4 h-4";
+  const base = "w-8 h-8 rounded-lg flex items-center justify-center shrink-0";
+  switch (type) {
+    case 'deposit': return <div className={`${base} bg-emerald-500/15`}><svg className={`${iconClass} text-emerald-500`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>;
+    case 'withdrawal': return <div className={`${base} bg-blue-500/15`}><svg className={`${iconClass} text-blue-500`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg></div>;
+    case 'purchase': case 'preorder': return <div className={`${base} bg-gold-500/15`}><svg className={`${iconClass} text-gold-500`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><text x="12" y="16" textAnchor="middle" fill="currentColor" fontSize="10" fontWeight="bold" stroke="none">$</text></svg></div>;
+    case 'sell': return <div className={`${base} bg-purple-500/15`}><svg className={`${iconClass} text-purple-500`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>;
+    case 'referral_reward': return <div className={`${base} bg-amber-500/15`}><svg className={`${iconClass} text-amber-500`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>;
+    case 'trade': return <div className={`${base} bg-cyan-500/15`}><svg className={`${iconClass} text-cyan-500`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>;
+    default: return <div className={`${base} bg-zinc-500/15`}><svg className={`${iconClass} text-zinc-400`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg></div>;
+  }
+}
+
+function ActionIcon({ type }: { type: string }) {
+  switch (type) {
+    case 'preorder': return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>;
+    case 'trade': return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>;
+    case 'wallet': return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
+    case 'referrals': return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+    case 'kyc': return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
+    default: return null;
+  }
+}
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -240,11 +255,11 @@ export default function DashboardPage() {
               <h3 className="text-base md:text-lg font-semibold mb-4">Quick Actions</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                 {[
-                  { href: '/preorder', label: 'Preorder GPG', gold: true, icon: '🪙' },
-                  { href: '/trade', label: 'Trade P2P', gold: false, icon: '📊' },
-                  { href: '/wallet', label: 'Fund Wallet', gold: false, icon: '💰' },
-                  { href: '/referrals', label: 'Refer & Earn', gold: false, icon: '🎁' },
-                  { href: '/kyc', label: 'KYC Verify', gold: false, icon: '🛡️' },
+                  { href: '/preorder', label: 'Preorder GPG', gold: true, type: 'preorder' },
+                  { href: '/trade', label: 'Trade P2P', gold: false, type: 'trade' },
+                  { href: '/wallet', label: 'Fund Wallet', gold: false, type: 'wallet' },
+                  { href: '/referrals', label: 'Refer & Earn', gold: false, type: 'referrals' },
+                  { href: '/kyc', label: 'KYC Verify', gold: false, type: 'kyc' },
                 ].map((action) => (
                   <motion.div key={action.href} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                     <Link href={action.href}
@@ -253,7 +268,7 @@ export default function DashboardPage() {
                           ? 'bg-gold-500 text-black hover:bg-gold-400 shadow-lg shadow-gold-500/20'
                           : 'border border-zinc-700/60 hover:bg-zinc-800/80 hover:border-zinc-600'
                       }`}>
-                      <span className="text-lg">{action.icon}</span>
+                      <ActionIcon type={action.type} />
                       {action.label}
                     </Link>
                   </motion.div>
@@ -298,7 +313,9 @@ export default function DashboardPage() {
               </div>
               {transactions.length === 0 ? (
                 <div className="text-center py-8">
-                  <div className="text-3xl mb-2">📭</div>
+                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-zinc-500"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                  </div>
                   <p className="text-gray-400 text-sm">No activity yet</p>
                   <Link href="/preorder" className="text-gold-500 text-xs hover:underline mt-1 inline-block">Start investing &rarr;</Link>
                 </div>
@@ -306,12 +323,11 @@ export default function DashboardPage() {
                 <div className="space-y-2">
                   {transactions.slice(0, 8).map((tx: any, i: number) => {
                     const isPos = tx.type === 'deposit' || tx.type === 'sell' || tx.type === 'referral_reward';
-                    const icon = TX_ICONS[tx.type] || '📋';
                     return (
                       <motion.div key={tx.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.7 + i * 0.04 }}
                         className="flex items-center gap-3 py-2.5 px-2 rounded-lg hover:bg-zinc-800/50 transition-colors">
-                        <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-sm shrink-0">{icon}</div>
+                        <TxIcon type={tx.type} />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium capitalize truncate">{tx.type.replace(/_/g, ' ')}</p>
                           <p className="text-[11px] text-gray-500">{tx.currency} • {new Date(tx.created_at).toLocaleDateString()}</p>
