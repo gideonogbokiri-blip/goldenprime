@@ -21,6 +21,7 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL || 'http://localhost:3000',
+    'https://goldenprime.vercel.app',
     'https://frontend-eight-beige-32.vercel.app',
     'https://goldenprime-pi.vercel.app',
   ],
