@@ -90,7 +90,7 @@ export default function ReferralsPage() {
           transition={{ delay: 0.1 }}
           className="text-gray-400 mb-6 md:mb-8 text-sm md:text-base"
         >
-          Invite friends and earn GPG — higher tiers earn more per referral
+          Invite friends and earn USD cash rewards — higher tiers earn more per referral
         </motion.p>
 
         {/* Tier Progress */}
@@ -121,16 +121,15 @@ export default function ReferralsPage() {
           </StaggerItem>
           <StaggerItem>
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
-              <p className="text-gray-400 text-xs md:text-sm mb-1">GPG Earned</p>
-              <p className="text-2xl md:text-4xl font-bold">{referral?.earnings?.toFixed(4) || '0.0000'}</p>
-              <p className="text-xs md:text-sm text-gray-400">~ ${((referral?.earnings || 0) * 50).toFixed(2)}</p>
+              <p className="text-gray-400 text-xs md:text-sm mb-1">Cash Earned</p>
+              <p className="text-2xl md:text-4xl font-bold">${referral?.earnings?.toFixed(2) || '0.00'}</p>
             </div>
           </StaggerItem>
           <StaggerItem>
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
               <p className="text-gray-400 text-xs md:text-sm mb-1">Current Reward</p>
-              <p className="text-2xl md:text-4xl font-bold" style={{ color: tierInfo?.color }}>{referral?.rewardPerReferral || 0.0001}</p>
-              <p className="text-xs md:text-sm text-gray-400">GPG per referral</p>
+              <p className="text-2xl md:text-4xl font-bold" style={{ color: tierInfo?.color }}>${referral?.rewardPerReferral || 5}</p>
+              <p className="text-xs md:text-sm text-gray-400">USD per referral</p>
             </div>
           </StaggerItem>
         </StaggerContainer>
@@ -200,7 +199,7 @@ export default function ReferralsPage() {
             </div>
           </div>
           <div className="mt-4 md:mt-6 bg-gold-500/10 border border-gold-500/30 rounded-lg p-3 md:p-4">
-            <p className="text-xs md:text-sm"><span className="text-gold-500 font-semibold">How it works:</span> Share your referral link. When friends sign up, you earn GPG at your current tier rate. Reach higher tiers for bigger rewards!</p>
+            <p className="text-xs md:text-sm"><span className="text-gold-500 font-semibold">How it works:</span> Share your referral link. When friends sign up, you earn USD at your current tier rate. Reach higher tiers for bigger rewards!</p>
           </div>
         </motion.div>
 
@@ -232,8 +231,7 @@ export default function ReferralsPage() {
                       <p className="text-xs text-gray-400">{entry.referralCount} referrals</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-bold text-gold-500 text-sm">{entry.earnings.toFixed(4)} GPG</p>
-                      <p className="text-[10px] text-gray-400">~ ${(entry.earnings * 50).toFixed(2)}</p>
+                      <p className="font-bold text-gold-500 text-sm">${entry.earnings.toFixed(2)}</p>
                     </div>
                   </div>
                 </StaggerItem>

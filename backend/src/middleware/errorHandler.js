@@ -23,6 +23,8 @@ function errorHandler(err, req, res, next) {
 
   res.status(status).json({
     error: status >= 500 ? 'Internal server error' : message,
+    ...(err.needsVerification ? { needsVerification: true } : {}),
+    ...(err.email ? { email: err.email } : {}),
   });
 }
 

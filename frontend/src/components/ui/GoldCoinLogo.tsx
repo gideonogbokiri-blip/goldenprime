@@ -33,10 +33,10 @@ export default function GoldCoinLogo({ size = 40, className = '' }: { size?: num
         {/* Inner decorative ring */}
         <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
         <circle cx="50" cy="50" r="34" fill="none" stroke="rgba(139,114,0,0.3)" strokeWidth="0.5" />
-        {/* GPG text */}
-        <text x="50" y="46" textAnchor="middle" fill="#000000" fontWeight="800" fontSize="18" fontFamily="system-ui, sans-serif" letterSpacing="1">GPG</text>
+        {/* GP text */}
+        <text x="50" y="46" textAnchor="middle" fill="#000000" fontWeight="800" fontSize="18" fontFamily="system-ui, sans-serif" letterSpacing="1">GP</text>
         {/* Price text */}
-        <text x="50" y="62" textAnchor="middle" fill="rgba(0,0,0,0.5)" fontWeight="600" fontSize="10" fontFamily="system-ui, sans-serif">$50</text>
+        <text x="50" y="62" textAnchor="middle" fill="rgba(0,0,0,0.5)" fontWeight="600" fontSize="10" fontFamily="system-ui, sans-serif">AU</text>
         {/* Specular highlight */}
         <ellipse cx="38" cy="32" rx="14" ry="8" fill="rgba(255,255,255,0.12)" transform="rotate(-20 38 32)" />
       </svg>

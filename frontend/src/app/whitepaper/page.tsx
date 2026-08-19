@@ -13,7 +13,7 @@ const ROADMAP = [
     items: [
       'Platform development and core architecture',
       'User authentication and wallet system',
-      'GPG coin pre-order system',
+      'Deposit and withdrawal system',
       'Admin dashboard and payment processing',
     ],
   },
@@ -59,8 +59,8 @@ const ROADMAP = [
     date: 'Q4 2026',
     status: 'upcoming',
     items: [
-      'GPG Token Generation Event (TGE)',
-      'DEX listing and liquidity pools',
+      'Managed investment rollout and expected profit distribution',
+      'Expanded trading pairs and liquidity',
       'Staking and yield farming',
       'Mobile app beta',
     ],
@@ -72,20 +72,11 @@ const ROADMAP = [
     status: 'upcoming',
     items: [
       'CEX listings (Tier 1 and Tier 2 exchanges)',
-      'GPG debit card for everyday spending',
+      'GoldenPrime debit card for everyday spending',
       'Institutional partnerships',
       'Cross-chain bridge deployment',
     ],
   },
-];
-
-const TOKENOMICS = [
-  { label: 'Public Sale', percent: 40, color: 'bg-gold-500' },
-  { label: 'Team & Advisors', percent: 15, color: 'bg-blue-500' },
-  { label: 'Staking Rewards', percent: 20, color: 'bg-green-500' },
-  { label: 'Liquidity Pool', percent: 10, color: 'bg-purple-500' },
-  { label: 'Marketing', percent: 10, color: 'bg-orange-500' },
-  { label: 'Reserve', percent: 5, color: 'bg-zinc-500' },
 ];
 
 const TEAM = [
@@ -101,7 +92,7 @@ export default function WhitepaperPage() {
         <BrandLogo size={32} href="/dashboard" />
         <div className="flex gap-4">
           <Link href="/dashboard" className="text-gray-400 hover:text-white text-sm">Dashboard</Link>
-          <Link href="/preorder" className="bg-gold-500 text-black px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gold-400">Preorder GPG</Link>
+          <Link href="/register" className="bg-gold-500 text-black px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gold-400">Create Account</Link>
         </div>
       </nav>
 
@@ -120,8 +111,8 @@ export default function WhitepaperPage() {
             <span className="text-gold-500">Golden</span>Prime Whitepaper
           </h1>
           <p className="text-base md:text-xl text-gray-400 max-w-2xl mx-auto">
-            A comprehensive overview of the GoldenPrime Gold Coin (GPG) ecosystem,
-            tokenomics, and roadmap for the future of tokenized gold investment.
+            A comprehensive overview of the GoldenPrime investment platform — its managed portfolios,
+            expected profit model, trading features, and roadmap for the future of digital asset brokerage.
           </p>
         </motion.div>
 
@@ -130,65 +121,61 @@ export default function WhitepaperPage() {
           <h2 className="text-xl md:text-3xl font-bold mb-4 md:mb-6">Executive Summary</h2>
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 md:p-8">
             <p className="text-gray-300 leading-relaxed mb-4">
-              GoldenPrime (GP) is a next-generation crypto investment platform designed to democratize access to
-              gold-backed digital assets. Our flagship product, the GoldenPrime Gold Coin (GPG), represents a new
-              paradigm in tokenized precious metals, combining the stability of gold with the innovation of
-              blockchain technology.
+              GoldenPrime (GP) is a next-generation investment broker designed to make wealth management
+              accessible to everyone. Our managed investment program delivers a guaranteed expected profit on
+              your balance, while our peer-to-peer trading marketplace lets you trade digital assets securely.
             </p>
             <p className="text-gray-300 leading-relaxed mb-4">
-              Each GPG coin is pegged to $50 USD during the pre-order phase, with a total supply of 1,000,000 coins.
-              The platform offers P2P trading, tiered referral rewards, and a comprehensive ecosystem that bridges
-              traditional finance with decentralized innovation.
+              Fund your account via bank transfer or crypto, upload a payment slip, and our team credits your
+              wallet once it is verified. Withdrawals are approved by our support team with funds sent directly
+              to your bank account. Every deposit and withdrawal is confirmed by email.
             </p>
             <p className="text-gray-300 leading-relaxed">
-              Our mission is to make gold investment accessible, transparent, and profitable for everyone, regardless
-              of geographic location or investment experience. By leveraging blockchain technology, we ensure that every
-              transaction is verifiable, every holding is auditable, and every participant is empowered.
+              Our mission is to make investing simple, transparent, and profitable for everyone, regardless of
+              geographic location or investment experience. By combining real support, clear expected profits,
+              and a secure wallet, we ensure every participant is empowered.
             </p>
           </div>
         </motion.section>
 
-        {/* Tokenomics */}
+        {/* How It Works */}
         <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mb-16">
-          <h2 className="text-xl md:text-3xl font-bold mb-4 md:mb-6">GPG Tokenomics</h2>
+          <h2 className="text-xl md:text-3xl font-bold mb-4 md:mb-6">How It Works</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            {/* Distribution */}
+            {/* Steps */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
-              <h3 className="text-xl font-semibold mb-4">Token Distribution</h3>
-              <div className="space-y-3">
-                {TOKENOMICS.map((t) => (
-                  <div key={t.label}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-400">{t.label}</span>
-                      <span className="font-bold">{t.percent}%</span>
-                    </div>
-                    <div className="w-full bg-zinc-800 rounded-full h-2">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${t.percent}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 1, ease: 'easeOut' }}
-                        className={`${t.color} h-2 rounded-full`}
-                      />
+              <h3 className="text-xl font-semibold mb-4">Your Journey</h3>
+              <div className="space-y-4">
+                {[
+                  { step: '1', title: 'Create Account', desc: 'Sign up and verify your email address to activate your account.' },
+                  { step: '2', title: 'Fund Your Wallet', desc: 'Deposit via bank transfer or crypto, then upload your payment slip for review.' },
+                  { step: '3', title: 'Start Earning', desc: 'Once your deposit is approved, your balance grows with the expected profit rate.' },
+                  { step: '4', title: 'Withdraw Anytime', desc: 'Request a withdrawal to your bank account. Our team approves it and sends the funds.' },
+                ].map((s) => (
+                  <div key={s.step} className="flex gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-gold-500 font-bold text-sm shrink-0">{s.step}</div>
+                    <div>
+                      <p className="font-semibold text-sm">{s.title}</p>
+                      <p className="text-sm text-gray-400 mt-0.5">{s.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Key Stats */}
+            {/* Key Metrics */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
               <h3 className="text-xl font-semibold mb-4">Key Metrics</h3>
               <div className="space-y-4">
                 {[
-                  { label: 'Token Name', value: 'GoldenPrime Gold Coin' },
-                  { label: 'Symbol', value: 'GPG' },
-                  { label: 'Total Supply', value: '1,000,000 GPG' },
-                  { label: 'Pre-order Price', value: '$50 / GPG' },
-                  { label: 'Launch Date', value: 'October 1, 2026' },
-                  { label: 'Blockchain', value: 'Ethereum (ERC-20)' },
-                  { label: 'Initial Market Cap', value: '$50,000,000' },
-                  { label: 'Backing', value: 'Gold Reserves + USD Collateral' },
+                  { label: 'Platform', value: 'GoldenPrime Broker' },
+                  { label: 'Expected Profit', value: 'Set by your broker' },
+                  { label: 'Minimum Deposit', value: '$10' },
+                  { label: 'Maximum Deposit', value: '$50,000' },
+                  { label: 'Referral Rewards', value: '$5 - $50 per referral' },
+                  { label: 'Supported Assets', value: 'BTC, ETH, SOL, USDT, USDC' },
+                  { label: 'Withdrawals', value: 'Admin-approved to bank' },
+                  { label: 'Support', value: 'Live chat with your broker' },
                 ].map((stat) => (
                   <div key={stat.label} className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-zinc-800/50 last:border-0 gap-1">
                     <span className="text-sm text-gray-400">{stat.label}</span>
@@ -310,14 +297,14 @@ export default function WhitepaperPage() {
           className="text-center bg-gradient-to-r from-gold-500/10 to-zinc-900 border border-gold-500/30 rounded-2xl p-6 md:p-12">
           <h2 className="text-xl md:text-3xl font-bold mb-4">Join the GoldenPrime Revolution</h2>
           <p className="text-gray-400 mb-8 max-w-lg mx-auto">
-            Be part of the future of gold investment. Preorder GPG coins today and earn rewards by referring others.
+            Be part of the future of investing. Deposit today, earn expected profit on your balance, and earn cash rewards by referring others.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/preorder" className="bg-gold-500 text-black px-8 py-3 rounded-lg font-semibold hover:bg-gold-400 transition-colors">
-              Preorder GPG
-            </Link>
-            <Link href="/register" className="border border-zinc-700 px-8 py-3 rounded-lg font-semibold hover:bg-zinc-800 transition-colors">
+            <Link href="/register" className="bg-gold-500 text-black px-8 py-3 rounded-lg font-semibold hover:bg-gold-400 transition-colors">
               Create Account
+            </Link>
+            <Link href="/dashboard" className="border border-zinc-700 px-8 py-3 rounded-lg font-semibold hover:bg-zinc-800 transition-colors">
+              Go to Dashboard
             </Link>
           </div>
         </motion.section>

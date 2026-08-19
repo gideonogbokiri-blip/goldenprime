@@ -85,13 +85,13 @@ export default function GoldCoin({
             className="font-bold text-black leading-none"
             style={{ fontSize: innerSize * 0.28 }}
           >
-            GPG
+            GP
           </div>
           <div
             className="text-black/60 font-semibold"
             style={{ fontSize: innerSize * 0.12 }}
           >
-            $50
+            AU
           </div>
         </div>
       </motion.div>

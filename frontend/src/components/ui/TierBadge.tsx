@@ -148,7 +148,7 @@ export function TierCard({ tier, isActive, referralCount }: {
       </div>
       <div className="text-sm">
         <span className="text-gray-400">Reward: </span>
-        <span className="font-mono font-bold" style={{ color: tier.color }}>{tier.rewardPerReferral} GPG</span>
+        <span className="font-mono font-bold" style={{ color: tier.color }}>${tier.rewardPerReferral}</span>
       </div>
       {isActive && (
         <motion.div

@@ -68,4 +68,14 @@ async function getMe(req, res, next) {
   }
 }
 
-module.exports = { register, login, verifyEmail, forgotPassword, resetPassword, getMe };
+async function resendVerification(req, res, next) {
+  try {
+    const { email } = req.body;
+    const result = await authService.resendVerification(email);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { register, login, verifyEmail, forgotPassword, resetPassword, getMe, resendVerification };

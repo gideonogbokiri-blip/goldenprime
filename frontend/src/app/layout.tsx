@@ -1,14 +1,15 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { ToastProvider } from '@/components/ui/Toast';
+import ChatBot from '@/components/ChatBot';
 
 export const metadata: Metadata = {
   title: 'GoldenPrime - Digital Gold Investment Platform',
-  description: 'Invest in GoldenPrime Gold Coin (GPG) at $50 per coin. Preorder, trade P2P, and earn referral rewards on a secure, regulated crypto investment platform.',
-  keywords: ['GoldenPrime', 'GPG', 'digital gold', 'crypto investment', 'gold coin', 'preorder', 'P2P trading'],
+  description: 'A professional digital asset brokerage. Fund your account, trade, refer friends, and grow your wealth securely.',
+  keywords: ['GoldenPrime', 'investment', 'broker', 'digital assets', 'trading', 'referrals'],
   openGraph: {
     title: 'GoldenPrime - Digital Gold Investment Platform',
-    description: 'Invest in GoldenPrime Gold Coin (GPG) at $50 per coin. Preorder, trade P2P, and earn referral rewards.',
+    description: 'A professional digital asset brokerage. Fund your account, trade, refer friends, and grow your wealth securely.',
     type: 'website',
   },
 };
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="antialiased">
         <ToastProvider>{children}</ToastProvider>
+        <ChatBot />
       </body>
     </html>
   );

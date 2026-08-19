@@ -2,8 +2,8 @@ const depositService = require('../services/depositService');
 
 async function requestDeposit(req, res, next) {
   try {
-    const { amount, method, referenceCode } = req.body;
-    const result = await depositService.requestDeposit(req.user.id, { amount, method, referenceCode });
+    const { amount, method, referenceCode, slip } = req.body;
+    const result = await depositService.requestDeposit(req.user.id, { amount, method, referenceCode, slip });
     res.json(result);
   } catch (err) {
     next(err);

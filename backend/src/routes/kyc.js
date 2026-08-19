@@ -1,5 +1,6 @@
 const express = require('express');
 const authenticate = require('../middleware/auth');
+const requireVerified = require('../middleware/requireVerified');
 const kycController = require('../controllers/kycController');
 
 const router = express.Router();
@@ -36,7 +37,7 @@ const router = express.Router();
  *       201:
  *         description: KYC submitted for review
  */
-router.post('/submit', authenticate, kycController.submit);
+router.post('/submit', authenticate, requireVerified, kycController.submit);
 
 /**
  * @swagger
@@ -50,6 +51,6 @@ router.post('/submit', authenticate, kycController.submit);
  *       200:
  *         description: KYC status (pending, approved, rejected)
  */
-router.get('/status', authenticate, kycController.getStatus);
+router.get('/status', authenticate, requireVerified, kycController.getStatus);
 
 module.exports = router;

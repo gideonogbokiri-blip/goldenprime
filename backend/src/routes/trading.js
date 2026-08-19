@@ -1,5 +1,6 @@
 const express = require('express');
 const authenticate = require('../middleware/auth');
+const requireVerified = require('../middleware/requireVerified');
 const tradingController = require('../controllers/tradingController');
 
 const router = express.Router();
@@ -32,7 +33,7 @@ const router = express.Router();
  *       400:
  *         description: Insufficient balance or invalid coin
  */
-router.post('/buy', authenticate, tradingController.buy);
+router.post('/buy', authenticate, requireVerified, tradingController.buy);
 
 /**
  * @swagger
@@ -61,7 +62,7 @@ router.post('/buy', authenticate, tradingController.buy);
  *       400:
  *         description: Insufficient crypto balance
  */
-router.post('/sell', authenticate, tradingController.sell);
+router.post('/sell', authenticate, requireVerified, tradingController.sell);
 
 /**
  * @swagger
@@ -75,6 +76,6 @@ router.post('/sell', authenticate, tradingController.sell);
  *       200:
  *         description: Portfolio with holdings array and totalValue
  */
-router.get('/portfolio', authenticate, tradingController.getPortfolio);
+router.get('/portfolio', authenticate, requireVerified, tradingController.getPortfolio);
 
 module.exports = router;

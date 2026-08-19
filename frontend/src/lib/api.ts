@@ -41,6 +41,7 @@ export const authAPI = {
     api.post('/auth/register', data),
   login: (data: { email: string; password: string }) => api.post('/auth/login', data),
   verifyEmail: (token: string) => api.get(`/auth/verify-email?token=${token}`),
+  resendVerification: (email: string) => api.post('/auth/resend-verification', { email }),
   forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
   resetPassword: (token: string, password: string) =>
     api.post('/auth/reset-password', { token, password }),
@@ -51,6 +52,25 @@ export const walletAPI = {
   getWallets: () => api.get('/wallet'),
   getTransactions: (limit?: number, offset?: number) =>
     api.get('/wallet/transactions', { params: { limit, offset } }),
+  withdraw: (data: { amount: number; bankName: string; accountNumber: string; accountName: string }) =>
+    api.post('/wallet/withdraw', data),
+};
+
+export const depositAPI = {
+  request: (data: { amount: number; method: string; referenceCode?: string; slip?: string }) =>
+    api.post('/deposits/request', data),
+  my: (limit?: number) => api.get('/deposits/my', { params: { limit } }),
+  instructions: () => api.get('/deposits/instructions'),
+};
+
+export const chatAPI = {
+  getMessages: () => api.get('/chat/messages'),
+  sendMessage: (data: { message?: string; attachment?: string }) => api.post('/chat/messages', data),
+  markRead: () => api.post('/chat/read'),
+};
+
+export const settingsAPI = {
+  getPublic: () => api.get('/settings'),
 };
 
 export const tradingAPI = {
@@ -95,6 +115,17 @@ export const adminAPI = {
   approvePreorder: (id: string, notes?: string) => api.put(`/admin/preorders/${id}/approve`, { notes }),
   rejectPreorder: (id: string, reason: string) => api.put(`/admin/preorders/${id}/reject`, { reason }),
   getUserPaymentDetails: (userId: string) => api.get(`/admin/user/${userId}/payment-details`),
+  fundWallet: (userId: string, amount: number, note?: string) =>
+    api.post(`/admin/users/${userId}/fund`, { amount, note }),
+  getWithdrawals: (status?: string) => api.get('/admin/withdrawals', { params: { status } }),
+  approveWithdrawal: (id: string, notes?: string) => api.put(`/admin/withdrawals/${id}/approve`, { notes }),
+  rejectWithdrawal: (id: string, reason: string) => api.put(`/admin/withdrawals/${id}/reject`, { reason }),
+  getSettings: () => api.get('/admin/settings'),
+  saveSettings: (data: any) => api.put('/admin/settings', data),
+  getChatThreads: () => api.get('/admin/chat/threads'),
+  getChatConversation: (userId: string) => api.get(`/admin/chat/users/${userId}/messages`),
+  adminReply: (userId: string, data: { message?: string; creditAmount?: number; creditNote?: string }) =>
+    api.post(`/admin/chat/users/${userId}/messages`, data),
 };
 
 export const p2pAPI = {

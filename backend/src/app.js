@@ -13,6 +13,8 @@ const depositRoutes = require('./routes/deposit');
 const preorderRoutes = require('./routes/preorder');
 const p2pRoutes = require('./routes/p2pTrading');
 const adminRoutes = require('./routes/admin');
+const chatRoutes = require('./routes/chat');
+const settingsRoutes = require('./routes/settings');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -47,6 +49,8 @@ app.use('/api/deposits', depositRoutes);
 app.use('/api/gold', preorderRoutes);
 app.use('/api/p2p', p2pRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/settings', settingsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString(), environment: process.env.NODE_ENV || 'development' });

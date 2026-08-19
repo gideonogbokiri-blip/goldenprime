@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import GoldCoin from '@/components/ui/GoldCoin';
-import Countdown from '@/components/ui/Countdown';
 import Navbar from '@/components/ui/Navbar';
 import Footer from '@/components/ui/Footer';
 import { StaggerContainer, StaggerItem, FadeInUp } from '@/components/ui/Animations';
@@ -15,7 +14,7 @@ function LiveTicker() {
     { label: 'BNB', value: '$612.40', change: '+2.1%', up: true },
     { label: 'BTC', value: '$68,420', change: '+1.8%', up: true },
     { label: 'ETH', value: '$3,840', change: '+2.4%', up: true },
-    { label: 'GPG', value: '$50.00', change: 'Launch Oct 2026', up: true },
+    { label: 'GOLD', value: '$2,460.50', change: '+0.8%', up: true },
     { label: 'SOL', value: '$142.80', change: '+5.2%', up: true },
     { label: 'USDT', value: '$1.00', change: '0.0%', up: true },
   ];
@@ -99,9 +98,9 @@ function PhoneMockup() {
 
           <div className="px-3 mt-2.5 pb-3 space-y-1">
             {[
-              { sym: 'GPG', amt: '45.2', val: '$2,260', pct: '+12.4%', up: true, color: '#D4AF37' },
               { sym: 'BTC', amt: '0.082', val: '$6,150', pct: '+3.1%', up: true, color: '#F7931A' },
               { sym: 'ETH', amt: '1.2', val: '$3,840', pct: '+2.8%', up: true, color: '#627EEA' },
+              { sym: 'SOL', amt: '18.4', val: '$2,630', pct: '+5.2%', up: true, color: '#9945FF' },
               { sym: 'USDT', amt: '200', val: '$200', pct: '0.0%', up: true, color: '#26A17B' },
             ].map(c => (
               <div key={c.sym} className="flex items-center justify-between py-1">
@@ -145,8 +144,8 @@ function PhoneMockup() {
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-gold-500/15 flex items-center justify-center text-[8px] font-bold text-gold-400">GP</div>
           <div>
-            <p className="text-[8px] text-zinc-500">GPG Price</p>
-            <p className="text-[10px] font-bold text-gold-400">$50.00</p>
+            <p className="text-[8px] text-zinc-500">GOLD Spot</p>
+            <p className="text-[10px] font-bold text-gold-400">$2,460.50</p>
           </div>
         </div>
       </motion.div>
@@ -196,31 +195,23 @@ function ATMCard({ type = 'gold' }: { type?: 'gold' | 'black' }) {
 }
 
 const FEATURES = [
-  { title: 'P2P Trading', desc: 'Trade GPG, BTC, ETH, SOL, USDT with other users via a secure escrow system.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> },
-  { title: 'Tiered Referrals', desc: 'Earn escalating GPG rewards from Bronze to Platinum based on your referral count.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+  { title: 'P2P Trading', desc: 'Trade BTC, ETH, SOL, USDT with other users via a secure escrow system.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> },
+  { title: 'Expected Profit', desc: 'Earn a set monthly profit on your balance with our managed investment program.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> },
+  { title: 'Tiered Referrals', desc: 'Earn USD cash rewards from $5 to $50 for every friend you refer.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
   { title: 'Visa Debit Card', desc: 'Spend crypto and gold tokens at millions of merchants worldwide with your GP card.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> },
   { title: 'Secure Wallet', desc: 'Fund via bank transfer or card. Bank-grade encryption protects every transaction.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
   { title: 'Web3 Ready', desc: 'Connect MetaMask for seamless blockchain interactions and future DeFi features.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> },
-  { title: 'AI Assistant', desc: 'Get instant answers about GPG, trading, referrals, and the platform 24/7.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> },
+  { title: 'AI Assistant', desc: 'Get instant answers about deposits, trading, referrals, and the platform 24/7.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> },
 ];
 
 const ROADMAP = [
-  { q: 'Q3 2026', title: 'Platform Launch', desc: 'Web platform, GPG preorders, KYC verification, and referral system go live.', active: true },
-  { q: 'Q4 2026', title: 'GPG Token Launch', desc: 'Token Generation Event on BNB Chain. GPG listed on DEX. Visa card beta rollout.', active: false },
+  { q: 'Q3 2026', title: 'Platform Launch', desc: 'Web platform, KYC verification, managed investments, and referral system go live.', active: true },
+  { q: 'Q4 2026', title: 'Debit Cards & Expansion', desc: 'GoldenPrime debit card beta rollout, expected profit distribution, and expanded trading pairs.', active: false },
   { q: 'Q1 2027', title: 'P2P & DeFi', desc: 'P2P trading marketplace, MetaMask integration, staking, and liquidity pools.', active: false },
   { q: 'Q2 2027', title: 'Global Expansion', desc: 'Mobile app launch, multi-chain support, institutional partnerships, and CEX listings.', active: false },
 ];
 
 export default function Home() {
-  const [coinInfo, setCoinInfo] = useState<any>(null);
-
-  useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/gold/coin`)
-      .then(r => r.json())
-      .then(setCoinInfo)
-      .catch(() => {});
-  }, []);
-
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <Navbar />
@@ -236,7 +227,7 @@ export default function Home() {
               <FadeInUp>
                 <div className="inline-flex items-center gap-2 mb-6 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-emerald-400 text-xs font-medium">Launching October 1, 2026</span>
+                  <span className="text-emerald-400 text-xs font-medium">Coming Soon</span>
                 </div>
               </FadeInUp>
 
@@ -249,7 +240,7 @@ export default function Home() {
 
               <FadeInUp delay={0.16}>
                 <p className="text-zinc-400 text-sm md:text-base max-w-lg mx-auto lg:mx-0 mb-8 leading-relaxed">
-                  GoldenPrime combines tokenized gold investment, peer-to-peer crypto trading, and a Visa-powered debit card — all on the BNB Chain. Preorder GPG at <span className="text-gold-400 font-semibold">$50/coin</span>.
+                  GoldenPrime is a modern investment broker that combines guaranteed expected profits on your balance, peer-to-peer crypto trading, and a secure fiat wallet — all in one platform. Fund your account and start earning today.
                 </p>
               </FadeInUp>
 
@@ -327,24 +318,24 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GPG Coin Section */}
-      <section id="gpg" className="max-w-6xl mx-auto px-4 md:px-6 py-16 md:py-24">
+      {/* Coming Soon Section */}
+      <section id="coming-soon" className="max-w-6xl mx-auto px-4 md:px-6 py-16 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <FadeInUp>
             <div className="text-center lg:text-left">
-              <span className="text-gold-500 text-xs font-semibold uppercase tracking-[0.15em]">The Coin</span>
+              <span className="text-gold-500 text-xs font-semibold uppercase tracking-[0.15em]">Coming Soon</span>
               <h2 className="text-2xl md:text-4xl font-bold mt-2 mb-4">
-                GoldenPrime Gold Coin <span className="text-gold-400">(GPG)</span>
+                More Ways to <span className="text-gold-400">Grow</span>
               </h2>
               <p className="text-zinc-400 text-sm md:text-base leading-relaxed mb-6">
-                GPG is a tokenized gold asset on the BNB Chain. Each coin represents $50 worth of gold-backed digital value with a total supply of 1,000,000 coins. Secure your position before the official launch.
+                We&apos;re constantly expanding the platform. Managed portfolios, the GoldenPrime debit card, a mobile app, and more trading pairs are on the way.
               </p>
               <div className="grid grid-cols-2 gap-3 mb-6">
                 {[
-                  { label: 'Price', value: '$50', sub: 'per coin' },
-                  { label: 'Total Supply', value: '1,000,000', sub: 'GPG' },
-                  { label: 'Network', value: 'BNB Chain', sub: 'BEP-20' },
-                  { label: 'Launch', value: 'Oct 1, 2026', sub: 'TGE' },
+                  { label: 'Managed Portfolios', value: 'Expected Profit', sub: 'set by your broker' },
+                  { label: 'Debit Card', value: 'Visa Powered', sub: 'beta rollout' },
+                  { label: 'Mobile App', value: 'iOS & Android', sub: 'in development' },
+                  { label: 'More Assets', value: 'New Pairs', sub: 'expanding order book' },
                 ].map(item => (
                   <div key={item.label} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3.5 text-center lg:text-left">
                     <p className="text-[10px] text-zinc-500 uppercase tracking-wider">{item.label}</p>
@@ -353,19 +344,6 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              {coinInfo && (
-                <div>
-                  <div className="flex justify-between text-xs text-zinc-500 mb-1.5">
-                    <span>{coinInfo.totalSold?.toLocaleString(undefined, {maximumFractionDigits:0})} sold</span>
-                    <span>{coinInfo.remaining?.toLocaleString(undefined, {maximumFractionDigits:0})} remaining</span>
-                  </div>
-                  <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(parseFloat(coinInfo.percentSold) || 0, 100)}%` }}
-                      transition={{ duration: 1.5, ease: 'easeOut', delay: 0.5 }}
-                      className="h-2 rounded-full" style={{background:'linear-gradient(90deg,#D4AF37,#FFD700)'}} />
-                  </div>
-                </div>
-              )}
             </div>
           </FadeInUp>
           <FadeInUp delay={0.2}>
@@ -412,7 +390,7 @@ export default function Home() {
             <span className="text-gold-500 text-xs font-semibold uppercase tracking-[0.15em]">GoldenPrime Cards</span>
             <h2 className="text-2xl md:text-4xl font-bold mt-2 mb-3">Spend Your Crypto Anywhere</h2>
             <p className="text-zinc-400 text-sm md:text-base max-w-xl mx-auto">
-              Link your GoldenPrime wallet to a Visa-powered debit card. Spend GPG, BTC, ETH, and more at millions of merchants worldwide.
+              Link your GoldenPrime wallet to a Visa-powered debit card. Spend BTC, ETH, SOL, and USDT at millions of merchants worldwide.
             </p>
           </div>
         </FadeInUp>
@@ -477,28 +455,24 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Countdown + Stats */}
+      {/* Coming Soon strip */}
       <section className="max-w-6xl mx-auto px-4 md:px-6 py-16 md:py-24 text-center">
         <FadeInUp>
-          <p className="text-zinc-500 mb-4 text-xs uppercase tracking-[0.2em] font-medium">Time Until GPG Launch</p>
-          <Countdown targetDate="2026-10-01T00:00:00Z" />
+          <p className="text-zinc-500 mb-4 text-xs uppercase tracking-[0.2em] font-medium">Coming Soon</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
+            {[
+              { value: 'Debit Card', label: 'Spend anywhere' },
+              { value: 'Mobile App', label: 'iOS & Android' },
+              { value: 'More Pairs', label: 'Expanded trading' },
+              { value: 'Staking', label: 'Earn more' },
+            ].map(s => (
+              <div key={s.label} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
+                <p className="text-lg md:text-2xl font-bold text-gold-400">{s.value}</p>
+                <p className="text-[10px] md:text-xs text-zinc-500 mt-1">{s.label}</p>
+              </div>
+            ))}
+          </div>
         </FadeInUp>
-        {coinInfo && (
-          <FadeInUp delay={0.2}>
-            <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto mt-10">
-              {[
-                { value: coinInfo.totalSupply?.toLocaleString(), label: 'Total Supply' },
-                { value: coinInfo.totalSold?.toLocaleString(undefined, {maximumFractionDigits:0}), label: 'Preordered' },
-                { value: coinInfo.remaining?.toLocaleString(undefined, {maximumFractionDigits:0}), label: 'Remaining' },
-              ].map(s => (
-                <div key={s.label} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
-                  <p className="text-lg md:text-2xl font-bold text-gold-400">{s.value}</p>
-                  <p className="text-[10px] md:text-xs text-zinc-500 mt-1">{s.label}</p>
-                </div>
-              ))}
-            </div>
-          </FadeInUp>
-        )}
       </section>
 
       {/* Referral */}
@@ -508,16 +482,16 @@ export default function Home() {
             <div className="relative bg-gradient-to-br from-gold-500/[0.06] via-zinc-900/80 to-zinc-900/80 border border-gold-500/15 rounded-3xl p-8 md:p-12 text-center overflow-hidden">
               <div className="absolute top-0 right-0 w-72 h-72 bg-gold-500/[0.04] rounded-full blur-[120px]" />
               <span className="text-gold-500 text-xs font-semibold uppercase tracking-[0.15em]">Referral Program</span>
-              <h2 className="text-2xl md:text-4xl font-bold mt-2 mb-3">Refer & Earn Gold</h2>
+              <h2 className="text-2xl md:text-4xl font-bold mt-2 mb-3">Refer & Earn Cash</h2>
               <p className="text-zinc-400 mb-8 max-w-xl mx-auto text-sm md:text-base leading-relaxed">
-                Share your referral code. Earn <span className="text-gold-400 font-semibold">GPG rewards</span> for every friend who joins. Higher tier means more gold per referral.
+                Share your referral code. Earn <span className="text-gold-400 font-semibold">USD cash rewards</span> for every friend who joins. Higher tier means more cash per referral.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto mb-8">
                 {[
-                  { tier: 'Bronze', reward: '0.0001', req: '1-4 refs', color: '#CD7F32' },
-                  { tier: 'Silver', reward: '0.0002', req: '5-14 refs', color: '#C0C0C0' },
-                  { tier: 'Gold', reward: '0.0005', req: '15-49 refs', color: '#FFD700' },
-                  { tier: 'Platinum', reward: '0.001', req: '50+ refs', color: '#E5E4E2' },
+                  { tier: 'Bronze', reward: '5', req: '1-4 refs', color: '#CD7F32' },
+                  { tier: 'Silver', reward: '10', req: '5-14 refs', color: '#C0C0C0' },
+                  { tier: 'Gold', reward: '25', req: '15-49 refs', color: '#FFD700' },
+                  { tier: 'Platinum', reward: '50', req: '50+ refs', color: '#E5E4E2' },
                 ].map(t => (
                   <motion.div key={t.tier} whileHover={{ y: -4, scale: 1.02 }}
                     className="bg-zinc-900/80 border border-white/[0.06] rounded-xl p-4 text-center">
@@ -528,7 +502,7 @@ export default function Home() {
                       </svg>
                     </div>
                     <div className="text-xs font-semibold" style={{ color: t.color }}>{t.tier}</div>
-                    <div className="text-base md:text-lg font-bold text-white mt-1">{t.reward} GPG</div>
+                    <div className="text-base md:text-lg font-bold text-white mt-1">${t.reward}</div>
                     <div className="text-[9px] text-zinc-500">{t.req}</div>
                   </motion.div>
                 ))}
@@ -545,9 +519,9 @@ export default function Home() {
       {/* Final CTA */}
       <section className="max-w-4xl mx-auto px-4 md:px-6 py-16 md:py-24 text-center">
         <FadeInUp>
-          <h2 className="text-2xl md:text-4xl font-bold mb-4">Ready to Own Digital Gold?</h2>
+          <h2 className="text-2xl md:text-4xl font-bold mb-4">Ready to Start Earning?</h2>
           <p className="text-zinc-400 mb-8 text-sm md:text-base max-w-lg mx-auto">
-            Join thousands of investors preordering GoldenPrime Gold Coin. Secure your GPG at $50 before the October 2026 launch.
+            Join GoldenPrime today and start earning guaranteed expected profit on your balance.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/register"

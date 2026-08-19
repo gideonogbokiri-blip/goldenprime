@@ -19,6 +19,9 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +33,26 @@ export default function LoginPage() {
       localStorage.setItem('refreshToken', res.data.refreshToken);
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed. Check your credentials.');
+      if (err.response?.data?.needsVerification) {
+        setNeedsVerification(true);
+        setError(err.response?.data?.error || 'Please verify your email before logging in.');
+      } else {
+        setError(err.response?.data?.error || 'Login failed. Check your credentials.');
+      }
     } finally { setLoading(false); }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    try {
+      await authAPI.resendVerification(form.email);
+      setResent(true);
+      setError('');
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Could not resend. Try again later.');
+    } finally {
+      setResending(false);
+    }
   };
 
   return (
@@ -50,6 +71,20 @@ export default function LoginPage() {
                 className="bg-red-500/10 border border-red-500/25 text-red-400 px-4 py-3 rounded-xl mb-4 text-sm flex items-start gap-2">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                 {error}
+              </motion.div>
+            )}
+
+            {needsVerification && (
+              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                className="bg-gold-500/10 border border-gold-500/25 rounded-xl px-4 py-3 mb-4 text-sm">
+                <p className="text-gold-400 font-semibold mb-1">Verify your email</p>
+                <p className="text-zinc-400 text-xs mb-2">We emailed you a verification link. Click it to activate your account, or resend the email below.</p>
+                <button
+                  onClick={handleResend}
+                  disabled={resending || resent}
+                  className="text-xs bg-gold-500 text-black font-semibold px-3 py-2 rounded-lg hover:bg-gold-400 disabled:opacity-50 transition-all">
+                  {resent ? 'Verification email sent!' : resending ? 'Sending...' : 'Resend Verification Email'}
+                </button>
               </motion.div>
             )}
 

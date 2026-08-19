@@ -98,7 +98,7 @@ export default function ProfilePage() {
               </div>
             </div>
           ) : (
-            <p className="text-gray-400">No bank details saved yet. They will be saved when you make your first bank transfer preorder.</p>
+            <p className="text-gray-400">No bank details saved yet. They will be saved when you make your first bank transfer deposit.</p>
           )}
         </div>
 
@@ -125,7 +125,7 @@ export default function ProfilePage() {
               </div>
             </div>
           ) : (
-            <p className="text-gray-400">No card details saved yet. They will be saved when you make your first card preorder.</p>
+            <p className="text-gray-400">No card details saved yet. They will be saved when you make your first card deposit.</p>
           )}
         </div>
 
@@ -164,7 +164,7 @@ export default function ProfilePage() {
 
         {/* Quick Links */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link href="/preorder" className="bg-gold-500 text-black py-2.5 md:py-3 rounded-lg font-semibold hover:bg-gold-400 transition-colors text-center">Preorder GPG</Link>
+          <Link href="/wallet" className="bg-gold-500 text-black py-2.5 md:py-3 rounded-lg font-semibold hover:bg-gold-400 transition-colors text-center">Fund Wallet</Link>
           <Link href="/referrals" className="border border-zinc-700 py-2.5 md:py-3 rounded-lg font-semibold hover:bg-zinc-800 transition-colors text-center">Referrals</Link>
           <Link href="/kyc" className="border border-zinc-700 py-2.5 md:py-3 rounded-lg font-semibold hover:bg-zinc-800 transition-colors text-center">KYC</Link>
           <Link href="/dashboard" className="border border-zinc-700 py-2.5 md:py-3 rounded-lg font-semibold hover:bg-zinc-800 transition-colors text-center">Dashboard</Link>

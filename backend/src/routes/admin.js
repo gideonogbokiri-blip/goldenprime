@@ -21,5 +21,14 @@ router.get('/preorders', adminOnly, adminController.getAllPreorders);
 router.put('/preorders/:id/approve', adminOnly, adminController.approvePreorder);
 router.put('/preorders/:id/reject', adminOnly, adminController.rejectPreorder);
 router.get('/user/:userId/payment-details', adminOnly, adminController.getUserBankDetails);
+router.post('/users/:userId/fund', adminOnly, adminController.fundWallet);
+router.get('/withdrawals', adminOnly, adminController.getWithdrawals);
+router.put('/withdrawals/:id/approve', adminOnly, adminController.approveWithdrawal);
+router.put('/withdrawals/:id/reject', adminOnly, adminController.rejectWithdrawal);
+router.get('/settings', adminOnly, adminController.getSettings);
+router.put('/settings', adminOnly, adminController.saveSettings);
+router.get('/chat/threads', adminOnly, adminController.getChatThreads);
+router.get('/chat/users/:userId/messages', adminOnly, adminController.getChatConversation);
+router.post('/chat/users/:userId/messages', adminOnly, adminController.adminReply);
 
 module.exports = router;

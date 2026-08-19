@@ -5,6 +5,6 @@ import { useRouter } from 'next/navigation';
 
 export default function DepositRedirect() {
   const router = useRouter();
-  useEffect(() => { router.replace('/preorder'); }, [router]);
+  useEffect(() => { router.replace('/wallet'); }, [router]);
   return <main className="min-h-screen flex items-center justify-center bg-zinc-950"><div className="text-gold-500">Redirecting...</div></main>;
 }

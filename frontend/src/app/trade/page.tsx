@@ -12,7 +12,6 @@ import CryptoIcon from '@/components/CryptoIcon';
 import BrandLogo from '@/components/ui/BrandLogo';
 
 const COINS = [
-  { symbol: 'GPG', name: 'GoldenPrime Gold', color: 'text-gold-500' },
   { symbol: 'BTC', name: 'Bitcoin', color: 'text-orange-500' },
   { symbol: 'ETH', name: 'Ethereum', color: 'text-blue-400' },
   { symbol: 'SOL', name: 'Solana', color: 'text-purple-400' },
@@ -24,7 +23,7 @@ type Tab = 'orderbook' | 'create' | 'myorders' | 'trades' | 'history';
 
 export default function TradePage() {
   const router = useRouter();
-  const [selectedCoin, setSelectedCoin] = useState('GPG');
+  const [selectedCoin, setSelectedCoin] = useState('BTC');
   const [activeTab, setActiveTab] = useState<Tab>('orderbook');
   const [orderBook, setOrderBook] = useState<any>(null);
   const [myOrders, setMyOrders] = useState<any[]>([]);
@@ -181,7 +180,7 @@ export default function TradePage() {
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-4">
           <Link href="/dashboard" className="text-gray-400 hover:text-white text-sm">Dashboard</Link>
-          <Link href="/preorder" className="text-gray-400 hover:text-white text-sm">Preorder</Link>
+          <Link href="/wallet" className="text-gray-400 hover:text-white text-sm">Fund Wallet</Link>
           <span className="text-gold-500 font-semibold text-sm">Trade</span>
           <Link href="/wallet" className="text-gray-400 hover:text-white text-sm">Wallet</Link>
           <span className="text-gray-400 text-sm hidden lg:inline">{user?.email}</span>
@@ -198,7 +197,7 @@ export default function TradePage() {
             className="md:hidden border-b border-zinc-800 bg-zinc-900 overflow-hidden">
             <div className="px-4 py-4 flex flex-col gap-2">
               <Link href="/dashboard" className="text-gray-400 hover:text-white text-sm py-2" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
-              <Link href="/preorder" className="text-gray-400 hover:text-white text-sm py-2" onClick={() => setMobileMenuOpen(false)}>Preorder</Link>
+              <Link href="/wallet" className="text-gray-400 hover:text-white text-sm py-2" onClick={() => setMobileMenuOpen(false)}>Fund Wallet</Link>
               <span className="text-gold-500 font-semibold text-sm py-2">Trade</span>
               <Link href="/wallet" className="text-gray-400 hover:text-white text-sm py-2" onClick={() => setMobileMenuOpen(false)}>Wallet</Link>
               <span className="text-gray-400 text-xs truncate">{user?.email}</span>

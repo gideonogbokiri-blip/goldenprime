@@ -4,12 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { authAPI, goldAPI, walletAPI } from '@/lib/api';
+import { authAPI, goldAPI, walletAPI, tradingAPI, settingsAPI } from '@/lib/api';
 import CryptoPrices from '@/components/CryptoPrices';
-import CoinFlip from '@/components/ui/CoinFlip';
 import MarketChart from '@/components/MarketChart';
 import { SkeletonCard } from '@/components/ui/Skeleton';
-import ChatBot from '@/components/ChatBot';
 import BrandLogo from '@/components/ui/BrandLogo';
 
 const TxIcon = ({ type }: { type: string }) => {
@@ -29,8 +27,7 @@ const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { st
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 
 const NAV = [
-  { href: '/preorder', label: 'Preorder GPG', gold: true },
-  { href: '/trade', label: 'Trade', gold: false },
+  { href: '/trade', label: 'Trade', gold: true },
   { href: '/wallet', label: 'Wallet', gold: false },
   { href: '/referrals', label: 'Referrals', gold: false },
   { href: '/kyc', label: 'KYC', gold: false },
@@ -40,30 +37,30 @@ const NAV = [
 ];
 
 const QUICK_ACTIONS = [
-  { href: '/preorder', label: 'Preorder GPG', gold: true, type: 'preorder' },
-  { href: '/trade', label: 'Trade P2P', gold: false, type: 'trade' },
+  { href: '/trade', label: 'Trade', gold: true, type: 'trade' },
   { href: '/wallet', label: 'Fund Wallet', gold: false, type: 'wallet' },
+  { href: '/wallet', label: 'Withdraw', gold: false, type: 'withdraw' },
   { href: '/referrals', label: 'Refer & Earn', gold: false, type: 'referrals' },
   { href: '/kyc', label: 'KYC Verify', gold: false, type: 'kyc' },
 ];
 
 function ActionIcon({ type }: { type: string }) {
   switch (type) {
-    case 'preorder': return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>;
     case 'trade': return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>;
     case 'wallet': return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
+    case 'withdraw': return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>;
     case 'referrals': return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
     case 'kyc': return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
     default: return null;
   }
 }
 
-function StatCard({ label, value, sub, hoverColor = 'gold' }: { label: string; value: string; sub?: string; hoverColor?: string }) {
+function StatCard({ label, value, sub, gold = false }: { label: string; value: string; sub?: string; gold?: boolean }) {
   return (
     <motion.div variants={item} whileHover={{ y: -4, borderColor: 'rgba(255,255,255,0.1)' }}
       className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 md:p-5 transition-all hover:shadow-xl hover:shadow-black/20 h-full flex flex-col justify-between group">
       <p className="text-zinc-500 text-[11px] md:text-xs font-medium tracking-wide">{label}</p>
-      <p className={`text-xl md:text-2xl font-bold mt-1.5 ${hoverColor === 'gold' ? 'text-white' : 'text-green-400'}`}>{value}</p>
+      <p className={`text-xl md:text-2xl font-bold mt-1.5 ${gold ? 'text-gold-400' : 'text-white'}`}>{value}</p>
       {sub && <p className="text-zinc-600 text-[10px] md:text-xs mt-1.5">{sub}</p>}
     </motion.div>
   );
@@ -74,9 +71,9 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [portfolio, setPortfolio] = useState<any>(null);
   const [referral, setReferral] = useState<any>(null);
-  const [coinInfo, setCoinInfo] = useState<any>(null);
   const [wallets, setWallets] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [expectedRate, setExpectedRate] = useState(3);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
@@ -92,11 +89,11 @@ export default function DashboardPage() {
     if (!token) { router.push('/login'); return; }
     Promise.all([
       authAPI.getMe().then(r => setUser(r.data.user)),
-      goldAPI.getPortfolio().then(r => setPortfolio(r.data)),
-      goldAPI.getReferralInfo().then(r => setReferral(r.data)),
-      goldAPI.getCoinInfo().then(r => setCoinInfo(r.data)),
+      tradingAPI.getPortfolio().catch(() => ({ data: { holdings: [], totalValue: 0 } })).then(r => setPortfolio(r.data)),
+      goldAPI.getReferralInfo().then(r => setReferral(r.data)).catch(() => {}),
       walletAPI.getWallets().then(r => setWallets(r.data.wallets)),
       walletAPI.getTransactions(10).then(r => setTransactions(r.data.transactions)),
+      settingsAPI.getPublic().then(r => setExpectedRate(r.data.expectedProfitRate)).catch(() => {}),
     ]).catch(() => {}).finally(() => setLoading(false));
   }, [router]);
 
@@ -138,13 +135,11 @@ export default function DashboardPage() {
     );
   }
 
-  const gpgBalance = portfolio?.holdings?.find((h: any) => h.currency === 'GPG');
-  const usdBalance = wallets.find((w: any) => w.currency === 'USD');
-  const totalValue = portfolio?.totalValue || 0;
-  const usd = usdBalance ? parseFloat(usdBalance.balance) : 0;
-  const gpgQty = gpgBalance ? parseFloat(gpgBalance.balance) : 0;
-  const gpgValue = gpgQty * 50;
-  const profitLoss = totalValue - gpgValue;
+  const usdWallet = wallets.find((w: any) => w.currency === 'USD');
+  const usd = usdWallet ? parseFloat(usdWallet.balance) : 0;
+  const cryptoValue = portfolio?.totalValue || 0;
+  const totalValue = usd + cryptoValue;
+  const expectedProfit = (usd * (expectedRate || 0)) / 100;
 
   return (
     <main className="min-h-screen bg-zinc-950">
@@ -202,59 +197,32 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* Stats */}
-        <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mb-6 md:mb-8">
-          <motion.div variants={item}>
-            <CoinFlip balance={gpgBalance ? gpgBalance.balance : 0} />
-          </motion.div>
+        <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+          <StatCard label="Expected Profit (monthly)" value={`$${expectedProfit.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} sub={`${expectedRate}% on your balance`} gold />
           <StatCard label="USD Balance" value={`$${usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} sub="Available balance" />
-          <StatCard label="Portfolio Value" value={`$${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} sub="Estimated total" hoverColor="green" />
-          <StatCard label="Profit / Loss" value={`${profitLoss >= 0 ? '+' : ''}$${Math.abs(profitLoss).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-            sub="Since inception" hoverColor={profitLoss >= 0 ? 'green' : 'gold'} />
-          <StatCard label="Referrals" value={`${referral?.referralCount || 0}`} sub={`${referral?.earnings?.toFixed(4) || '0.0000'} GPG earned`} />
+          <StatCard label="Portfolio Value" value={`$${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} sub="Cash + crypto holdings" />
+          <StatCard label="Referrals" value={`${referral?.referralCount || 0}`} sub={`$${(referral?.earnings || 0).toFixed(2)} earned`} />
         </motion.div>
 
-        {/* GPG Progress */}
-        {coinInfo && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
-            className="bg-gradient-to-r from-gold-500/[0.04] via-zinc-900 to-zinc-900 border border-gold-500/15 rounded-xl p-4 md:p-6 mb-6 md:mb-8 relative overflow-hidden group">
-            <div className="absolute -top-20 -right-20 w-40 h-40 bg-gold-500/[0.03] rounded-full blur-[60px] group-hover:scale-150 transition-transform duration-1000" />
-            <div className="relative">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gold-500/15 flex items-center justify-center">
-                    <svg width="22" height="22" viewBox="0 0 100 100"><defs><linearGradient id="gpgd" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#FFD700"/><stop offset="100%" stopColor="#B8960F"/></linearGradient></defs><circle cx="50" cy="50" r="46" fill="url(#gpgd)"/><text x="50" y="56" textAnchor="middle" fill="#000" fontWeight="800" fontSize="18" fontFamily="system-ui">GP</text></svg>
-                  </div>
-                  <div>
-                    <h3 className="text-base md:text-lg font-semibold">GoldenPrime Gold Coin</h3>
-                    <p className="text-xs text-zinc-500">Preorder phase &mdash; launching Oct 1, 2026</p>
-                  </div>
+        {/* Coming Soon banner */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
+          className="bg-gradient-to-r from-gold-500/[0.04] via-zinc-900 to-zinc-900 border border-gold-500/15 rounded-xl p-4 md:p-6 mb-6 md:mb-8 relative overflow-hidden group">
+          <div className="absolute -top-20 -right-20 w-40 h-40 bg-gold-500/[0.03] rounded-full blur-[60px] group-hover:scale-150 transition-transform duration-1000" />
+          <div className="relative">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-2">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gold-500/15 flex items-center justify-center">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2.5 2.5"/></svg>
                 </div>
-                <Link href="/preorder"
-                  className="bg-gold-500 text-black px-5 py-2 rounded-lg font-semibold text-sm hover:bg-gold-400 transition-all shadow-lg shadow-gold-500/10 whitespace-nowrap">Preorder Now</Link>
+                <div>
+                  <h3 className="text-base md:text-lg font-semibold">Coming Soon</h3>
+                  <p className="text-xs text-zinc-500">Our full investment suite &amp; advanced features are being prepared.</p>
+                </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-4">
-                {[
-                  { label: 'Price', value: `$${coinInfo.price}`, gold: true },
-                  { label: 'Supply', value: coinInfo.totalSupply?.toLocaleString(), gold: false },
-                  { label: 'Sold', value: coinInfo.totalSold?.toLocaleString(undefined, { maximumFractionDigits: 0 }), gold: false },
-                  { label: 'Remaining', value: coinInfo.remaining?.toLocaleString(undefined, { maximumFractionDigits: 0 }), gold: false },
-                  { label: 'Launch', value: 'Oct 1, 2026', gold: true },
-                ].map(s => (
-                  <div key={s.label}>
-                    <p className="text-xs text-zinc-500">{s.label}</p>
-                    <p className={`font-bold text-sm ${s.gold ? 'text-gold-400' : 'text-white'}`}>{s.value}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
-                <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(parseFloat(coinInfo.percentSold) || 0, 100)}%` }}
-                  transition={{ duration: 1.5, ease: 'easeOut', delay: 0.5 }}
-                  className="h-2 rounded-full" style={{background:'linear-gradient(90deg,#D4AF37,#FFD700)'}} />
-              </div>
-              <p className="text-xs text-zinc-500 mt-2 text-right">{coinInfo.percentSold}% sold</p>
+              <span className="px-4 py-1.5 rounded-full bg-gold-500/15 border border-gold-500/25 text-gold-400 text-xs font-semibold whitespace-nowrap">Stay tuned</span>
             </div>
-          </motion.div>
-        )}
+          </div>
+        </motion.div>
 
         {/* Chart */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.5 }}
@@ -272,7 +240,7 @@ export default function DashboardPage() {
               <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">Quick Actions</h3>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 {QUICK_ACTIONS.map(a => (
-                  <motion.div key={a.href} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <motion.div key={a.href + a.type} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                     <Link href={a.href}
                       className={`flex flex-col items-center gap-2 py-4 rounded-xl font-semibold transition-all text-center text-xs ${
                         a.gold
@@ -305,7 +273,7 @@ export default function DashboardPage() {
                 <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-3">Referral</h3>
                 <p className="text-2xl font-bold text-gold-400 mb-1">{referral?.referralCount || 0}</p>
                 <p className="text-xs text-zinc-500 mb-4">{referral?.referralCount === 1 ? 'Referral' : 'Total Referrals'}</p>
-                <p className="text-xs text-zinc-400 mb-2">Earn <span className="text-gold-400 font-semibold">{referral?.rewardPerReferral || 0.0001} GPG</span> per referral</p>
+                <p className="text-xs text-zinc-400 mb-2">Earn <span className="text-gold-400 font-semibold">${referral?.rewardPerReferral || 5}</span> per referral</p>
                 <div className="relative">
                   <input readOnly value={copied ? 'Copied!' : (referral?.referralCode || '')}
                     onClick={copyReferral}
@@ -333,7 +301,7 @@ export default function DashboardPage() {
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-zinc-500"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
                   </div>
                   <p className="text-zinc-400 text-sm">No activity yet</p>
-                  <Link href="/preorder" className="text-gold-500 text-xs hover:underline mt-1 inline-block">Start investing &rarr;</Link>
+                  <Link href="/wallet" className="text-gold-500 text-xs hover:underline mt-1 inline-block">Fund your wallet &rarr;</Link>
                 </div>
               ) : (
                 <motion.div variants={container} initial="hidden" animate="show" className="space-y-1">
@@ -349,7 +317,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="text-right shrink-0">
                           <p className={`text-sm font-mono font-semibold ${isPos ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {isPos ? '+' : '-'}{tx.currency === 'GPG' ? parseFloat(tx.amount).toFixed(4) : '$' + parseFloat(tx.usd_value || tx.amount).toFixed(2)}
+                            {isPos ? '+' : '-'}${parseFloat(tx.usd_value || tx.amount).toFixed(2)}
                           </p>
                           <p className={`text-[10px] ${tx.status === 'completed' ? 'text-emerald-500' : tx.status === 'rejected' ? 'text-red-500' : 'text-yellow-500'}`}>{tx.status}</p>
                         </div>
@@ -362,7 +330,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-      <ChatBot />
     </main>
   );
 }

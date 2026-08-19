@@ -166,9 +166,79 @@ async function getUserBankDetails(req, res, next) {
   } catch (err) { next(err); }
 }
 
+async function fundWallet(req, res, next) {
+  try {
+    const { amount, note } = req.body;
+    const result = await adminService.fundWallet(req.params.userId, amount, req.user.id, note);
+    res.json({ message: `Credited $${amount} to user's wallet`, ...result });
+  } catch (err) { next(err); }
+}
+
+async function getWithdrawals(req, res, next) {
+  try {
+    const withdrawals = await adminService.getWithdrawals({ status: req.query.status });
+    res.json({ withdrawals });
+  } catch (err) { next(err); }
+}
+
+async function approveWithdrawal(req, res, next) {
+  try {
+    const { notes } = req.body || {};
+    const withdrawal = await adminService.approveWithdrawal(req.params.id, req.user.id, notes);
+    res.json({ message: 'Withdrawal approved', withdrawal });
+  } catch (err) { next(err); }
+}
+
+async function rejectWithdrawal(req, res, next) {
+  try {
+    const { reason } = req.body || {};
+    const withdrawal = await adminService.rejectWithdrawal(req.params.id, req.user.id, reason);
+    res.json({ message: 'Withdrawal rejected', withdrawal });
+  } catch (err) { next(err); }
+}
+
+async function getSettings(req, res, next) {
+  try {
+    const settings = await adminService.getSettings();
+    res.json({ settings });
+  } catch (err) { next(err); }
+}
+
+async function saveSettings(req, res, next) {
+  try {
+    const settings = await adminService.saveSettings(req.body, req.user.id);
+    res.json({ message: 'Settings updated', settings });
+  } catch (err) { next(err); }
+}
+
+async function getChatThreads(req, res, next) {
+  try {
+    const threads = await adminService.getChatThreads();
+    res.json({ threads });
+  } catch (err) { next(err); }
+}
+
+async function getChatConversation(req, res, next) {
+  try {
+    const messages = await adminService.getChatConversation(req.params.userId);
+    res.json({ messages });
+  } catch (err) { next(err); }
+}
+
+async function adminReply(req, res, next) {
+  try {
+    const result = await adminService.adminReply(req.params.userId, req.body, req.user.id);
+    res.status(201).json(result);
+  } catch (err) { next(err); }
+}
+
 module.exports = {
   dashboard, getUsers, updateUserRole,
+  fundWallet,
   getTransactions, updateTransactionStatus,
+  getWithdrawals, approveWithdrawal, rejectWithdrawal,
+  getSettings, saveSettings,
+  getChatThreads, getChatConversation, adminReply,
   getKYCRequests, approveKYC, rejectKYC,
   getLogs, getPendingDeposits, getAllDeposits, approveDeposit, rejectDeposit,
   getAllPreorders, approvePreorder, rejectPreorder, getUserBankDetails,

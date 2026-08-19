@@ -143,8 +143,8 @@ export default function Web3Page() {
           className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
           <h3 className="text-base md:text-lg font-semibold mb-4">Why Connect a Wallet?</h3>
           <ul className="space-y-3 text-sm text-gray-400">
-            <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">&#10003;</span> Seamless on-chain GPG token transfers when the token launches.</li>
-            <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">&#10003;</span> Direct crypto-to-GPG swaps without fiat intermediaries.</li>
+            <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">&#10003;</span> Seamless on-chain token transfers for supported digital assets.</li>
+            <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">&#10003;</span> Direct crypto deposits and withdrawals without fiat intermediaries.</li>
             <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">&#10003;</span> Verifiable on-chain transactions and proof of holdings.</li>
             <li className="flex items-start gap-2"><span className="text-gold-500 mt-0.5">&#10003;</span> DeFi integrations and staking rewards in future updates.</li>
           </ul>

@@ -27,10 +27,6 @@ async function register({ email, password, firstName, lastName, referralCode }) 
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
   const user = await User.create({ email, passwordHash, firstName, lastName });
 
-  // Generate tokens immediately — user is created, registration is successful
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
-
   // Post-creation steps: best-effort, never fail registration
   const { generateReferralCode, creditReferrer } = require('../models/Referral');
   let myRefCode;
@@ -70,12 +66,11 @@ async function register({ email, password, firstName, lastName, referralCode }) 
     }
   }
 
-  // Create default wallets
+  // Create default wallet
   try {
     await Wallet.getOrCreate(user.id, 'USD');
-    await Wallet.getOrCreate(user.id, 'GPG');
   } catch (err) {
-    console.error('Failed to create default wallets:', err.message);
+    console.error('Failed to create default wallet:', err.message);
   }
 
   // Set verification token (best-effort)
@@ -96,7 +91,7 @@ async function register({ email, password, firstName, lastName, referralCode }) 
     }
   }
 
-  return { user: { ...user, referralCode: myRefCode }, accessToken, refreshToken };
+  return { user: { ...user, referralCode: myRefCode } };
 }
 
 async function login({ email, password }) {
@@ -110,11 +105,42 @@ async function login({ email, password }) {
     throw Object.assign(new Error('Invalid email or password'), { status: 401 });
   }
 
+  if (!user.is_verified) {
+    throw Object.assign(new Error('Please verify your email before logging in.'), {
+      status: 403,
+      needsVerification: true,
+      email,
+    });
+  }
+
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
 
   const { password_hash, verification_token, reset_token, reset_token_expires, ...userSafe } = user;
   return { user: userSafe, accessToken, refreshToken };
+}
+
+async function resendVerification(email) {
+  const user = await User.findByEmail(email);
+  if (!user) {
+    return { message: 'If an account exists, a verification email has been sent.' };
+  }
+  if (user.is_verified) {
+    return { message: 'This email is already verified. You can log in.' };
+  }
+
+  const token = await User.setVerificationToken(user.id);
+  if (token) {
+    try {
+      const { sendVerificationEmail } = require('../services/emailService');
+      await sendVerificationEmail(email, token);
+    } catch (err) {
+      console.error('Failed to send verification email:', err.message);
+      throw Object.assign(new Error('Could not send verification email. Please try again later.'), { status: 500 });
+    }
+  }
+
+  return { message: 'Verification email sent. Please check your inbox.' };
 }
 
 async function verifyEmail(token) {
@@ -161,4 +187,4 @@ async function getMe(userId) {
   return user;
 }
 
-module.exports = { register, login, verifyEmail, forgotPassword, resetPassword, getMe };
+module.exports = { register, login, verifyEmail, forgotPassword, resetPassword, getMe, resendVerification };

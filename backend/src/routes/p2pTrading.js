@@ -1,5 +1,6 @@
 const express = require('express');
 const authenticate = require('../middleware/auth');
+const requireVerified = require('../middleware/requireVerified');
 const p2pController = require('../controllers/p2pTradingController');
 
 const router = express.Router();
@@ -60,7 +61,7 @@ router.get('/orderbook/:coin', p2pController.getOrderBook);
  *       400:
  *         description: Insufficient balance or invalid params
  */
-router.post('/orders', authenticate, p2pController.createOrder);
+router.post('/orders', authenticate, requireVerified, p2pController.createOrder);
 
 /**
  * @swagger
@@ -83,7 +84,7 @@ router.post('/orders', authenticate, p2pController.createOrder);
  *       400:
  *         description: Not your order or already filled
  */
-router.delete('/orders/:id', authenticate, p2pController.cancelOrder);
+router.delete('/orders/:id', authenticate, requireVerified, p2pController.cancelOrder);
 
 /**
  * @swagger
@@ -117,7 +118,7 @@ router.delete('/orders/:id', authenticate, p2pController.cancelOrder);
  *       400:
  *         description: Insufficient balance or invalid amount
  */
-router.post('/orders/:id/take', authenticate, p2pController.takeOrder);
+router.post('/orders/:id/take', authenticate, requireVerified, p2pController.takeOrder);
 
 /**
  * @swagger
@@ -137,7 +138,7 @@ router.post('/orders/:id/take', authenticate, p2pController.takeOrder);
  *       200:
  *         description: List of user orders
  */
-router.get('/my-orders', authenticate, p2pController.getMyOrders);
+router.get('/my-orders', authenticate, requireVerified, p2pController.getMyOrders);
 
 /**
  * @swagger
@@ -157,7 +158,7 @@ router.get('/my-orders', authenticate, p2pController.getMyOrders);
  *       200:
  *         description: List of user trades
  */
-router.get('/my-trades', authenticate, p2pController.getMyTrades);
+router.get('/my-trades', authenticate, requireVerified, p2pController.getMyTrades);
 
 /**
  * @swagger
@@ -180,7 +181,7 @@ router.get('/my-trades', authenticate, p2pController.getMyTrades);
  *       403:
  *         description: Not your trade
  */
-router.get('/trades/:id', authenticate, p2pController.getTrade);
+router.get('/trades/:id', authenticate, requireVerified, p2pController.getTrade);
 
 /**
  * @swagger
@@ -203,7 +204,7 @@ router.get('/trades/:id', authenticate, p2pController.getTrade);
  *       400:
  *         description: Not in escrow
  */
-router.post('/trades/:id/confirm', authenticate, p2pController.confirmTrade);
+router.post('/trades/:id/confirm', authenticate, requireVerified, p2pController.confirmTrade);
 
 /**
  * @swagger
@@ -234,7 +235,7 @@ router.post('/trades/:id/confirm', authenticate, p2pController.confirmTrade);
  *       200:
  *         description: Trade disputed, admin review pending
  */
-router.post('/trades/:id/dispute', authenticate, p2pController.disputeTrade);
+router.post('/trades/:id/dispute', authenticate, requireVerified, p2pController.disputeTrade);
 
 /**
  * @swagger
@@ -265,6 +266,6 @@ router.post('/trades/:id/dispute', authenticate, p2pController.disputeTrade);
  *       200:
  *         description: Trade updated with new message
  */
-router.post('/trades/:id/message', authenticate, p2pController.sendMessage);
+router.post('/trades/:id/message', authenticate, requireVerified, p2pController.sendMessage);
 
 module.exports = router;

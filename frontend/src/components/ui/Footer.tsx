@@ -11,7 +11,7 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1">
             <BrandLogo size={28} />
             <p className="mt-4 text-sm text-zinc-500 leading-relaxed max-w-[280px]">
-              Invest in tokenized gold. Trade P2P. Spend anywhere with a Visa-powered debit card.
+              Invest with confidence. Trade P2P. Earn expected profit with a Visa-powered debit card on the way.
             </p>
             <div className="flex gap-3 mt-5">
               {[
@@ -34,7 +34,7 @@ export default function Footer() {
             <ul className="space-y-2.5">
               {[
                 { label: 'P2P Trading', href: '/trade' },
-                { label: 'Preorder GPG', href: '/preorder' },
+                { label: 'Fund Wallet', href: '/wallet' },
                 { label: 'Wallet', href: '/wallet' },
                 { label: 'Referrals', href: '/referrals' },
               ].map(l => (

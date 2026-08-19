@@ -22,6 +22,9 @@ function RegisterForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   useEffect(() => {
     if (refParam) setForm(prev => ({ ...prev, referralCode: refParam }));
@@ -54,15 +57,26 @@ function RegisterForm() {
         email: form.email, password: form.password, firstName: form.firstName,
         lastName: form.lastName, referralCode: form.referralCode || undefined,
       });
-      localStorage.setItem('accessToken', res.data.accessToken);
-      localStorage.setItem('refreshToken', res.data.refreshToken);
-      router.push('/dashboard');
+      setRegisteredEmail(form.email);
     } catch (err: any) {
       const status = err.response?.status;
       if (status === 409) setError('An account with this email already exists. Sign in instead.');
       else if (!err.response) setError('Network error. Try again.');
       else setError(err.response?.data?.errors?.[0]?.msg || err.response?.data?.error || 'Registration failed.');
     } finally { setLoading(false); }
+  };
+
+  const handleResend = async () => {
+    if (!registeredEmail) return;
+    setResending(true);
+    try {
+      await authAPI.resendVerification(registeredEmail);
+      setResent(true);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Could not resend verification email.');
+    } finally {
+      setResending(false);
+    }
   };
 
   return (
@@ -75,10 +89,31 @@ function RegisterForm() {
             <BrandLogo size={32} />
           </div>
 
+          {registeredEmail ? (
+            <AuthCard title="Check Your Email" subtitle="Verify your account to get started">
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center py-4 text-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-gold-500/15 flex items-center justify-center">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2" /><polyline points="22,6 12,13 2,6" /></svg>
+                </div>
+                <p className="text-white text-sm">We sent a verification link to</p>
+                <p className="text-gold-400 font-semibold">{registeredEmail}</p>
+                <p className="text-zinc-500 text-xs">Click the link in the email to activate your account, then sign in.</p>
+                <button
+                  onClick={handleResend}
+                  disabled={resending || resent}
+                  className="mt-1 text-sm text-gold-500 hover:text-gold-400 disabled:opacity-50 transition-colors">
+                  {resent ? 'Verification email sent!' : resending ? 'Sending...' : "Didn't get it? Resend"}
+                </button>
+                <Link href="/login" className="mt-2 w-full py-3 rounded-xl font-semibold text-sm bg-gold-500 text-black hover:bg-gold-400 transition-all text-center">
+                  Back to Sign In
+                </Link>
+              </motion.div>
+            </AuthCard>
+          ) : (
           <AuthCard title="Create Account" subtitle={step === 'info' ? 'Start your journey with GoldenPrime' : 'Secure your account'}>
             {refParam && (
               <div className="bg-gold-500/10 border border-gold-500/20 rounded-xl px-4 py-3 mb-4 text-sm text-gold-400 text-center">
-                Referred by <span className="font-bold">{refParam}</span> — earn GPG rewards!
+                Referred by <span className="font-bold">{refParam}</span> — earn USD cash rewards!
               </div>
             )}
 
@@ -166,6 +201,7 @@ function RegisterForm() {
               </p>
             </div>
           </AuthCard>
+          )}
 
           <p className="text-center text-zinc-600 text-xs mt-4 px-4">
             By creating an account, you agree to our Terms of Service and Privacy Policy.

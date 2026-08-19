@@ -1,5 +1,6 @@
 const express = require('express');
 const authenticate = require('../middleware/auth');
+const requireVerified = require('../middleware/requireVerified');
 const walletController = require('../controllers/walletController');
 
 const router = express.Router();
@@ -16,7 +17,7 @@ const router = express.Router();
  *       200:
  *         description: List of wallets with balances
  */
-router.get('/', authenticate, walletController.getWallets);
+router.get('/', authenticate, requireVerified, walletController.getWallets);
 
 /**
  * @swagger
@@ -41,7 +42,7 @@ router.get('/', authenticate, walletController.getWallets);
  *       200:
  *         description: List of transactions
  */
-router.get('/transactions', authenticate, walletController.getTransactions);
+router.get('/transactions', authenticate, requireVerified, walletController.getTransactions);
 
 /**
  * @swagger
@@ -68,7 +69,7 @@ router.get('/transactions', authenticate, walletController.getTransactions);
  *       201:
  *         description: Deposit request created
  */
-router.post('/deposit', authenticate, walletController.createDeposit);
+router.post('/deposit', authenticate, requireVerified, walletController.createDeposit);
 
 /**
  * @swagger
@@ -92,7 +93,7 @@ router.post('/deposit', authenticate, walletController.createDeposit);
  *       201:
  *         description: Withdrawal request created
  */
-router.post('/withdraw', authenticate, walletController.createWithdraw);
+router.post('/withdraw', authenticate, requireVerified, walletController.createWithdraw);
 
 /**
  * @swagger
@@ -116,6 +117,6 @@ router.post('/withdraw', authenticate, walletController.createWithdraw);
  *       200:
  *         description: Deposit simulated
  */
-router.post('/dev-deposit', authenticate, walletController.devDeposit);
+router.post('/dev-deposit', authenticate, requireVerified, walletController.devDeposit);
 
 module.exports = router;

@@ -2,51 +2,40 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { chatAPI } from '@/lib/api';
 
-interface Message {
+interface ChatMessage {
   id: string;
-  role: 'user' | 'bot';
-  text: string;
-  timestamp: Date;
+  sender: 'user' | 'admin';
+  message: string | null;
+  attachment: string | null;
+  created_at: string;
 }
 
-const FAQ: Record<string, string> = {
-  'what is goldenprime': 'GoldenPrime (GP) is a crypto investment platform. We offer GoldenPrime Gold Coin (GPG), a tokenized gold coin priced at $50 per coin. You can preorder GPG, trade P2P, and earn referral rewards.',
-  'what is gpg': 'GoldenPrime Gold Coin (GPG) is our native token. Each GPG coin is priced at $50 USD during the pre-order phase. The total supply is 1,000,000 GPG coins, with a launch date of October 1, 2026.',
-  'how to buy': 'To buy GPG: 1) Create an account, 2) Fund your wallet via bank transfer or card, 3) Go to the Preorder page, 4) Enter the amount and confirm. You can also trade P2P on the Trade page.',
-  'how to trade': 'Go to the Trade page to access P2P trading. You can create buy or sell orders for GPG, BTC, ETH, SOL, USDT, and USDC. Orders are matched via our escrow system for safe trades.',
-  'referral': 'GoldenPrime has a tiered referral system! Share your referral code. You earn GPG rewards per referral: Bronze (0.0001 GPG), Silver (0.0002, 5+ referrals), Gold (0.0005, 15+), Platinum (0.001, 50+).',
-  'referral code': 'Your referral code is on the Dashboard or Referrals page. Share it with friends. When they register using your code, you both earn rewards!',
-  'tiers': 'We have 4 referral tiers: Bronze (0-4 referrals, 0.0001 GPG each), Silver (5-14, 0.0002), Gold (15-49, 0.0005), Platinum (50+, 0.001). Tier upgrades happen automatically!',
-  'deposit': 'Fund your wallet from the Wallet page. We support bank transfers and card payments. Admin will verify your payment and credit your USD balance.',
-  'kyc': 'KYC verification helps us keep the platform secure. Submit your identity document from the KYC page. Verification typically takes 24-48 hours.',
-  'security': 'GoldenPrime uses industry-standard security: JWT authentication, rate limiting, encrypted passwords, and optional 2FA (coming soon). Visit the Security page to manage your settings.',
-  'wallet': 'Your wallet shows your USD balance and all crypto holdings. Fund it via bank transfer or card, then use the balance to buy GPG or trade P2P.',
-  'price': 'GPG is currently priced at $50 per coin during the pre-order phase. After launch on October 1, 2026, the price will be determined by market demand.',
-  'launch': 'GoldenPrime Gold Coin (GPG) launches on October 1, 2026. Preorders are open now at $50 per coin.',
-  'help': 'I can help with: GPG info, how to buy/trade, referrals, deposits, KYC, security, and general platform questions. Just ask!',
-  'hello': "Hello! Welcome to GoldenPrime. I'm here to help you with any questions about the platform. How can I assist you?",
-  'hi': 'Hey there! How can I help you with GoldenPrime today?',
-  'thanks': "You're welcome! Is there anything else I can help you with?",
-  'thank you': 'My pleasure! Feel free to ask if you have more questions.',
-};
-
-function findAnswer(input: string): string {
-  const lower = input.toLowerCase().trim();
-  for (const [key, answer] of Object.entries(FAQ)) {
-    if (lower.includes(key)) return answer;
-  }
-  if (lower.includes('gpg') || lower.includes('coin') || lower.includes('gold')) return FAQ['what is gpg'];
-  if (lower.includes('buy') || lower.includes('purchase') || lower.includes('invest')) return FAQ['how to buy'];
-  if (lower.includes('trade') || lower.includes('sell') || lower.includes('swap')) return FAQ['how to trade'];
-  if (lower.includes('refer') || lower.includes('invite') || lower.includes('friend')) return FAQ['referral'];
-  if (lower.includes('tier') || lower.includes('level') || lower.includes('rank')) return FAQ['tiers'];
-  if (lower.includes('depos') || lower.includes('fund') || lower.includes('add money')) return FAQ['deposit'];
-  if (lower.includes('kyc') || lower.includes('verify') || lower.includes('identity')) return FAQ['kyc'];
-  if (lower.includes('safe') || lower.includes('security') || lower.includes('2fa') || lower.includes('password')) return FAQ['security'];
-  if (lower.includes('price') || lower.includes('worth') || lower.includes('value')) return FAQ['price'];
-  if (lower.includes('when') || lower.includes('launch') || lower.includes('date')) return FAQ['launch'];
-  return 'I\'m not sure about that. Try asking about GPG, buying, trading, referrals, deposits, KYC, security, or the platform launch. Type "help" to see what I can assist with!';
+function compressImage(file: File, maxSize = 900, quality = 0.7): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxSize || height > maxSize) {
+          const ratio = Math.min(maxSize / width, maxSize / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = reader.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 function SendIcon() {
@@ -94,63 +83,105 @@ function GPLogo({ size = 32 }: { size?: number }) {
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'bot',
-      text: "Hi! I'm the GoldenPrime assistant. How can I help you today?",
-      timestamp: new Date(),
-    },
-  ]);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
+  const [attachment, setAttachment] = useState<string | null>(null);
+  const [unread, setUnread] = useState(0);
+  const [sending, setSending] = useState(false);
+  const [loading, setLoading] = useState(false);
   const messagesEnd = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setAuthenticated(!!localStorage.getItem('accessToken'));
+    }
+  }, []);
+
+  const loadMessages = useCallback(async (markRead = false) => {
+    try {
+      const res = await chatAPI.getMessages();
+      setMessages(res.data.messages || []);
+      setUnread(res.data.unread || 0);
+      if (markRead && (res.data.unread || 0) > 0) {
+        await chatAPI.markRead();
+        setUnread(0);
+      }
+    } catch (err) {
+      /* not authenticated or network error */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    if (isOpen) {
+      setLoading(true);
+      loadMessages(true).finally(() => setLoading(false));
+      messagesEnd.current?.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => inputRef.current?.focus(), 300);
+    }
+  }, [isOpen, authenticated, loadMessages]);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    const timer = setInterval(() => {
+      if (!isOpen) loadMessages(false);
+    }, 15000);
+    return () => clearInterval(timer);
+  }, [authenticated, isOpen, loadMessages]);
 
   useEffect(() => {
     messagesEnd.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 300);
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Please attach an image (e.g. a payment slip).');
+      return;
     }
-  }, [isOpen]);
+    try {
+      setAttachment(await compressImage(file));
+    } catch {
+      alert('Could not read that image. Try another one.');
+    }
+    e.target.value = '';
+  };
 
-  const processMessage = useCallback((text: string) => {
-    if (!text.trim()) return;
-    const userMsg: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      text: text.trim(),
-      timestamp: new Date(),
+  const sendMessage = async () => {
+    const text = input.trim();
+    if ((!text && !attachment) || sending) return;
+
+    setSending(true);
+    const temp: ChatMessage = {
+      id: 'temp-' + Date.now(),
+      sender: 'user',
+      message: text || null,
+      attachment,
+      created_at: new Date().toISOString(),
     };
-    setMessages(prev => [...prev, userMsg]);
-
-    setTimeout(() => {
-      const answer = findAnswer(text);
-      const botMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'bot',
-        text: answer,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, botMsg]);
-    }, 600);
-  }, []);
-
-  const sendMessage = () => {
-    processMessage(input);
+    setMessages((prev) => [...prev, temp]);
     setInput('');
+    setAttachment(null);
+
+    try {
+      await chatAPI.sendMessage({ message: text || undefined, attachment: attachment || undefined });
+      await loadMessages(false);
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Message failed to send. Try again.');
+      setMessages((prev) => prev.filter((m) => m.id !== temp.id));
+    } finally {
+      setSending(false);
+    }
   };
 
-  const handleQuickReply = (question: string) => {
-    setInput('');
-    processMessage(question);
-  };
+  if (!authenticated) return null;
 
   return (
     <>
-      {/* Floating Button */}
       <motion.button
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}
@@ -173,9 +204,13 @@ export default function ChatBot() {
             </motion.div>
           )}
         </AnimatePresence>
+        {!isOpen && unread > 0 && (
+          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center">
+            {unread}
+          </span>
+        )}
       </motion.button>
 
-      {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -188,65 +223,80 @@ export default function ChatBot() {
               md:bottom-24 md:right-6 md:left-auto md:w-[400px]"
             style={{ maxHeight: 'min(75vh, 560px)' }}
           >
-            {/* Header */}
             <div className="px-4 py-3 flex items-center gap-3 shrink-0 border-b border-zinc-800"
               style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.08) 0%, #09090b 100%)' }}>
               <GPLogo size={36} />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white">GoldenPrime Assistant</p>
+                <p className="text-sm font-semibold text-white">GoldenPrime Support</p>
                 <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <p className="text-xs text-emerald-400">Online</p>
+                  <p className="text-xs text-emerald-400">Admin will respond shortly</p>
                 </div>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white transition-colors p-1">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
+                <CloseIcon />
               </button>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
-              {messages.map((msg) => (
-                <motion.div
-                  key={msg.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  {msg.role === 'bot' && (
-                    <div className="shrink-0 mr-2 mt-1">
-                      <GPLogo size={22} />
-                    </div>
-                  )}
-                  <div className={`max-w-[80%] px-3.5 py-2.5 text-sm leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'bg-gold-500/15 text-gold-200 rounded-2xl rounded-br-md border border-gold-500/20'
-                      : 'bg-zinc-900 text-gray-300 rounded-2xl rounded-bl-md border border-zinc-800'
-                  }`}>
-                    {msg.text}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 bg-zinc-950">
+              {loading ? (
+                <div className="text-center py-10 text-zinc-500 text-sm">Loading messages...</div>
+              ) : messages.length === 0 ? (
+                <div className="text-center py-10">
+                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                    <ChatIcon />
                   </div>
-                </motion.div>
-              ))}
+                  <p className="text-zinc-400 text-sm mb-1">Send us a message</p>
+                  <p className="text-zinc-600 text-xs">Ask questions or attach a payment slip — our admin will reply here.</p>
+                </div>
+              ) : (
+                messages.map((msg) => (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    {msg.sender === 'admin' && (
+                      <div className="shrink-0 mr-2 mt-1">
+                        <GPLogo size={22} />
+                      </div>
+                    )}
+                    <div className={`max-w-[80%] px-3.5 py-2.5 text-sm leading-relaxed ${
+                      msg.sender === 'user'
+                        ? 'bg-gold-500/15 text-gold-200 rounded-2xl rounded-br-md border border-gold-500/20'
+                        : 'bg-zinc-900 text-gray-300 rounded-2xl rounded-bl-md border border-zinc-800'
+                    }`}>
+                      {msg.message && <p>{msg.message}</p>}
+                      {msg.attachment && (
+                        <img
+                          src={msg.attachment}
+                          alt="Attachment"
+                          className="mt-1.5 rounded-lg max-h-48 w-full object-cover cursor-pointer"
+                          onClick={() => msg.attachment && window.open(msg.attachment, '_blank')}
+                        />
+                      )}
+                      <p className="text-[10px] text-zinc-500 mt-1">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                  </motion.div>
+                ))
+              )}
               <div ref={messagesEnd} />
             </div>
 
-            {/* Quick Replies */}
-            <div className="px-3 pb-2 flex gap-1.5 flex-wrap shrink-0">
-              {['What is GPG?', 'How to buy?', 'Referrals', 'Help'].map((q) => (
-                <button
-                  key={q}
-                  onClick={() => handleQuickReply(q)}
-                  className="text-xs bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-full text-zinc-400 hover:text-gold-400 hover:border-gold-500/40 transition-all whitespace-nowrap"
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
+            {attachment && (
+              <div className="px-3 pb-2 shrink-0">
+                <div className="relative inline-block">
+                  <img src={attachment} alt="Payment slip preview" className="h-20 rounded-lg border border-zinc-700" />
+                  <button onClick={() => setAttachment(null)} className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 text-xs flex items-center justify-center hover:text-white">
+                    ✕
+                  </button>
+                </div>
+                <p className="text-[10px] text-zinc-500 mt-1">Payment slip attached — send to submit</p>
+              </div>
+            )}
 
-            {/* Input */}
             <div className="border-t border-zinc-800 p-3 flex gap-2 shrink-0">
               <input
                 ref={inputRef}
@@ -254,21 +304,36 @@ export default function ChatBot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder="Ask me anything..."
+                placeholder="Type a message..."
                 className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-gold-500/50 transition-colors min-w-0"
               />
               <button
+                onClick={() => fileRef.current?.click()}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-400 shrink-0 hover:text-gold-400 transition-colors"
+                aria-label="Attach payment slip"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                </svg>
+              </button>
+              <button
                 onClick={sendMessage}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-black shrink-0 transition-all hover:scale-105 active:scale-95"
+                disabled={sending || (!input.trim() && !attachment)}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-black shrink-0 transition-all hover:scale-105 active:scale-95 disabled:opacity-40"
                 style={{
-                  background: input.trim()
+                  background: input.trim() || attachment
                     ? 'linear-gradient(135deg, #FFD700 0%, #D4AF37 100%)'
                     : '#27272a',
-                  color: input.trim() ? 'black' : '#52525b',
+                  color: input.trim() || attachment ? 'black' : '#52525b',
                 }}
               >
-                <SendIcon />
+                {sending ? (
+                  <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/></svg>
+                ) : (
+                  <SendIcon />
+                )}
               </button>
+              <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
             </div>
           </motion.div>
         )}

@@ -7,7 +7,7 @@ import BrandLogo from './BrandLogo';
 
 const NAV_LINKS = [
   { label: 'Features', href: '#features' },
-  { label: 'GPG Coin', href: '#gpg' },
+  { label: 'Coming Soon', href: '#coming-soon' },
   { label: 'Cards', href: '#cards' },
   { label: 'Roadmap', href: '#roadmap' },
 ];

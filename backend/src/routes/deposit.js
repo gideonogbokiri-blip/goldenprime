@@ -1,5 +1,6 @@
 const express = require('express');
 const authenticate = require('../middleware/auth');
+const requireVerified = require('../middleware/requireVerified');
 const depositController = require('../controllers/depositController');
 
 const router = express.Router();
@@ -29,7 +30,7 @@ const router = express.Router();
  *       201:
  *         description: Deposit request created
  */
-router.post('/request', authenticate, depositController.requestDeposit);
+router.post('/request', authenticate, requireVerified, depositController.requestDeposit);
 
 /**
  * @swagger
@@ -43,7 +44,7 @@ router.post('/request', authenticate, depositController.requestDeposit);
  *       200:
  *         description: List of user deposits
  */
-router.get('/my', authenticate, depositController.getMyDeposits);
+router.get('/my', authenticate, requireVerified, depositController.getMyDeposits);
 
 /**
  * @swagger
@@ -57,6 +58,6 @@ router.get('/my', authenticate, depositController.getMyDeposits);
  *       200:
  *         description: Admin bank details for manual transfer
  */
-router.get('/instructions', authenticate, depositController.getInstructions);
+router.get('/instructions', authenticate, requireVerified, depositController.getInstructions);
 
 module.exports = router;

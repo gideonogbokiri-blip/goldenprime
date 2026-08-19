@@ -196,4 +196,32 @@ router.post(
  */
 router.get('/me', authenticate, authController.getMe);
 
+/**
+ * @swagger
+ * /auth/resend-verification:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Resend the email verification link
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Verification email sent
+ */
+router.post(
+  '/resend-verification',
+  [body('email').isEmail().normalizeEmail().withMessage('Valid email required')],
+  validate,
+  authController.resendVerification
+);
+
 module.exports = router;

@@ -44,13 +44,16 @@ async function createDeposit(req, res, next) {
 
 async function createWithdraw(req, res, next) {
   try {
-    const { amount } = req.body;
+    const { amount, bankName, accountNumber, accountName } = req.body;
     if (!amount || amount <= 0) {
       return res.status(400).json({ error: 'Invalid amount' });
     }
+    if (!bankName || !accountNumber || !accountName) {
+      return res.status(400).json({ error: 'Bank name, account number, and account name are required' });
+    }
 
-    const tx = await paymentService.createWithdrawRequest(req.user.id, amount);
-    res.json({ message: 'Withdrawal requested', transaction: tx });
+    const tx = await paymentService.createWithdrawRequest(req.user.id, amount, { bankName, accountNumber, accountName });
+    res.json({ message: 'Withdrawal requested. Funds are locked until admin approval.', transaction: tx });
   } catch (err) {
     next(err);
   }

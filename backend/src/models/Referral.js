@@ -4,10 +4,10 @@ const Transaction = require('../models/Transaction');
 const supabase = require('../config/supabase');
 
 const TIERS = [
-  { name: 'Bronze', minReferrals: 0, rewardPerReferral: 0.0001, color: '#CD7F32', icon: '🥉' },
-  { name: 'Silver', minReferrals: 5, rewardPerReferral: 0.0002, color: '#C0C0C0', icon: '🥈' },
-  { name: 'Gold', minReferrals: 15, rewardPerReferral: 0.0005, color: '#FFD700', icon: '🏆' },
-  { name: 'Platinum', minReferrals: 50, rewardPerReferral: 0.001, color: '#E5E4E2', icon: '💎' },
+  { name: 'Bronze', minReferrals: 0, rewardPerReferral: 5, color: '#CD7F32', icon: '🥉' },
+  { name: 'Silver', minReferrals: 5, rewardPerReferral: 10, color: '#C0C0C0', icon: '🥈' },
+  { name: 'Gold', minReferrals: 15, rewardPerReferral: 25, color: '#FFD700', icon: '🏆' },
+  { name: 'Platinum', minReferrals: 50, rewardPerReferral: 50, color: '#E5E4E2', icon: '💎' },
 ];
 
 function getTierInfo(referralCount) {
@@ -60,22 +60,22 @@ async function creditReferrer(referrerId) {
     .from('wallets')
     .select('id, balance')
     .eq('user_id', referrerId)
-    .eq('currency', 'GPG')
+    .eq('currency', 'USD')
     .single();
 
   if (wallet) {
     const newBalance = parseFloat(wallet.balance) + REWARD;
     await supabase.from('wallets').update({ balance: newBalance, updated_at: new Date().toISOString() }).eq('id', wallet.id);
   } else {
-    await supabase.from('wallets').insert({ user_id: referrerId, currency: 'GPG', balance: REWARD });
+    await supabase.from('wallets').insert({ user_id: referrerId, currency: 'USD', balance: REWARD });
   }
 
   await Transaction.create({
     userId: referrerId,
     type: 'referral_reward',
-    currency: 'GPG',
+    currency: 'USD',
     amount: REWARD,
-    usdValue: REWARD * 50,
+    usdValue: REWARD,
     status: 'completed',
     metadata: { source: 'referral_signup', reward: REWARD, tier: tierInfo.currentTier.name },
   });
