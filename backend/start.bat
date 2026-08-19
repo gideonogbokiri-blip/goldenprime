@@ -1,3 +1,3 @@
 @echo off
-cd /d C:\Users\hp\OneDrive\Desktop\goldernprime\backend
+cd /d %~dp0
 node src/app.js

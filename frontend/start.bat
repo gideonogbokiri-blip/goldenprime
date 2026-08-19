@@ -1,3 +1,3 @@
 @echo off
-cd /d C:\Users\hp\OneDrive\Desktop\goldernprime\frontend
+cd /d %~dp0
 node node_modules\next\dist\bin\next dev

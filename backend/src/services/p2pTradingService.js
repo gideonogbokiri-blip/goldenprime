@@ -11,6 +11,8 @@ async function createOrder(userId, { type, coin, amount, pricePerUnit, paymentMe
   if (!amount || amount <= 0) throw Object.assign(new Error('Invalid amount'), { status: 400 });
   if (!pricePerUnit || pricePerUnit <= 0) throw Object.assign(new Error('Invalid price'), { status: 400 });
 
+  const totalUsd = parseFloat(amount) * parseFloat(pricePerUnit);
+
   if (type === 'sell') {
     const balance = await Wallet.getBalance(userId, coin);
     if (balance < parseFloat(amount)) {
@@ -24,7 +26,26 @@ async function createOrder(userId, { type, coin, amount, pricePerUnit, paymentMe
       type: 'escrow_lock',
       currency: coin,
       amount: cryptoAmount,
-      usdValue: cryptoAmount * parseFloat(pricePerUnit),
+      usdValue: totalUsd,
+      status: 'completed',
+      metadata: { source: 'p2p_order', coin, locked: true },
+    });
+  } else {
+    // Buy orders must lock the buyer's USD up front so the seller can be
+    // paid from escrow when the trade completes. Without this, the seller
+    // is credited USD out of thin air and the buyer receives coins free.
+    const usdBalance = await Wallet.getBalance(userId, 'USD');
+    if (usdBalance < totalUsd) {
+      throw Object.assign(new Error(`Insufficient USD balance. Need $${totalUsd.toFixed(2)}`), { status: 400 });
+    }
+    await Wallet.updateBalance(userId, 'USD', -totalUsd);
+
+    await Transaction.create({
+      userId,
+      type: 'escrow_lock',
+      currency: 'USD',
+      amount: totalUsd,
+      usdValue: totalUsd,
       status: 'completed',
       metadata: { source: 'p2p_order', coin, locked: true },
     });
@@ -47,6 +68,9 @@ async function cancelOrder(orderId, userId) {
   const result = TradeOrder.cancelOrder(orderId, userId);
   if (result.error) throw Object.assign(new Error(result.error), { status: 400 });
 
+  // result.amount is the remaining (unfilled) order amount after partial fills
+  const remainingUsd = parseFloat(result.amount) * parseFloat(result.price_per_unit);
+
   if (result.type === 'sell') {
     await Wallet.updateBalance(userId, result.coin, result.amount);
     await Transaction.create({
@@ -54,7 +78,19 @@ async function cancelOrder(orderId, userId) {
       type: 'escrow_unlock',
       currency: result.coin,
       amount: result.amount,
-      usdValue: result.total_usd,
+      usdValue: remainingUsd,
+      status: 'completed',
+      metadata: { source: 'p2p_cancel', coin: result.coin },
+    });
+  } else {
+    // Refund the USD that was locked in escrow for the unfilled portion
+    await Wallet.updateBalance(userId, 'USD', remainingUsd);
+    await Transaction.create({
+      userId,
+      type: 'escrow_unlock',
+      currency: 'USD',
+      amount: remainingUsd,
+      usdValue: remainingUsd,
       status: 'completed',
       metadata: { source: 'p2p_cancel', coin: result.coin },
     });

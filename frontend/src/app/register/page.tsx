@@ -8,6 +8,11 @@ import { authAPI } from '@/lib/api';
 import BrandLogo from '@/components/ui/BrandLogo';
 import { FloatingTokens, AuthCard } from '@/components/ui/AuthLayout';
 
+const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+  <input {...props}
+    className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl focus:outline-none focus:border-gold-500/50 text-sm text-white placeholder-zinc-500 transition-all hover:border-white/[0.12]" />
+);
+
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -59,11 +64,6 @@ function RegisterForm() {
       else setError(err.response?.data?.errors?.[0]?.msg || err.response?.data?.error || 'Registration failed.');
     } finally { setLoading(false); }
   };
-
-  const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-    <input {...props}
-      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl focus:outline-none focus:border-gold-500/50 text-sm text-white placeholder-zinc-500 transition-all hover:border-white/[0.12]" />
-  );
 
   return (
     <main className="min-h-screen flex flex-col bg-zinc-950 relative overflow-hidden">
