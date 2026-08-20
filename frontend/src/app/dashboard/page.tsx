@@ -9,6 +9,7 @@ import CryptoPrices from '@/components/CryptoPrices';
 import MarketChart from '@/components/MarketChart';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import BrandLogo from '@/components/ui/BrandLogo';
+import DepositFeed from '@/components/DepositFeed';
 
 const TxIcon = ({ type }: { type: string }) => {
   const c = "w-4 h-4"; const b = "w-8 h-8 rounded-lg flex items-center justify-center shrink-0";
@@ -185,6 +186,8 @@ export default function DashboardPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <DepositFeed />
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10">
         {/* Greeting */}

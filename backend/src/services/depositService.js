@@ -188,6 +188,30 @@ async function getPaymentInstructions() {
   return { bank, crypto };
 }
 
+async function getPublicFeed(limit = 20) {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('id, amount, created_at, metadata')
+    .eq('type', 'deposit')
+    .eq('status', 'completed')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return (data || []).map(tx => {
+    const email = tx.metadata?.userEmail || '';
+    const name = tx.metadata?.userName || '';
+    const displayName = name || (email ? email.charAt(0) + '***@' + email.split('@')[1] : 'Anonymous');
+    return {
+      id: tx.id,
+      amount: parseFloat(tx.amount),
+      displayName,
+      created_at: tx.created_at,
+    };
+  });
+}
+
 module.exports = {
   requestDeposit,
   getMyDeposits,
@@ -196,4 +220,5 @@ module.exports = {
   approveDeposit,
   rejectDeposit,
   getPaymentInstructions,
+  getPublicFeed,
 };

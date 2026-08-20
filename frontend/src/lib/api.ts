@@ -61,6 +61,7 @@ export const depositAPI = {
     api.post('/deposits/request', data),
   my: (limit?: number) => api.get('/deposits/my', { params: { limit } }),
   instructions: () => api.get('/deposits/instructions'),
+  feed: (limit?: number) => api.get('/deposits/feed', { params: { limit } }),
 };
 
 export const chatAPI = {

@@ -60,4 +60,16 @@ router.get('/my', authenticate, requireVerified, depositController.getMyDeposits
  */
 router.get('/instructions', authenticate, requireVerified, depositController.getInstructions);
 
+/**
+ * @swagger
+ * /deposits/feed:
+ *   get:
+ *     tags: [Deposits]
+ *     summary: Get public feed of recent completed deposits (anonymized)
+ *     responses:
+ *       200:
+ *         description: List of recent deposits with anonymized user info
+ */
+router.get('/feed', depositController.getPublicFeed);
+
 module.exports = router;

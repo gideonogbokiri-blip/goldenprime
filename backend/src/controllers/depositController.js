@@ -30,4 +30,14 @@ async function getInstructions(req, res, next) {
   }
 }
 
-module.exports = { requestDeposit, getMyDeposits, getInstructions };
+async function getPublicFeed(req, res, next) {
+  try {
+    const limit = parseInt(req.query.limit) || 20;
+    const feed = await depositService.getPublicFeed(limit);
+    res.json({ feed });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { requestDeposit, getMyDeposits, getInstructions, getPublicFeed };
