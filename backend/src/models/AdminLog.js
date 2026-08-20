@@ -30,11 +30,14 @@ class AdminLog {
   }
 
   static async getStats() {
-    const [users, transactions, kycPending, kycApproved] = await Promise.all([
+    const [users, transactions, kycPending, kycApproved, pendingDeposits, pendingWithdrawals, verifiedUsers] = await Promise.all([
       supabase.from('users').select('id', { count: 'exact', head: true }),
       supabase.from('transactions').select('id', { count: 'exact', head: true }),
       supabase.from('kyc').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('kyc').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
+      supabase.from('transactions').select('id', { count: 'exact', head: true }).eq('type', 'deposit').eq('status', 'pending'),
+      supabase.from('transactions').select('id', { count: 'exact', head: true }).eq('type', 'withdrawal').eq('status', 'pending'),
+      supabase.from('users').select('id', { count: 'exact', head: true }).eq('is_verified', true),
     ]);
 
     return {
@@ -42,6 +45,9 @@ class AdminLog {
       totalTransactions: transactions.count || 0,
       kycPending: kycPending.count || 0,
       kycApproved: kycApproved.count || 0,
+      pendingDeposits: pendingDeposits.count || 0,
+      pendingWithdrawals: pendingWithdrawals.count || 0,
+      verifiedUsers: verifiedUsers.count || 0,
     };
   }
 }
