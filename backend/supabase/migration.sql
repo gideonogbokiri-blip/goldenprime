@@ -38,10 +38,20 @@ CREATE INDEX IF NOT EXISTS idx_chat_messages_read ON public.chat_messages (user_
 
 -- ---------- 3. Wipe all existing user data (keeps admin accounts) ----------
 -- Child tables first, then users that are not admins.
-TRUNCATE public.p2p_trades, public.p2p_orders, public.chat_messages,
-         public.transactions, public.wallets, public.user_settings,
-         public.kyc, public.admin_logs
-  CASCADE;
+DO $$
+DECLARE t TEXT;
+BEGIN
+  FOR t IN SELECT unnest(ARRAY[
+    'p2p_trades','p2p_orders','chat_messages',
+    'transactions','wallets','user_settings',
+    'kyc','admin_logs'
+  ])
+  LOOP
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name=t) THEN
+      EXECUTE format('TRUNCATE public.%I CASCADE', t);
+    END IF;
+  END LOOP;
+END $$;
 
 -- Keep only admin-role accounts (your admin login stays working)
 DELETE FROM public.users WHERE role <> 'admin';
