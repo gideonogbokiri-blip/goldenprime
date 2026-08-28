@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://goldenprime-api.vercel.app';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://goldenprime-api.vercel.app/api';
 
 const api = axios.create({
   baseURL: API_URL,
