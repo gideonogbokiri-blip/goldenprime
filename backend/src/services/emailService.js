@@ -1,27 +1,38 @@
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const RESEND_FROM = process.env.RESEND_FROM || 'GoldenPrime <onboarding@resend.dev>';
+const nodemailer = require('nodemailer');
+
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS;
+const EMAIL_FROM = process.env.EMAIL_FROM || (EMAIL_USER ? `GoldenPrime <${EMAIL_USER}>` : 'GoldenPrime <noreply@goldenprime.com>');
+
+let transporter;
+
+function getTransporter() {
+  if (transporter) return transporter;
+  if (!EMAIL_USER || !EMAIL_PASS) {
+    console.error('[emailService] EMAIL_USER / EMAIL_PASS not configured — emails will not send.');
+    return null;
+  }
+  transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: { user: EMAIL_USER, pass: EMAIL_PASS },
+  });
+  return transporter;
+}
 
 async function sendEmail({ to, subject, html }) {
-  if (!RESEND_API_KEY) {
-    console.error('[emailService] RESEND_API_KEY not configured — skipping email send.');
-    return { skipped: true };
+  const tr = getTransporter();
+  if (!tr) return { skipped: true };
+
+  try {
+    await tr.sendMail({ from: EMAIL_FROM, to, subject, html });
+    return { ok: true };
+  } catch (err) {
+    console.error('[emailService] Failed to send email:', err.message);
+    throw err;
   }
-
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ from: RESEND_FROM, to, subject, html }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Resend failed (${res.status}): ${body}`);
-  }
-
-  return res.json();
 }
 
 function layout(html) {
