@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { adminAPI } from '@/lib/api';
+import { adminAPI, authAPI } from '@/lib/api';
 import BrandLogo from '@/components/ui/BrandLogo';
 
 type Tab = 'overview' | 'users' | 'deposits' | 'withdrawals' | 'transactions' | 'kyc' | 'chats' | 'settings' | 'logs';
@@ -11,6 +11,7 @@ type Tab = 'overview' | 'users' | 'deposits' | 'withdrawals' | 'transactions' | 
 export default function AdminPage() {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>('overview');
+  const [isAdmin, setIsAdmin] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -42,8 +43,15 @@ export default function AdminPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
-    if (!token) { router.push('/login'); return; }
-    loadTab('overview');
+    if (!token) { router.push('/admin/login'); return; }
+    authAPI.getMe().then((r) => {
+      if (r.data.user?.role !== 'admin') {
+        router.push('/admin/login');
+        return;
+      }
+      setIsAdmin(true);
+      loadTab('overview');
+    }).catch(() => { router.push('/admin/login'); });
   }, [router]);
 
   const loadTab = async (t: Tab) => {
@@ -225,7 +233,11 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {loading ? (
+        {!isAdmin ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="w-6 h-6 border-2 border-gold-500/30 border-t-gold-500 rounded-full animate-spin" />
+          </div>
+        ) : loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-6 h-6 border-2 border-gold-500/30 border-t-gold-500 rounded-full animate-spin" />
           </div>

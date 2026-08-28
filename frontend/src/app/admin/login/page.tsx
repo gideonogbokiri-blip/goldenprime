@@ -6,22 +6,19 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { authAPI } from '@/lib/api';
 import BrandLogo from '@/components/ui/BrandLogo';
-import { FloatingTokens, AuthCard } from '@/components/ui/AuthLayout';
+import { AuthCard } from '@/components/ui/AuthLayout';
 
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input {...props}
     className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl focus:outline-none focus:border-gold-500/50 text-sm text-white placeholder-zinc-500 transition-all hover:border-white/[0.12]" />
 );
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   const router = useRouter();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [needsVerification, setNeedsVerification] = useState(false);
-  const [resending, setResending] = useState(false);
-  const [resent, setResent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,69 +26,43 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const res = await authAPI.login(form);
+      if (res.data.user?.role !== 'admin') {
+        setError('This account does not have admin access.');
+        setLoading(false);
+        return;
+      }
       localStorage.setItem('accessToken', res.data.accessToken);
       localStorage.setItem('refreshToken', res.data.refreshToken);
-      router.push('/dashboard');
+      router.push('/admin');
     } catch (err: any) {
-      if (err.response?.data?.needsVerification) {
-        setNeedsVerification(true);
-        setError(err.response?.data?.error || 'Please verify your email before logging in.');
-      } else {
-        setError(err.response?.data?.error || 'Login failed. Check your credentials.');
-      }
+      setError(err.response?.data?.error || 'Login failed. Check your credentials.');
     } finally { setLoading(false); }
-  };
-
-  const handleResend = async () => {
-    setResending(true);
-    try {
-      await authAPI.resendVerification(form.email);
-      setResent(true);
-      setError('');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Could not resend. Try again later.');
-    } finally {
-      setResending(false);
-    }
   };
 
   return (
     <main className="min-h-screen flex flex-col bg-zinc-950 relative overflow-hidden">
-      <FloatingTokens />
-
+      <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.04] via-transparent to-transparent pointer-events-none" />
       <div className="flex-1 flex items-center justify-center px-4 py-8 relative z-10">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="w-full max-w-sm">
           <div className="flex justify-center mb-6">
             <BrandLogo size={32} />
           </div>
+          <AuthCard title="Admin Login" subtitle="Restricted access — GoldenPrime staff only">
+            <div className="mb-5 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-gold-500 bg-gold-500/10 border border-gold-500/20 rounded-lg px-3 py-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Admin Portal
+            </div>
 
-          <AuthCard title="Welcome Back" subtitle="Sign in to your GoldenPrime account">
             {error && (
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-                className="bg-red-500/10 border border-red-500/25 text-red-400 px-4 py-3 rounded-xl mb-4 text-sm flex items-start gap-2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                className="bg-red-500/10 border border-red-500/25 text-red-400 px-4 py-3 rounded-xl mb-4 text-sm text-center">
                 {error}
               </motion.div>
             )}
 
-            {needsVerification && (
-              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-                className="bg-gold-500/10 border border-gold-500/25 rounded-xl px-4 py-3 mb-4 text-sm">
-                <p className="text-gold-400 font-semibold mb-1">Verify your email</p>
-                <p className="text-zinc-400 text-xs mb-2">We emailed you a verification link. Click it to activate your account, or resend the email below.</p>
-                <button
-                  onClick={handleResend}
-                  disabled={resending || resent}
-                  className="text-xs bg-gold-500 text-black font-semibold px-3 py-2 rounded-lg hover:bg-gold-400 disabled:opacity-50 transition-all">
-                  {resent ? 'Verification email sent!' : resending ? 'Sending...' : 'Resend Verification Email'}
-                </button>
-              </motion.div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-3">
-              <Input type="email" placeholder="Email address" required value={form.email}
+              <Input type="email" placeholder="Admin email" required value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })} />
-
               <div className="relative">
                 <Input type={showPassword ? 'text' : 'password'} placeholder="Password" required value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })} style={{ paddingRight: '3rem' }} />
@@ -104,27 +75,19 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
-
               <button type="submit" disabled={loading}
                 className="w-full py-3 rounded-xl font-semibold text-sm bg-gold-500 text-black hover:bg-gold-400 transition-all shadow-lg shadow-gold-500/10 disabled:opacity-50">
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/></svg>
-                    Signing in...
-                  </span>
-                ) : 'Sign In'}
+                {loading ? 'Signing in...' : 'Sign In to Admin'}
               </button>
             </form>
 
-            <div className="mt-5 pt-4 border-t border-white/[0.06] text-center">
-              <p className="text-zinc-500 text-sm">
-                Don&apos;t have an account?{' '}
-                <Link href="/register" className="text-gold-500 hover:text-gold-400 font-medium transition-colors">Create Account</Link>
-              </p>
+            <div className="mt-4 text-center">
+              <button onClick={() => router.push('/forgot-password')}
+                className="text-sm text-zinc-500 hover:text-gold-400 transition-colors">Forgot your password?</button>
             </div>
 
-            <div className="mt-3 text-center">
-              <Link href="/forgot-password" className="text-sm text-zinc-500 hover:text-gold-400 transition-colors">Forgot your password?</Link>
+            <div className="mt-5 pt-4 border-t border-white/[0.06] text-center">
+              <Link href="/login" className="text-sm text-zinc-500 hover:text-gold-400 transition-colors">User Login</Link>
             </div>
           </AuthCard>
         </motion.div>
