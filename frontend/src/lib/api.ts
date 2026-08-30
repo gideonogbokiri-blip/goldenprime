@@ -67,6 +67,7 @@ export const depositAPI = {
 export const chatAPI = {
   getMessages: () => api.get('/chat/messages'),
   sendMessage: (data: { message?: string; attachment?: string }) => api.post('/chat/messages', data),
+  assistant: (data: { message: string }) => api.post('/chat/assistant', data),
   markRead: () => api.post('/chat/read'),
 };
 

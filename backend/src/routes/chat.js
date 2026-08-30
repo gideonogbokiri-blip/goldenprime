@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get('/messages', authenticate, requireVerified, chatController.getMessages);
 router.post('/messages', authenticate, requireVerified, chatController.sendMessage);
+router.post('/assistant', authenticate, requireVerified, chatController.assistant);
 router.post('/read', authenticate, chatController.markRead);
 
 module.exports = router;

@@ -168,7 +168,21 @@ export default function ChatBot() {
     setAttachment(null);
 
     try {
-      await chatAPI.sendMessage({ message: text || undefined, attachment: attachment || undefined });
+      if (text) {
+        const res = await chatAPI.assistant({ message: text });
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: 'bot-' + Date.now(),
+            sender: 'admin',
+            message: res.data.reply,
+            attachment: null,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+      } else {
+        await chatAPI.sendMessage({ message: undefined, attachment: attachment || undefined });
+      }
       await loadMessages(false);
     } catch (err: any) {
       alert(err.response?.data?.error || 'Message failed to send. Try again.');
@@ -228,9 +242,9 @@ export default function ChatBot() {
               <GPLogo size={36} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-white">GoldenPrime Support</p>
-                <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <p className="text-xs text-emerald-400">Admin will respond shortly</p>
+                  <p className="text-xs text-emerald-400">AI Assistant online — instant replies</p>
                 </div>
               </div>
               <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white transition-colors p-1">
@@ -246,8 +260,8 @@ export default function ChatBot() {
                   <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-3">
                     <ChatIcon />
                   </div>
-                  <p className="text-zinc-400 text-sm mb-1">Send us a message</p>
-                  <p className="text-zinc-600 text-xs">Ask questions or attach a payment slip — our admin will reply here.</p>
+                  <p className="text-zinc-400 text-sm mb-1">GoldenPrime AI Assistant</p>
+                  <p className="text-zinc-600 text-xs">Ask me anything about deposits, expected profit, withdrawals, referrals, KYC or verification. I reply instantly!</p>
                 </div>
               ) : (
                 messages.map((msg) => (
