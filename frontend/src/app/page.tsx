@@ -6,18 +6,41 @@ import { motion } from 'framer-motion';
 import GoldCoin from '@/components/ui/GoldCoin';
 import Navbar from '@/components/ui/Navbar';
 import Footer from '@/components/ui/Footer';
+import CryptoPrices from '@/components/CryptoPrices';
 import { StaggerContainer, StaggerItem, FadeInUp } from '@/components/ui/Animations';
 
 function LiveTicker() {
   const [tick, setTick] = useState(0);
-  const items = [
-    { label: 'BNB', value: '$612.40', change: '+2.1%', up: true },
-    { label: 'BTC', value: '$68,420', change: '+1.8%', up: true },
-    { label: 'ETH', value: '$3,840', change: '+2.4%', up: true },
-    { label: 'GOLD', value: '$2,460.50', change: '+0.8%', up: true },
-    { label: 'SOL', value: '$142.80', change: '+5.2%', up: true },
+  const [items, setItems] = useState([
+    { label: 'BTC', value: '$0.00', change: '0.0%', up: true },
+    { label: 'ETH', value: '$0.00', change: '0.0%', up: true },
+    { label: 'SOL', value: '$0.00', change: '0.0%', up: true },
+    { label: 'BNB', value: '$0.00', change: '0.0%', up: true },
+    { label: 'GOLD', value: '$0.00', change: '0.0%', up: true },
     { label: 'USDT', value: '$1.00', change: '0.0%', up: true },
-  ];
+  ]);
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const base = process.env.NEXT_PUBLIC_API_URL || 'https://goldenprime-api.vercel.app/api';
+        const res = await fetch(`${base}/crypto/prices`);
+        const data = await res.json();
+        const prices = data.prices || [];
+        if (prices.length > 0) {
+          setItems(prices.slice(0, 6).map((p: any) => ({
+            label: p.symbol?.toUpperCase() || p.name,
+            value: `$${(p.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+            change: `${p.change24h >= 0 ? '+' : ''}${(p.change24h || 0).toFixed(1)}%`,
+            up: (p.change24h || 0) >= 0,
+          })));
+        }
+      } catch {}
+    };
+    fetchPrices();
+    const interval = setInterval(fetchPrices, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 20000);
@@ -381,6 +404,22 @@ export default function Home() {
             ))}
           </StaggerContainer>
         </div>
+      </section>
+
+      {/* Live Market Prices */}
+      <section id="prices" className="max-w-6xl mx-auto px-4 md:px-6 py-16 md:py-24">
+        <FadeInUp>
+          <div className="text-center mb-10 md:mb-14">
+            <span className="text-gold-500 text-xs font-semibold uppercase tracking-[0.15em]">Live Markets</span>
+            <h2 className="text-2xl md:text-4xl font-bold mt-2 mb-3">Real-Time Crypto Prices</h2>
+            <p className="text-zinc-400 text-sm md:text-base max-w-xl mx-auto">
+              Track live market prices for Bitcoin, Ethereum, Solana, and more — updated every 30 seconds.
+            </p>
+          </div>
+        </FadeInUp>
+        <FadeInUp delay={0.1}>
+          <CryptoPrices />
+        </FadeInUp>
       </section>
 
       {/* Cards */}
