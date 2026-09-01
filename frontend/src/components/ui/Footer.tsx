@@ -35,7 +35,6 @@ export default function Footer() {
               {[
                 { label: 'P2P Trading', href: '/trade' },
                 { label: 'Fund Wallet', href: '/wallet' },
-                { label: 'Wallet', href: '/wallet' },
                 { label: 'Referrals', href: '/referrals' },
               ].map(l => (
                 <li key={l.href}>

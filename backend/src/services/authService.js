@@ -187,4 +187,14 @@ async function getMe(userId) {
   return user;
 }
 
-module.exports = { register, login, verifyEmail, forgotPassword, resetPassword, getMe, resendVerification };
+async function changePassword(userId, currentPassword, newPassword) {
+  const user = await User.findById(userId);
+  if (!user) throw Object.assign(new Error('User not found'), { status: 404 });
+  const valid = await bcrypt.compare(currentPassword, user.password_hash);
+  if (!valid) throw Object.assign(new Error('Current password is incorrect'), { status: 400 });
+  const hash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+  await User.updatePassword(userId, hash);
+  return { message: 'Password changed successfully' };
+}
+
+module.exports = { register, login, verifyEmail, forgotPassword, resetPassword, getMe, resendVerification, changePassword };

@@ -57,6 +57,10 @@ export default function AdminPage() {
   const loadTab = async (t: Tab) => {
     setTab(t);
     setLoading(true);
+    setApproveId('');
+    setRejectId('');
+    setApproveNotes('');
+    setRejectReason('');
     try {
       if (t === 'overview') setStats((await adminAPI.getDashboard()).data);
       else if (t === 'users') setUsers((await adminAPI.getUsers(searchQuery || undefined)).data.users);

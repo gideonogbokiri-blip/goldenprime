@@ -32,8 +32,13 @@ export default function SecurityPage() {
       setMessage({ type: 'error', text: 'Password must be at least 8 characters' });
       return;
     }
-    setMessage({ type: 'success', text: 'Password change requested. Check your email for confirmation.' });
-    setPasswordForm({ current: '', newPass: '', confirm: '' });
+    try {
+      await authAPI.changePassword({ currentPassword: passwordForm.current, newPassword: passwordForm.newPass });
+      setMessage({ type: 'success', text: 'Password changed successfully.' });
+      setPasswordForm({ current: '', newPass: '', confirm: '' });
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to change password. Check your current password.' });
+    }
   };
 
   return (

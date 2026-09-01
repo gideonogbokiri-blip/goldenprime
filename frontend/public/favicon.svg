@@ -1,12 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="coinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFD700"/>
-      <stop offset="50%" stop-color="#D4AF37"/>
-      <stop offset="100%" stop-color="#B8960F"/>
+      <stop offset="40%" stop-color="#D4AF37"/>
+      <stop offset="70%" stop-color="#B8960F"/>
+      <stop offset="100%" stop-color="#D4AF37"/>
     </linearGradient>
+    <linearGradient id="coinShine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.35)"/>
+      <stop offset="50%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.1)"/>
+    </linearGradient>
+    <linearGradient id="coinEdge" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="100%" stop-color="#8B7200"/>
+    </linearGradient>
+    <filter id="coinShadow">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#D4AF37" flood-opacity="0.4"/>
+    </filter>
   </defs>
-  <circle cx="50" cy="50" r="48" fill="url(#g)"/>
-  <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
-  <text x="50" y="56" text-anchor="middle" fill="#000" font-weight="800" font-size="22" font-family="system-ui">GP</text>
+  <circle cx="50" cy="50" r="48" fill="url(#coinEdge)" filter="url(#coinShadow)"/>
+  <circle cx="50" cy="50" r="44" fill="url(#coinGrad)"/>
+  <circle cx="50" cy="50" r="44" fill="url(#coinShine)"/>
+  <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+  <text x="50" y="46" text-anchor="middle" fill="#000000" font-weight="800" font-size="18" font-family="system-ui, sans-serif" letter-spacing="1">GP</text>
+  <text x="50" y="62" text-anchor="middle" fill="rgba(0,0,0,0.5)" font-weight="600" font-size="10" font-family="system-ui, sans-serif">AU</text>
+  <ellipse cx="38" cy="32" rx="14" ry="8" fill="rgba(255,255,255,0.12)" transform="rotate(-20 38 32)"/>
 </svg>

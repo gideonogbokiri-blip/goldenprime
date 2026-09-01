@@ -19,7 +19,7 @@ export default function CryptoPrices() {
 
   const fetchPrices = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/crypto/prices`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://goldenprime-api.vercel.app/api'}/crypto/prices`);
       const data = await res.json();
       const newPrices = data.prices || [];
 

@@ -224,4 +224,16 @@ router.post(
   authController.resendVerification
 );
 
+router.post(
+  '/change-password',
+  authenticate,
+  [
+    body('currentPassword').notEmpty().withMessage('Current password required'),
+    body('newPassword').isLength({ min: 8 }).withMessage('New password must be at least 8 characters')
+      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).withMessage('New password must contain uppercase, lowercase, and number'),
+  ],
+  validate,
+  authController.changePassword
+);
+
 module.exports = router;

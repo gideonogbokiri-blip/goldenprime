@@ -46,6 +46,8 @@ export const authAPI = {
   resetPassword: (token: string, password: string) =>
     api.post('/auth/reset-password', { token, password }),
   getMe: () => api.get('/auth/me'),
+  changePassword: (data: { currentPassword: string; newPassword: string }) =>
+    api.post('/auth/change-password', data),
 };
 
 export const walletAPI = {

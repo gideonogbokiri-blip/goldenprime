@@ -182,8 +182,8 @@ export default function ChatBot() {
         ]);
       } else {
         await chatAPI.sendMessage({ message: undefined, attachment: attachment || undefined });
+        await loadMessages(false);
       }
-      await loadMessages(false);
     } catch (err: any) {
       alert(err.response?.data?.error || 'Message failed to send. Try again.');
       setMessages((prev) => prev.filter((m) => m.id !== temp.id));

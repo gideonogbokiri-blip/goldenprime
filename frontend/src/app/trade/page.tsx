@@ -146,10 +146,11 @@ export default function TradePage() {
     }
   };
 
-  const handleDispute = async (tradeId: string) => {
-    if (!disputeReason) return;
+  const handleDispute = async (tradeId: string, reason?: string) => {
+    const disputeText = reason || disputeReason;
+    if (!disputeText) return;
     try {
-      await p2pAPI.disputeTrade(tradeId, disputeReason);
+      await p2pAPI.disputeTrade(tradeId, disputeText);
       setMessage({ type: 'success', text: 'Dispute filed. Admin will review.' });
       setDisputeReason('');
       loadData();
@@ -536,7 +537,7 @@ export default function TradePage() {
                               </button>
                               <button onClick={() => {
                                 const reason = prompt('Why are you filing a dispute?');
-                                if (reason) handleDispute(trade.id);
+                                if (reason) handleDispute(trade.id, reason);
                               }}
                                 className="px-4 md:px-6 py-2 rounded-lg font-semibold text-xs md:text-sm text-red-500 border border-red-500/30 hover:bg-red-500/10 transition-colors">
                                 Dispute

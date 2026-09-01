@@ -99,16 +99,16 @@ export default function GoldCoin({
       {/* Floating particles */}
       {showGlow && (
         <div className="particles">
-          {[...Array(6)].map((_, i) => (
+          {[25, 45, 65, 35, 55, 75].map((pos, i) => (
             <div
               key={i}
               className="particle"
               style={{
-                left: `${20 + Math.random() * 60}%`,
-                top: `${20 + Math.random() * 60}%`,
+                left: `${pos}%`,
+                top: `${pos}%`,
                 animationDelay: `${i * 0.4}s`,
-                width: 2 + Math.random() * 3,
-                height: 2 + Math.random() * 3,
+                width: 2 + (i % 3),
+                height: 2 + (i % 3),
               }}
             />
           ))}
