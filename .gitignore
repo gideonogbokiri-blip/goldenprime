@@ -15,3 +15,5 @@ backend/data/trade_history.json
 
 .vercel
 .env*
+
+.vercel
