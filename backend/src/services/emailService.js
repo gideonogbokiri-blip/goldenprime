@@ -27,7 +27,19 @@ async function sendEmail({ to, subject, html }) {
   if (!tr) return { skipped: true };
 
   try {
-    await tr.sendMail({ from: EMAIL_FROM, to, subject, html });
+    await tr.sendMail({
+      from: EMAIL_FROM,
+      to,
+      subject,
+      html,
+      text: html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+      replyTo: EMAIL_USER,
+      headers: {
+        'X-Entity-Ref-ID': `gp-${Date.now()}`,
+        'List-Unsubscribe': `<mailto:${EMAIL_USER}?subject=unsubscribe>`,
+        MessageId: `<gp-${Date.now()}@goldenprime.vercel.app>`,
+      },
+    });
     return { ok: true };
   } catch (err) {
     console.error('[emailService] Failed to send email:', err.message);

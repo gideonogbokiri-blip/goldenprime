@@ -73,12 +73,19 @@ export default function AdminPage() {
       else if (t === 'settings') {
         const s = (await adminAPI.getSettings()).data.settings;
         setSettings(s);
+        const cw = s.crypto_wallet || {};
+        const cwObj = typeof cw === 'string' ? JSON.parse(cw) : cw;
+        const cwBtc = cwObj?.bitcoin?.address || cwObj?.btc || '';
+        const cwEth = cwObj?.ethereum?.address || cwObj?.eth || '';
+        const cwUsdt = cwObj?.usdt || '';
         setSettingsForm({
           expectedProfitRate: s.expected_profit_rate ?? 3,
-          minDeposit: s.min_deposit ?? 10,
+          minDeposit: s.min_deposit ?? 500,
           maxDeposit: s.max_deposit ?? 50000,
-          bankDetails: typeof s.bank_details === 'string' ? s.bank_details : JSON.stringify(s.bank_details || {}, null, 2),
-          cryptoWallet: typeof s.crypto_wallet === 'string' ? s.crypto_wallet : JSON.stringify(s.crypto_wallet || {}, null, 2),
+          btcWallet: s.btc_wallet ?? cwBtc ?? '',
+          ethWallet: s.eth_wallet ?? cwEth ?? '',
+          usdtWallet: s.usdt_wallet ?? cwUsdt ?? '',
+          walletNetwork: s.wallet_network ?? 'Ethereum (ERC-20)',
         });
       }
     } catch (err) { console.error(err); } finally { setLoading(false); }
@@ -165,18 +172,18 @@ export default function AdminPage() {
 
   const saveSettings = async () => {
     try {
-      const bankDetails = JSON.parse(settingsForm.bankDetails || '{}');
-      const cryptoWallet = JSON.parse(settingsForm.cryptoWallet || '{}');
       await adminAPI.saveSettings({
         expected_profit_rate: Number(settingsForm.expectedProfitRate),
         min_deposit: Number(settingsForm.minDeposit),
         max_deposit: Number(settingsForm.maxDeposit),
-        bank_details: bankDetails,
-        crypto_wallet: cryptoWallet,
+        btc_wallet: (settingsForm.btcWallet || '').trim(),
+        eth_wallet: (settingsForm.ethWallet || '').trim(),
+        usdt_wallet: (settingsForm.usdtWallet || '').trim(),
+        wallet_network: settingsForm.walletNetwork || 'Ethereum (ERC-20)',
       });
-      alert('Settings saved');
+      alert('Settings saved — wallet addresses now live for users.');
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Invalid JSON in one of the fields.');
+      alert(err.response?.data?.error || 'Failed to save settings.');
     }
   };
 
@@ -584,16 +591,33 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs text-zinc-500 block mb-1.5">Bank Details (JSON)</label>
-                    <textarea rows={4} value={settingsForm.bankDetails} onChange={(e) => setSettingsForm({ ...settingsForm, bankDetails: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm font-mono focus:outline-none focus:border-gold-500 transition-colors" />
-                    <p className="text-[11px] text-zinc-600 mt-1">Shown to users on deposit page</p>
+                    <label className="text-xs text-zinc-500 block mb-1.5">BTC Wallet Address</label>
+                    <input type="text" value={settingsForm.btcWallet} onChange={(e) => setSettingsForm({ ...settingsForm, btcWallet: e.target.value })}
+                      placeholder="bc1q... or 1..." className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm font-mono focus:outline-none focus:border-gold-500 transition-colors" />
+                    <p className="text-[11px] text-zinc-600 mt-1">Shown to users for Bitcoin deposits</p>
                   </div>
                   <div>
-                    <label className="text-xs text-zinc-500 block mb-1.5">Crypto Wallet (JSON)</label>
-                    <textarea rows={4} value={settingsForm.cryptoWallet} onChange={(e) => setSettingsForm({ ...settingsForm, cryptoWallet: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm font-mono focus:outline-none focus:border-gold-500 transition-colors" />
-                    <p className="text-[11px] text-zinc-600 mt-1">Crypto addresses shown to users for deposits</p>
+                    <label className="text-xs text-zinc-500 block mb-1.5">ETH Wallet Address</label>
+                    <input type="text" value={settingsForm.ethWallet} onChange={(e) => setSettingsForm({ ...settingsForm, ethWallet: e.target.value })}
+                      placeholder="0x..." className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm font-mono focus:outline-none focus:border-gold-500 transition-colors" />
+                    <p className="text-[11px] text-zinc-600 mt-1">Shown to users for Ethereum deposits</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-500 block mb-1.5">USDT Wallet Address</label>
+                    <input type="text" value={settingsForm.usdtWallet} onChange={(e) => setSettingsForm({ ...settingsForm, usdtWallet: e.target.value })}
+                      placeholder="0x... or T..." className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm font-mono focus:outline-none focus:border-gold-500 transition-colors" />
+                    <p className="text-[11px] text-zinc-600 mt-1">Shown to users for USDT deposits</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-500 block mb-1.5">USDT Network</label>
+                    <select value={settingsForm.walletNetwork} onChange={(e) => setSettingsForm({ ...settingsForm, walletNetwork: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-gold-500 transition-colors">
+                      <option value="Ethereum (ERC-20)">Ethereum (ERC-20)</option>
+                      <option value="Tron (TRC-20)">Tron (TRC-20)</option>
+                      <option value="BNB Smart Chain (BEP-20)">BNB Smart Chain (BEP-20)</option>
+                      <option value="Solana">Solana</option>
+                    </select>
+                    <p className="text-[11px] text-zinc-600 mt-1">Network your USDT wallet runs on</p>
                   </div>
                   <button onClick={saveSettings} className="bg-gold-500 text-black px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-gold-400 transition-colors">Save Settings</button>
                 </div>

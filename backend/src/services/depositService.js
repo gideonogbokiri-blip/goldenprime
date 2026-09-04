@@ -14,28 +14,38 @@ async function getBankDetails() {
 }
 
 async function getCryptoWallet() {
-  return Setting.get('crypto_wallet', {
-    bitcoin: { address: 'bc1qgoldenprime000000000000000000000', network: 'Bitcoin (BTC)' },
-    ethereum: { address: '0xGoldenPrime0000000000000000000000000', network: 'Ethereum (ERC-20)' },
-    usdt: { address: '0xGoldenPrimeUSDT000000000000000000000', network: 'Ethereum (ERC-20)' },
-  });
+  const [btc, eth, usdt, network, cw] = await Promise.all([
+    Setting.get('btc_wallet', null),
+    Setting.get('eth_wallet', null),
+    Setting.get('usdt_wallet', null),
+    Setting.get('wallet_network', 'Ethereum (ERC-20)'),
+    Setting.get('crypto_wallet', {}),
+  ]);
+
+  const c = cw && typeof cw === 'object' ? cw : {};
+
+  return {
+    bitcoin: { address: btc || c.bitcoin?.address || c.btc || '', network: 'Bitcoin (BTC)' },
+    ethereum: { address: eth || c.ethereum?.address || c.eth || '', network: 'Ethereum (ERC-20)' },
+    usdt: { address: usdt || c.usdt || '', network },
+  };
 }
 
 async function requestDeposit(userId, { amount, method, referenceCode, slip }) {
-  const minDeposit = Number(await Setting.get('min_deposit', 10)) || 10;
+  const minDeposit = Number(await Setting.get('min_deposit', 500)) || 500;
   const maxDeposit = Number(await Setting.get('max_deposit', 50000)) || 50000;
 
   if (!amount || amount <= 0) throw Object.assign(new Error('Invalid amount'), { status: 400 });
   if (amount < minDeposit) throw Object.assign(new Error(`Minimum deposit is $${minDeposit}`), { status: 400 });
   if (amount > maxDeposit) throw Object.assign(new Error(`Maximum deposit is $${maxDeposit}`), { status: 400 });
-  if (!['bank_transfer', 'crypto'].includes(method)) {
-    throw Object.assign(new Error('Invalid method. Use bank_transfer or crypto'), { status: 400 });
+  const method_ = method === 'bank_transfer' ? 'crypto' : method;
+  if (method_ !== 'crypto') {
+    throw Object.assign(new Error('Invalid method. Use crypto'), { status: 400 });
   }
 
   const user = await supabase.from('users').select('email, first_name, last_name').eq('id', userId).single();
   const userName = `${user.data.first_name || ''} ${user.data.last_name || ''}`.trim() || user.data.email;
 
-  const bankDetails = await getBankDetails();
   const cryptoWallet = await getCryptoWallet();
 
   const tx = await Transaction.create({
@@ -46,31 +56,23 @@ async function requestDeposit(userId, { amount, method, referenceCode, slip }) {
     usdValue: amount,
     status: 'pending',
     metadata: {
-      method,
+      method: method_,
       userName,
       userEmail: user.data.email,
       referenceCode: referenceCode || null,
       slip: slip || null,
-      bankDetails: method === 'bank_transfer' ? bankDetails : null,
-      cryptoWallet: method === 'crypto' ? cryptoWallet : null,
+      cryptoWallet,
       requestedAt: new Date().toISOString(),
     },
   });
 
   return {
     transaction: tx,
-    instructions: method === 'bank_transfer'
-      ? {
-          ...bankDetails,
-          amount,
-          reference: referenceCode || user.data.email,
-          note: `Transfer $${amount} to the account above. Use "${referenceCode || user.data.email}" as your payment reference.`,
-        }
-      : {
-          ...cryptoWallet,
-          amount,
-          note: `Send $${amount} worth of crypto to the address for your chosen network.`,
-        },
+    instructions: {
+      ...cryptoWallet,
+      amount,
+      note: `Send $${amount} worth of crypto to the address for your chosen network.`,
+    },
   };
 }
 
@@ -183,9 +185,8 @@ async function rejectDeposit(txId, adminId, reason) {
 }
 
 async function getPaymentInstructions() {
-  const bank = await getBankDetails();
   const crypto = await getCryptoWallet();
-  return { bank, crypto };
+  return { crypto };
 }
 
 async function getPublicFeed(limit = 20) {

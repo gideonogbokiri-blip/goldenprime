@@ -109,23 +109,53 @@ async function rejectWithdrawal(txId, adminId, reason) {
 
 async function getSettings() {
   const all = await Setting.getAll();
-  return all.reduce((acc, s) => {
+  const acc = {};
+  for (const s of all) {
+    if (s.key === 'crypto_wallet' && typeof s.value === 'object' && s.value) {
+      const cw = s.value;
+      const btc = cw.bitcoin?.address || cw.btc || null;
+      const eth = cw.ethereum?.address || cw.eth || null;
+      const usdt = cw.usdt || null;
+      if (btc && !all.find(x => x.key === 'btc_wallet')) acc.btc_wallet = btc;
+      if (eth && !all.find(x => x.key === 'eth_wallet')) acc.eth_wallet = eth;
+      if (usdt && !all.find(x => x.key === 'usdt_wallet')) acc.usdt_wallet = usdt;
+    }
     acc[s.key] = s.value;
-    return acc;
-  }, {});
+  }
+  return acc;
 }
 
 async function saveSettings(updates, adminId) {
-  const allowed = ['expected_profit_rate', 'min_deposit', 'max_deposit', 'bank_details', 'crypto_wallet'];
+  const allowed = [
+    'expected_profit_rate', 'min_deposit', 'max_deposit',
+    'bank_details', 'crypto_wallet',
+    'btc_wallet', 'eth_wallet', 'usdt_wallet', 'wallet_network',
+  ];
   const saved = {};
   for (const key of allowed) {
     if (updates[key] !== undefined) {
-      const value = typeof updates[key] === 'string' && (key === 'bank_details' || key === 'crypto_wallet')
-        ? JSON.parse(updates[key])
-        : updates[key];
+      let value = updates[key];
+      if (typeof value === 'string' && (key === 'bank_details' || key === 'crypto_wallet')) {
+        value = JSON.parse(value);
+      }
+      if (typeof value === 'string') value = value.trim();
       saved[key] = await Setting.set(key, value);
     }
   }
+
+  if (updates.crypto_wallet !== undefined) {
+    const cw = updates.crypto_wallet;
+    if (typeof cw === 'string' ? JSON.parse(cw) : cw) {
+      const parsed = typeof cw === 'string' ? JSON.parse(cw) : cw;
+      const btc = parsed.bitcoin?.address || parsed.btc || null;
+      const eth = parsed.ethereum?.address || parsed.eth || null;
+      const usdt = parsed.usdt || null;
+      if (btc) await Setting.set('btc_wallet', btc);
+      if (eth) await Setting.set('eth_wallet', eth);
+      if (usdt) await Setting.set('usdt_wallet', usdt);
+    }
+  }
+
   await AdminLog.create({
     adminId,
     action: 'update_settings',

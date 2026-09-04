@@ -7,6 +7,7 @@ import GoldCoin from '@/components/ui/GoldCoin';
 import Navbar from '@/components/ui/Navbar';
 import Footer from '@/components/ui/Footer';
 import CryptoPrices from '@/components/CryptoPrices';
+import WithdrawFeed from '@/components/WithdrawFeed';
 import { StaggerContainer, StaggerItem, FadeInUp } from '@/components/ui/Animations';
 
 function LiveTicker() {
@@ -576,6 +577,7 @@ export default function Home() {
       </section>
 
       <Footer />
+      <WithdrawFeed />
     </main>
   );
 }
