@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { p2pAPI, goldAPI } from '@/lib/api';
+import { p2pAPI, goldAPI, tradingAPI } from '@/lib/api';
 import { fireGoldConfetti } from '@/lib/confetti';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { StaggerContainer, StaggerItem } from '@/components/ui/Animations';
@@ -19,12 +19,16 @@ const COINS = [
   { symbol: 'USDC', name: 'USD Coin', color: 'text-blue-500' },
 ];
 
-type Tab = 'orderbook' | 'create' | 'myorders' | 'trades' | 'history';
+const COIN_IDS: Record<string, string> = {
+  BTC: 'bitcoin', ETH: 'ethereum', SOL: 'solana', USDT: 'tether', USDC: 'usd-coin',
+};
+
+type Tab = 'quick' | 'orderbook' | 'create' | 'myorders' | 'trades' | 'history';
 
 export default function TradePage() {
   const router = useRouter();
   const [selectedCoin, setSelectedCoin] = useState('BTC');
-  const [activeTab, setActiveTab] = useState<Tab>('orderbook');
+  const [activeTab, setActiveTab] = useState<Tab>('quick');
   const [orderBook, setOrderBook] = useState<any>(null);
   const [myOrders, setMyOrders] = useState<any[]>([]);
   const [myTrades, setMyTrades] = useState<any[]>([]);
@@ -37,8 +41,13 @@ export default function TradePage() {
   const [orderType, setOrderType] = useState<'buy' | 'sell'>('buy');
   const [amount, setAmount] = useState('');
   const [price, setPrice] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('bank_transfer');
+  const [paymentMethod, setPaymentMethod] = useState('crypto');
   const [notes, setNotes] = useState('');
+
+  const [quickMode, setQuickMode] = useState<'buy' | 'sell'>('buy');
+  const [quickAmount, setQuickAmount] = useState('');
+  const [quickLoading, setQuickLoading] = useState(false);
+  const [balances, setBalances] = useState<any[]>([]);
 
   const [takeAmount, setTakeAmount] = useState('');
   const [takingOrder, setTakingOrder] = useState<any>(null);
@@ -58,16 +67,18 @@ export default function TradePage() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [bookRes, ordersRes, tradesRes, userRes] = await Promise.all([
+      const [bookRes, ordersRes, tradesRes, userRes, portRes] = await Promise.all([
         p2pAPI.getOrderBook(selectedCoin).catch(() => ({ data: { buyOrders: [], sellOrders: [], stats: {}, marketPrice: 0 } })),
         p2pAPI.getMyOrders().catch(() => ({ data: [] })),
         p2pAPI.getMyTrades().catch(() => ({ data: [] })),
         (await import('@/lib/api')).authAPI.getMe().catch(() => ({ data: { user: null } })),
+        tradingAPI.getPortfolio().catch(() => ({ data: { holdings: [] } })),
       ]);
       setOrderBook(bookRes.data);
       setMyOrders(ordersRes.data);
       setMyTrades(tradesRes.data);
       setUser(userRes.data.user);
+      setBalances(portRes.data.holdings || []);
       if (!price && bookRes.data.marketPrice) {
         setPrice(bookRes.data.marketPrice.toString());
       }
@@ -100,6 +111,40 @@ export default function TradePage() {
       setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to create order' });
     }
     setTradeLoading(false);
+  };
+
+  const handleQuickTrade = async () => {
+    const amt = parseFloat(quickAmount);
+    if (!amt || amt <= 0) {
+      setMessage({ type: 'error', text: 'Enter a valid amount' });
+      return;
+    }
+    if (quickMode === 'buy' && amt > balOf('USD')) {
+      setMessage({ type: 'error', text: `Insufficient USD balance. You have $${balOf('USD').toLocaleString(undefined, { maximumFractionDigits: 2 })}` });
+      return;
+    }
+    if (quickMode === 'sell' && amt > balOf(selectedCoin)) {
+      setMessage({ type: 'error', text: `Insufficient ${selectedCoin} balance. You have ${balOf(selectedCoin).toLocaleString(undefined, { maximumFractionDigits: 8 })} ${selectedCoin}` });
+      return;
+    }
+    setQuickLoading(true);
+    setMessage({ type: '', text: '' });
+    try {
+      if (quickMode === 'buy') {
+        const res = await tradingAPI.buy(COIN_IDS[selectedCoin], amt);
+        setMessage({ type: 'success', text: `Bought ${parseFloat(res.data.cryptoAmount).toFixed(6)} ${selectedCoin} for $${amt.toLocaleString(undefined, { maximumFractionDigits: 2 })}` });
+      } else {
+        const res = await tradingAPI.sell(COIN_IDS[selectedCoin], amt);
+        setMessage({ type: 'success', text: `Sold ${amt} ${selectedCoin} for $${parseFloat(res.data.usdReceived).toFixed(2)}` });
+      }
+      setQuickAmount('');
+      fireGoldConfetti();
+      loadData();
+    } catch (err: any) {
+      setMessage({ type: 'error', text: (err.response?.data?.error as string) || 'Trade failed' });
+      loadData();
+    }
+    setQuickLoading(false);
   };
 
   const handleTakeOrder = async (order: any) => {
@@ -171,6 +216,9 @@ export default function TradePage() {
 
   const coinInfo = COINS.find(c => c.symbol === selectedCoin);
   const stats = orderBook?.stats || {};
+  const balOf = (c: string) => balances.find(b => b.currency === c)?.balance || 0;
+  const usdBalance = balOf('USD');
+  const coinBalance = balOf(selectedCoin);
   const totalMyOpen = myOrders.filter(o => o.status === 'open').length;
   const totalActiveTrades = myTrades.filter(t => t.status === 'escrow').length;
 
@@ -214,6 +262,19 @@ export default function TradePage() {
             {message.text}
           </motion.div>
         )}
+
+        {/* Balances Bar */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          className="grid grid-cols-2 gap-3 mb-4 md:mb-6">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 md:p-4">
+            <p className="text-[10px] md:text-xs text-gray-400 mb-1">USD Balance</p>
+            <p className="text-sm md:text-lg font-bold text-gold-500">${usdBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+          </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 md:p-4">
+            <p className="text-[10px] md:text-xs text-gray-400 mb-1">{selectedCoin} Balance</p>
+            <p className={`text-sm md:text-lg font-bold ${coinInfo?.color}`}>{coinBalance.toLocaleString(undefined, { maximumFractionDigits: 8 })} {selectedCoin}</p>
+          </div>
+        </motion.div>
 
         {/* Coin Selector */}
         <div className="flex gap-2 md:gap-3 mb-4 md:mb-6 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
@@ -267,6 +328,7 @@ export default function TradePage() {
         {/* Tab Bar - scrollable on mobile */}
         <div className="flex gap-1 bg-zinc-900 rounded-xl p-1 mb-4 md:mb-6 overflow-x-auto scrollbar-hide">
           {([
+            { id: 'quick' as Tab, label: 'Quick Trade', badge: null },
             { id: 'orderbook' as Tab, label: 'Order Book', badge: null },
             { id: 'create' as Tab, label: 'Create', badge: null },
             { id: 'myorders' as Tab, label: 'My Orders', badge: totalMyOpen || null },
@@ -287,6 +349,74 @@ export default function TradePage() {
         </div>
 
         <AnimatePresence mode="wait">
+          {/* QUICK TRADE */}
+          {activeTab === 'quick' && (
+            <motion.div key="quick" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+              {loading ? (
+                <SkeletonCard />
+              ) : (
+                <div className="max-w-2xl mx-auto">
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-6">
+                    <h3 className="text-lg md:text-xl font-semibold mb-1">Instant {selectedCoin} Trade</h3>
+                    <p className="text-xs text-gray-400 mb-4">Buy or sell instantly at the live market price of <span className="text-gold-500 font-semibold">${orderBook?.marketPrice?.toLocaleString() || '…'}</span> per {selectedCoin}.</p>
+
+                    <div className="grid grid-cols-2 gap-3 mb-5">
+                      <motion.button whileHover={{ scale: 1.02 }} onClick={() => setQuickMode('buy')}
+                        className={`p-3 md:p-4 rounded-xl border-2 font-semibold transition-all text-sm md:text-base ${
+                          quickMode === 'buy' ? 'border-green-500 bg-green-500/10 text-green-500' : 'border-zinc-700 hover:border-zinc-500'
+                        }`}>
+                        Buy {selectedCoin}
+                      </motion.button>
+                      <motion.button whileHover={{ scale: 1.02 }} onClick={() => setQuickMode('sell')}
+                        className={`p-3 md:p-4 rounded-xl border-2 font-semibold transition-all text-sm md:text-base ${
+                          quickMode === 'sell' ? 'border-red-500 bg-red-500/10 text-red-500' : 'border-zinc-700 hover:border-zinc-500'
+                        }`}>
+                        Sell {selectedCoin}
+                      </motion.button>
+                    </div>
+
+                    <div>
+                      <label className="text-xs md:text-sm text-gray-400 mb-1 block">
+                        {quickMode === 'buy' ? `Amount in USD` : `Amount in ${selectedCoin}`}
+                      </label>
+                      <input type="number" min="0" step="any" placeholder={quickMode === 'buy' ? '1000' : '0.01'} value={quickAmount}
+                        onChange={(e) => setQuickAmount(e.target.value)}
+                        className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg font-mono text-base md:text-lg focus:outline-none focus:border-gold-500 transition-colors" />
+                    </div>
+
+                    {quickAmount && parseFloat(quickAmount) > 0 && orderBook?.marketPrice && (
+                      <div className="grid grid-cols-2 gap-3 mt-4">
+                        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3">
+                          <p className="text-[10px] md:text-xs text-gray-400 mb-1">You will {quickMode === 'buy' ? 'receive' : 'pay'}</p>
+                          <p className="font-bold font-mono text-sm md:text-base text-gold-500">
+                            {quickMode === 'buy'
+                              ? `${(parseFloat(quickAmount) / orderBook.marketPrice).toFixed(6)} ${selectedCoin}`
+                              : `$${(parseFloat(quickAmount) * orderBook.marketPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                          </p>
+                        </div>
+                        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3">
+                          <p className="text-[10px] md:text-xs text-gray-400 mb-1">{quickMode === 'buy' ? 'USD cost' : 'Coins sold'} (est.)</p>
+                          <p className="font-bold font-mono text-sm md:text-base">
+                            {quickMode === 'buy'
+                              ? `$${parseFloat(quickAmount).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+                              : `${parseFloat(quickAmount)} ${selectedCoin}`}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleQuickTrade} disabled={quickLoading || !quickAmount}
+                      className={`w-full mt-5 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg transition-colors disabled:opacity-50 ${
+                        quickMode === 'buy' ? 'bg-green-500 text-black hover:bg-green-400' : 'bg-red-500 text-white hover:bg-red-400'
+                      }`}>
+                      {quickLoading ? 'Processing...' : `${quickMode === 'buy' ? 'Buy' : 'Sell'} Now at Market Price`}
+                    </motion.button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {/* ORDER BOOK */}
           {activeTab === 'orderbook' && (
             <motion.div key="orderbook" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
@@ -418,6 +548,7 @@ export default function TradePage() {
                     <label className="text-xs md:text-sm text-gray-400 mb-1 block">Payment Method</label>
                     <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}
                       className="w-full px-3 md:px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500 transition-colors text-sm">
+                      <option value="crypto">Crypto Wallet</option>
                       <option value="bank_transfer">Bank Transfer</option>
                       <option value="card">Debit/Credit Card</option>
                     </select>

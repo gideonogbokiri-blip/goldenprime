@@ -189,30 +189,28 @@ async function confirmTrade(tradeId, userId) {
   if (result.error) throw Object.assign(new Error(result.error), { status: 400 });
 
   if (result.status === 'completed') {
-    if (result.payment_method === 'bank_transfer' || result.payment_method === 'card') {
-      await Wallet.updateBalance(result.seller_id, 'USD', result.total_usd);
+    await Wallet.updateBalance(result.seller_id, 'USD', result.total_usd);
 
-      await Transaction.create({
-        userId: result.seller_id,
-        type: 'escrow_release',
-        currency: 'USD',
-        amount: result.total_usd,
-        status: 'completed',
-        metadata: { source: 'p2p_complete', tradeId: result.id, coin: result.coin },
-      });
+    await Transaction.create({
+      userId: result.seller_id,
+      type: 'escrow_release',
+      currency: 'USD',
+      amount: result.total_usd,
+      status: 'completed',
+      metadata: { source: 'p2p_complete', tradeId: result.id, coin: result.coin },
+    });
 
-      await Wallet.updateBalance(result.buyer_id, result.coin, result.amount);
+    await Wallet.updateBalance(result.buyer_id, result.coin, result.amount);
 
-      await Transaction.create({
-        userId: result.buyer_id,
-        type: 'crypto_received',
-        currency: result.coin,
-        amount: result.amount,
-        usdValue: result.total_usd,
-        status: 'completed',
-        metadata: { source: 'p2p_complete', tradeId: result.id },
-      });
-    }
+    await Transaction.create({
+      userId: result.buyer_id,
+      type: 'crypto_received',
+      currency: result.coin,
+      amount: result.amount,
+      usdValue: result.total_usd,
+      status: 'completed',
+      metadata: { source: 'p2p_complete', tradeId: result.id },
+    });
   }
 
   return result;
