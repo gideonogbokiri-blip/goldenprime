@@ -228,8 +228,8 @@ async function sendMessage(tradeId, senderId, message) {
 }
 
 async function getOrderBook(coin) {
-  const book = TradeOrder.getOrderBook(coin);
-  const stats = TradeOrder.getTradeStats(coin);
+  const book = await TradeOrder.getOrderBook(coin);
+  const stats = await TradeOrder.getTradeStats(coin);
   let marketPrice = 0;
   if (coin === 'GPG') {
     marketPrice = 50;
