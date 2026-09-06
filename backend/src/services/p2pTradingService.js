@@ -13,53 +13,65 @@ async function createOrder(userId, { type, coin, amount, pricePerUnit, paymentMe
 
   const totalUsd = parseFloat(amount) * parseFloat(pricePerUnit);
 
-  if (type === 'sell') {
-    const balance = await Wallet.getBalance(userId, coin);
-    if (balance < parseFloat(amount)) {
-      throw Object.assign(new Error(`Insufficient ${coin} balance. You have ${balance} ${coin}`), { status: 400 });
-    }
-    const cryptoAmount = parseFloat(amount);
-    await Wallet.updateBalance(userId, coin, -cryptoAmount);
-
-    await Transaction.create({
+  // Create the order row FIRST so a DB failure can never deduct money
+  // without leaving an order behind (the bug that lost user funds).
+  let order;
+  try {
+    order = await TradeOrder.createOrder({
       userId,
-      type: 'escrow_lock',
-      currency: coin,
-      amount: cryptoAmount,
-      usdValue: totalUsd,
-      status: 'completed',
-      metadata: { source: 'p2p_order', coin, locked: true },
+      type,
+      coin,
+      amount,
+      pricePerUnit,
+      paymentMethod,
+      notes,
     });
-  } else {
-    // Buy orders must lock the buyer's USD up front so the seller can be
-    // paid from escrow when the trade completes. Without this, the seller
-    // is credited USD out of thin air and the buyer receives coins free.
-    const usdBalance = await Wallet.getBalance(userId, 'USD');
-    if (usdBalance < totalUsd) {
-      throw Object.assign(new Error(`Insufficient USD balance. Need $${totalUsd.toFixed(2)}`), { status: 400 });
-    }
-    await Wallet.updateBalance(userId, 'USD', -totalUsd);
-
-    await Transaction.create({
-      userId,
-      type: 'escrow_lock',
-      currency: 'USD',
-      amount: totalUsd,
-      usdValue: totalUsd,
-      status: 'completed',
-      metadata: { source: 'p2p_order', coin, locked: true },
-    });
+  } catch (err) {
+    throw Object.assign(new Error(`Failed to create order: ${err.message}`), { status: 500 });
   }
 
-  const order = TradeOrder.createOrder({
-    userId,
-    type,
-    coin,
-    amount,
-    pricePerUnit,
-    paymentMethod,
-    notes,
-  });
+  try {
+    if (type === 'sell') {
+      const balance = await Wallet.getBalance(userId, coin);
+      if (balance < parseFloat(amount)) {
+        throw Object.assign(new Error(`Insufficient ${coin} balance. You have ${balance} ${coin}`), { status: 400 });
+      }
+      const cryptoAmount = parseFloat(amount);
+      await Wallet.updateBalance(userId, coin, -cryptoAmount);
+
+      await Transaction.create({
+        userId,
+        type: 'escrow_lock',
+        currency: coin,
+        amount: cryptoAmount,
+        usdValue: totalUsd,
+        status: 'completed',
+        metadata: { source: 'p2p_order', coin, locked: true },
+      });
+    } else {
+      // Buy orders must lock the buyer's USD up front so the seller can be
+      // paid from escrow when the trade completes. Without this, the seller
+      // is credited USD out of thin air and the buyer receives coins free.
+      const usdBalance = await Wallet.getBalance(userId, 'USD');
+      if (usdBalance < totalUsd) {
+        throw Object.assign(new Error(`Insufficient USD balance. Need $${totalUsd.toFixed(2)}`), { status: 400 });
+      }
+      await Wallet.updateBalance(userId, 'USD', -totalUsd);
+
+      await Transaction.create({
+        userId,
+        type: 'escrow_lock',
+        currency: 'USD',
+        amount: totalUsd,
+        usdValue: totalUsd,
+        status: 'completed',
+        metadata: { source: 'p2p_order', coin, locked: true },
+      });
+    }
+  } catch (err) {
+    await TradeOrder.updateOrder(order.id, { status: 'cancelled' }).catch(() => {});
+    throw err;
+  }
 
   return order;
 }
@@ -112,76 +124,60 @@ async function takeOrder(takerId, orderId, amount) {
 
   const totalUsd = takeAmount * order.price_per_unit;
 
-  if (order.type === 'sell') {
-    const usdBalance = await Wallet.getBalance(takerId, 'USD');
-    if (usdBalance < totalUsd) {
-      throw Object.assign(new Error(`Insufficient USD balance. Need $${totalUsd.toFixed(2)}`), { status: 400 });
-    }
-    await Wallet.updateBalance(takerId, 'USD', -totalUsd);
-
-    const trade = TradeOrder.createTrade({
+  // Create the trade row FIRST so a DB failure can never deduct money
+  // without leaving a trade behind.
+  let trade;
+  try {
+    trade = await TradeOrder.createTrade({
       orderId,
-      buyerId: takerId,
-      sellerId: order.user_id,
+      buyerId: order.type === 'sell' ? takerId : order.user_id,
+      sellerId: order.type === 'sell' ? order.user_id : takerId,
       coin: order.coin,
       amount: takeAmount,
       pricePerUnit: order.price_per_unit,
       totalUsd,
       paymentMethod: order.payment_method,
     });
-
-    if (takeAmount >= order.amount) {
-      TradeOrder.updateOrder(orderId, { status: 'filled', filled_amount: order.amount });
-    } else {
-      TradeOrder.updateOrder(orderId, { amount: order.amount - takeAmount, filled_amount: order.filled_amount + takeAmount });
-    }
-
-    await Transaction.create({
-      userId: takerId,
-      type: 'escrow_lock',
-      currency: 'USD',
-      amount: totalUsd,
-      status: 'completed',
-      metadata: { source: 'p2p_trade', tradeId: trade.id, coin: order.coin },
-    });
-
-    return trade;
-  } else {
-    const balance = await Wallet.getBalance(takerId, order.coin);
-    if (balance < takeAmount) {
-      throw Object.assign(new Error(`Insufficient ${order.coin} balance`), { status: 400 });
-    }
-    await Wallet.updateBalance(takerId, order.coin, -takeAmount);
-
-    const trade = TradeOrder.createTrade({
-      orderId,
-      buyerId: order.user_id,
-      sellerId: takerId,
-      coin: order.coin,
-      amount: takeAmount,
-      pricePerUnit: order.price_per_unit,
-      totalUsd,
-      paymentMethod: order.payment_method,
-    });
-
-    if (takeAmount >= order.amount) {
-      TradeOrder.updateOrder(orderId, { status: 'filled', filled_amount: order.amount });
-    } else {
-      TradeOrder.updateOrder(orderId, { amount: order.amount - takeAmount, filled_amount: order.filled_amount + takeAmount });
-    }
-
-    await Transaction.create({
-      userId: takerId,
-      type: 'escrow_lock',
-      currency: order.coin,
-      amount: takeAmount,
-      usdValue: totalUsd,
-      status: 'completed',
-      metadata: { source: 'p2p_trade', tradeId: trade.id, coin: order.coin },
-    });
-
-    return trade;
+  } catch (err) {
+    throw Object.assign(new Error(`Failed to create trade: ${err.message}`), { status: 500 });
   }
+
+  try {
+    if (order.type === 'sell') {
+      const usdBalance = await Wallet.getBalance(takerId, 'USD');
+      if (usdBalance < totalUsd) {
+        throw Object.assign(new Error(`Insufficient USD balance. Need $${totalUsd.toFixed(2)}`), { status: 400 });
+      }
+      await Wallet.updateBalance(takerId, 'USD', -totalUsd);
+    } else {
+      const balance = await Wallet.getBalance(takerId, order.coin);
+      if (balance < takeAmount) {
+        throw Object.assign(new Error(`Insufficient ${order.coin} balance`), { status: 400 });
+      }
+      await Wallet.updateBalance(takerId, order.coin, -takeAmount);
+    }
+  } catch (err) {
+    await TradeOrder.updateTrade(trade.id, { status: 'voided' }).catch(() => {});
+    throw err;
+  }
+
+  if (takeAmount >= order.amount) {
+    TradeOrder.updateOrder(orderId, { status: 'filled', filled_amount: order.amount });
+  } else {
+    TradeOrder.updateOrder(orderId, { amount: order.amount - takeAmount, filled_amount: order.filled_amount + takeAmount });
+  }
+
+  await Transaction.create({
+    userId: takerId,
+    type: 'escrow_lock',
+    currency: order.type === 'sell' ? 'USD' : order.coin,
+    amount: order.type === 'sell' ? totalUsd : takeAmount,
+    usdValue: totalUsd,
+    status: 'completed',
+    metadata: { source: 'p2p_trade', tradeId: trade.id, coin: order.coin },
+  });
+
+  return trade;
 }
 
 async function confirmTrade(tradeId, userId) {
