@@ -7,6 +7,7 @@ const router = express.Router();
 router.get('/dashboard', adminOnly, adminController.dashboard);
 router.get('/users', adminOnly, adminController.getUsers);
 router.put('/users/:id/role', adminOnly, adminController.updateUserRole);
+router.put('/users/:id/expected-profit-rate', adminOnly, adminController.updateUserExpectedProfit);
 router.get('/transactions', adminOnly, adminController.getTransactions);
 router.put('/transactions/:id/status', adminOnly, adminController.updateTransactionStatus);
 router.get('/kyc', adminOnly, adminController.getKYCRequests);

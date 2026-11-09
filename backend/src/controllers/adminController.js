@@ -29,6 +29,18 @@ async function updateUserRole(req, res, next) {
   } catch (err) { next(err); }
 }
 
+async function updateUserExpectedProfit(req, res, next) {
+  try {
+    const { expectedProfitRate } = req.body || {};
+    const rate = expectedProfitRate === null ? null : Number(expectedProfitRate);
+    if (expectedProfitRate !== null && (!Number.isFinite(rate) || rate < 0)) {
+      return res.status(400).json({ error: 'Expected profit rate must be a non-negative number or null.' });
+    }
+    const user = await adminService.updateUserExpectedProfit(req.params.id, rate, req.user.id);
+    res.json({ user });
+  } catch (err) { next(err); }
+}
+
 async function getTransactions(req, res, next) {
   try {
     const txs = await adminService.getTransactions({ status: req.query.status, type: req.query.type });
@@ -233,7 +245,7 @@ async function adminReply(req, res, next) {
 }
 
 module.exports = {
-  dashboard, getUsers, updateUserRole,
+  dashboard, getUsers, updateUserRole, updateUserExpectedProfit,
   fundWallet,
   getTransactions, updateTransactionStatus,
   getWithdrawals, approveWithdrawal, rejectWithdrawal,

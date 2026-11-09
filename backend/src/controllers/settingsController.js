@@ -2,8 +2,9 @@ const Setting = require('../models/Setting');
 
 async function getPublicSettings(req, res, next) {
   try {
-    const [rate, minDeposit, maxDeposit, bankDetails, cryptoWallet, btcWallet, ethWallet, usdtWallet, walletNetwork] = await Promise.all([
+    const [defaultRate, userRate, minDeposit, maxDeposit, bankDetails, cryptoWallet, btcWallet, ethWallet, usdtWallet, walletNetwork] = await Promise.all([
       Setting.get('expected_profit_rate', 3),
+      Setting.get(Setting.userExpectedProfitRateKey(req.user.id), null),
       Setting.get('min_deposit', 500),
       Setting.get('max_deposit', 50000),
       Setting.get('bank_details', {}),
@@ -14,7 +15,7 @@ async function getPublicSettings(req, res, next) {
       Setting.get('wallet_network', 'Ethereum (ERC-20)'),
     ]);
     res.json({
-      expectedProfitRate: Number(rate) || 0,
+      expectedProfitRate: Number(userRate ?? defaultRate) || 0,
       minDeposit: Number(minDeposit) || 500,
       maxDeposit: Number(maxDeposit) || 50000,
       bankDetails,

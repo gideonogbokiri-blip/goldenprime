@@ -22,11 +22,51 @@ async function getUsers({ limit = 50, offset = 0, search = null } = {}) {
   if (error) throw error;
 
   const users = data || [];
+  const defaultProfitRate = Number(await Setting.get('expected_profit_rate', 3)) || 0;
+  const userIds = users.map((user) => user.id);
+  let profitRates = [];
+  if (userIds.length) {
+    const { data: rates, error: rateError } = await supabase
+      .from('settings')
+      .select('key, value')
+      .in('key', userIds.map(Setting.userExpectedProfitRateKey));
+    if (rateError) throw rateError;
+    profitRates = rates || [];
+  }
+  const rateByUser = new Map(profitRates.map((rate) => [rate.key.slice('user_expected_profit_rate:'.length), rate.value]));
   const withBalance = await Promise.all(users.map(async (u) => {
     const balance = await Wallet.getBalance(u.id, 'USD');
-    return { ...u, usdBalance: balance };
+    const override = rateByUser.get(u.id);
+    return {
+      ...u,
+      usdBalance: balance,
+      expectedProfitRate: override == null ? defaultProfitRate : Number(override),
+      hasCustomExpectedProfitRate: override != null,
+    };
   }));
   return withBalance;
+}
+
+async function updateUserExpectedProfit(userId, expectedProfitRate, adminId) {
+  const { data: user, error } = await supabase.from('users').select('id').eq('id', userId).maybeSingle();
+  if (error) throw error;
+  if (!user) throw Object.assign(new Error('User not found'), { status: 404 });
+
+  await Setting.set(Setting.userExpectedProfitRateKey(userId), expectedProfitRate);
+  await AdminLog.create({
+    adminId,
+    action: 'update_user_expected_profit',
+    targetType: 'user',
+    targetId: userId,
+    details: { expectedProfitRate },
+  });
+
+  const defaultRate = Number(await Setting.get('expected_profit_rate', 3)) || 0;
+  return {
+    id: userId,
+    expectedProfitRate: expectedProfitRate == null ? defaultRate : Number(expectedProfitRate),
+    hasCustomExpectedProfitRate: expectedProfitRate != null,
+  };
 }
 
 async function fundWallet(userId, amount, adminId, note) {
@@ -287,6 +327,7 @@ async function getLogs({ limit = 100, offset = 0 } = {}) {
 module.exports = {
   getDashboard,
   getUsers,
+  updateUserExpectedProfit,
   fundWallet,
   updateUserRole,
   getTransactions,

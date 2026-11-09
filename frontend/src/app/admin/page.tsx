@@ -40,6 +40,7 @@ export default function AdminPage() {
   const [chatCredit, setChatCredit] = useState('');
 
   const [settingsForm, setSettingsForm] = useState<any>({});
+  const [profitRateDrafts, setProfitRateDrafts] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -146,6 +147,28 @@ export default function AdminPage() {
       alert(`Credited $${fundAmount} to user wallet`);
       setFundUserId(null); setFundAmount(''); setFundNote(''); loadTab('users');
     } catch (err: any) { alert(err.response?.data?.error || 'Failed'); }
+  };
+
+  const handleExpectedProfitRateSave = async (u: any) => {
+    const rawRate = profitRateDrafts[u.id] ?? String(u.expectedProfitRate);
+    const rate = Number(rawRate);
+    if (rawRate.trim() === '' || !Number.isFinite(rate) || rate < 0) {
+      alert('Enter a valid non-negative profit rate.');
+      return;
+    }
+    try {
+      await adminAPI.updateUserExpectedProfit(u.id, rate);
+      setProfitRateDrafts((drafts) => { const next = { ...drafts }; delete next[u.id]; return next; });
+      await loadTab('users');
+    } catch (err: any) { alert(err.response?.data?.error || 'Failed to update expected profit.'); }
+  };
+
+  const handleExpectedProfitRateReset = async (userId: string) => {
+    try {
+      await adminAPI.updateUserExpectedProfit(userId, null);
+      setProfitRateDrafts((drafts) => { const next = { ...drafts }; delete next[userId]; return next; });
+      await loadTab('users');
+    } catch (err: any) { alert(err.response?.data?.error || 'Failed to reset expected profit.'); }
   };
 
   const openChat = async (u: any) => {
@@ -280,6 +303,7 @@ export default function AdminPage() {
                       <th className="p-4">User</th>
                       <th className="p-4 hidden md:table-cell">Name</th>
                       <th className="p-4">Balance</th>
+                      <th className="p-4">Expected Profit Rate</th>
                       <th className="p-4 hidden lg:table-cell">Email Verified</th>
                       <th className="p-4 hidden md:table-cell">Role</th>
                       <th className="p-4">Actions</th>
@@ -293,6 +317,21 @@ export default function AdminPage() {
                           </td>
                           <td className="p-4 text-zinc-400 hidden md:table-cell">{u.first_name || '-'} {u.last_name || '-'}</td>
                           <td className="p-4 font-mono text-gold-400 font-semibold">${parseFloat(u.usdBalance || 0).toFixed(2)}</td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              <input type="number" min="0" step="0.1" aria-label={`Expected profit rate for ${u.email}`}
+                                value={profitRateDrafts[u.id] ?? String(u.expectedProfitRate)}
+                                onChange={(e) => setProfitRateDrafts((drafts) => ({ ...drafts, [u.id]: e.target.value }))}
+                                className="w-20 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs focus:outline-none focus:border-gold-500" />
+                              <span className="text-xs text-zinc-500">%</span>
+                              <button onClick={() => handleExpectedProfitRateSave(u)}
+                                className="text-xs text-gold-400 hover:text-gold-300">Save</button>
+                            </div>
+                            <div className="mt-1 flex items-center gap-2 text-[10px] text-zinc-600">
+                              <span>{u.hasCustomExpectedProfitRate ? 'Custom rate' : 'Platform default'}</span>
+                              {u.hasCustomExpectedProfitRate && <button onClick={() => handleExpectedProfitRateReset(u.id)} className="text-zinc-400 hover:text-white">Use default</button>}
+                            </div>
+                          </td>
                           <td className="p-4 hidden lg:table-cell">
                             {u.is_verified ? (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-semibold">
@@ -318,7 +357,7 @@ export default function AdminPage() {
                         </tr>
                       ))}
                       {users.length === 0 && (
-                        <tr><td colSpan={6} className="p-8 text-center text-zinc-500 text-sm">No users found</td></tr>
+                        <tr><td colSpan={7} className="p-8 text-center text-zinc-500 text-sm">No users found</td></tr>
                       )}
                     </tbody>
                   </table>

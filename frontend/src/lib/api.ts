@@ -106,6 +106,8 @@ export const adminAPI = {
   getDashboard: () => api.get('/admin/dashboard'),
   getUsers: (search?: string) => api.get('/admin/users', { params: { search } }),
   updateUserRole: (id: string, role: string) => api.put(`/admin/users/${id}/role`, { role }),
+  updateUserExpectedProfit: (id: string, expectedProfitRate: number | null) =>
+    api.put(`/admin/users/${id}/expected-profit-rate`, { expectedProfitRate }),
   getTransactions: (status?: string, type?: string) => api.get('/admin/transactions', { params: { status, type } }),
   updateTransactionStatus: (id: string, status: string) => api.put(`/admin/transactions/${id}/status`, { status }),
   getKYC: (status?: string) => api.get('/admin/kyc', { params: { status } }),

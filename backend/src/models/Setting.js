@@ -1,6 +1,10 @@
 const supabase = require('../config/supabase');
 
 class Setting {
+  static userExpectedProfitRateKey(userId) {
+    return `user_expected_profit_rate:${userId}`;
+  }
+
   static async get(key, fallback = null) {
     const { data, error } = await supabase
       .from('settings')
