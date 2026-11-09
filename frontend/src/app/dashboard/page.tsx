@@ -203,7 +203,7 @@ export default function DashboardPage() {
 
         {/* Stats */}
         <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
-          <StatCard label="Expected Profit (monthly)" value={`$${expectedProfit.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} sub={`${expectedRate}% on your balance`} gold />
+          <StatCard label="Expected Profit" value={`$${expectedProfit.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} sub={`${expectedRate}% on your balance`} gold />
           <StatCard label="USD Balance" value={`$${usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} sub="Available balance" />
           <StatCard label="Portfolio Value" value={`$${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} sub="Cash + crypto holdings" />
           <StatCard label="Referrals" value={`${referral?.referralCount || 0}`} sub={`$${(referral?.earnings || 0).toFixed(2)} earned`} />
