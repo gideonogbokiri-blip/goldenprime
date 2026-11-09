@@ -390,7 +390,7 @@ export default function TradePage() {
                           <p className="text-[10px] md:text-xs text-gray-400 mb-1">You will {quickMode === 'buy' ? 'receive' : 'pay'}</p>
                           <p className="font-bold font-mono text-sm md:text-base text-gold-500">
                             {quickMode === 'buy'
-                              ? `${(parseFloat(quickAmount) / orderBook.marketPrice).toFixed(6)} ${selectedCoin}`
+                              ? `${(parseFloat(quickAmount) / orderBook.marketPrice).toFixed(8)} ${selectedCoin}`
                               : `$${(parseFloat(quickAmount) * orderBook.marketPrice).toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
                           </p>
                         </div>

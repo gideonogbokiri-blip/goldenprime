@@ -77,7 +77,7 @@ async function createOrder(userId, { type, coin, amount, pricePerUnit, paymentMe
 }
 
 async function cancelOrder(orderId, userId) {
-  const result = TradeOrder.cancelOrder(orderId, userId);
+  const result = await TradeOrder.cancelOrder(orderId, userId);
   if (result.error) throw Object.assign(new Error(result.error), { status: 400 });
 
   // result.amount is the remaining (unfilled) order amount after partial fills
@@ -112,7 +112,7 @@ async function cancelOrder(orderId, userId) {
 }
 
 async function takeOrder(takerId, orderId, amount) {
-  const order = TradeOrder.getOrder(orderId);
+  const order = await TradeOrder.getOrder(orderId);
   if (!order) throw Object.assign(new Error('Order not found'), { status: 404 });
   if (order.status !== 'open') throw Object.assign(new Error('Order is no longer open'), { status: 400 });
   if (order.user_id === takerId) throw Object.assign(new Error('Cannot take your own order'), { status: 400 });
@@ -162,9 +162,9 @@ async function takeOrder(takerId, orderId, amount) {
   }
 
   if (takeAmount >= order.amount) {
-    TradeOrder.updateOrder(orderId, { status: 'filled', filled_amount: order.amount });
+    await TradeOrder.updateOrder(orderId, { status: 'filled', filled_amount: order.amount });
   } else {
-    TradeOrder.updateOrder(orderId, { amount: order.amount - takeAmount, filled_amount: order.filled_amount + takeAmount });
+    await TradeOrder.updateOrder(orderId, { amount: order.amount - takeAmount, filled_amount: order.filled_amount + takeAmount });
   }
 
   await Transaction.create({
@@ -181,7 +181,7 @@ async function takeOrder(takerId, orderId, amount) {
 }
 
 async function confirmTrade(tradeId, userId) {
-  const result = TradeOrder.confirmTrade(tradeId, userId);
+  const result = await TradeOrder.confirmTrade(tradeId, userId);
   if (result.error) throw Object.assign(new Error(result.error), { status: 400 });
 
   if (result.status === 'completed') {
@@ -213,13 +213,13 @@ async function confirmTrade(tradeId, userId) {
 }
 
 async function disputeTrade(tradeId, userId, reason) {
-  const result = TradeOrder.disputeTrade(tradeId, userId, reason);
+  const result = await TradeOrder.disputeTrade(tradeId, userId, reason);
   if (result.error) throw Object.assign(new Error(result.error), { status: 400 });
   return result;
 }
 
 async function sendMessage(tradeId, senderId, message) {
-  const trade = TradeOrder.getTrade(tradeId);
+  const trade = await TradeOrder.getTrade(tradeId);
   if (!trade) throw Object.assign(new Error('Trade not found'), { status: 404 });
   if (trade.buyer_id !== senderId && trade.seller_id !== senderId) {
     throw Object.assign(new Error('Not your trade'), { status: 403 });
@@ -252,7 +252,7 @@ async function getUserTrades(userId, options) {
 }
 
 async function getTrade(tradeId, userId) {
-  const trade = TradeOrder.getTrade(tradeId);
+  const trade = await TradeOrder.getTrade(tradeId);
   if (!trade) throw Object.assign(new Error('Trade not found'), { status: 404 });
   if (trade.buyer_id !== userId && trade.seller_id !== userId) {
     throw Object.assign(new Error('Not your trade'), { status: 403 });
