@@ -180,35 +180,52 @@ async function takeOrder(takerId, orderId, amount) {
   return trade;
 }
 
-async function confirmTrade(tradeId, userId) {
-  const result = await TradeOrder.confirmTrade(tradeId, userId);
-  if (result.error) throw Object.assign(new Error(result.error), { status: 400 });
-
-  if (result.status === 'completed') {
-    await Wallet.updateBalance(result.seller_id, 'USD', result.total_usd);
-
+async function settleCompletedTrade(trade) {
+  const sellerRelease = await Transaction.findByTrade(trade.seller_id, 'escrow_release', trade.id);
+  if (!sellerRelease) {
+    await Wallet.updateBalance(trade.seller_id, 'USD', parseFloat(trade.total_usd));
     await Transaction.create({
-      userId: result.seller_id,
+      userId: trade.seller_id,
       type: 'escrow_release',
       currency: 'USD',
-      amount: result.total_usd,
+      amount: trade.total_usd,
+      usdValue: trade.total_usd,
       status: 'completed',
-      metadata: { source: 'p2p_complete', tradeId: result.id, coin: result.coin },
-    });
-
-    await Wallet.updateBalance(result.buyer_id, result.coin, result.amount);
-
-    await Transaction.create({
-      userId: result.buyer_id,
-      type: 'crypto_received',
-      currency: result.coin,
-      amount: result.amount,
-      usdValue: result.total_usd,
-      status: 'completed',
-      metadata: { source: 'p2p_complete', tradeId: result.id },
+      metadata: { source: 'p2p_complete', tradeId: trade.id, coin: trade.coin },
     });
   }
 
+  const buyerReceipt = await Transaction.findByTrade(trade.buyer_id, 'crypto_received', trade.id);
+  if (!buyerReceipt) {
+    await Wallet.updateBalance(trade.buyer_id, trade.coin, parseFloat(trade.amount));
+    await Transaction.create({
+      userId: trade.buyer_id,
+      type: 'crypto_received',
+      currency: trade.coin,
+      amount: trade.amount,
+      usdValue: trade.total_usd,
+      status: 'completed',
+      metadata: { source: 'p2p_complete', tradeId: trade.id },
+    });
+  }
+}
+
+async function confirmTrade(tradeId, userId) {
+  const current = await TradeOrder.getTrade(tradeId);
+  if (!current) throw Object.assign(new Error('Trade not found'), { status: 404 });
+  if (current.buyer_id !== userId && current.seller_id !== userId) {
+    throw Object.assign(new Error('Not your trade'), { status: 403 });
+  }
+
+  let result = current;
+  if (current.status === 'escrow') {
+    result = await TradeOrder.confirmTrade(tradeId, userId);
+    if (result.error) throw Object.assign(new Error(result.error), { status: 400 });
+  } else if (current.status !== 'completed') {
+    throw Object.assign(new Error('Trade not in escrow'), { status: 400 });
+  }
+
+  if (result.status === 'completed') await settleCompletedTrade(result);
   return result;
 }
 

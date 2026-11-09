@@ -57,6 +57,19 @@ class Transaction {
     return data;
   }
 
+  static async findByTrade(userId, type, tradeId) {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('type', type)
+      .contains('metadata', { tradeId })
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  }
+
   static async findByStripePaymentId(paymentId) {
     const { data, error } = await supabase
       .from('transactions')
