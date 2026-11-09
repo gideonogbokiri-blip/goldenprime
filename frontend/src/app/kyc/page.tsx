@@ -101,7 +101,7 @@ export default function KYCPage() {
               </div>
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">Country</label>
-                <input type="text" placeholder="e.g. US, NG, GB" required value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="w-full px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
+                <input type="text" placeholder="e.g. US, GB" required value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="w-full px-4 py-2.5 md:py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-gold-500" />
               </div>
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">Document Type</label>
