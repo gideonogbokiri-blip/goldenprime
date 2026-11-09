@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { adminAPI, authAPI } from '@/lib/api';
 import BrandLogo from '@/components/ui/BrandLogo';
 
-type Tab = 'overview' | 'users' | 'deposits' | 'withdrawals' | 'transactions' | 'kyc' | 'chats' | 'settings' | 'logs';
+type Tab = 'overview' | 'users' | 'deposits' | 'withdrawals' | 'transactions' | 'kyc' | 'chats' | 'mailer' | 'settings' | 'logs';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -24,6 +24,13 @@ export default function AdminPage() {
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [mailerSearch, setMailerSearch] = useState('');
+  const [mailerUserId, setMailerUserId] = useState('');
+  const [mailerAllUsers, setMailerAllUsers] = useState(false);
+  const [mailerSubject, setMailerSubject] = useState('');
+  const [mailerBody, setMailerBody] = useState('');
+  const [mailerSending, setMailerSending] = useState(false);
+  const [mailerNotice, setMailerNotice] = useState('');
 
   const [rejectReason, setRejectReason] = useState('');
   const [rejectId, setRejectId] = useState('');
@@ -65,6 +72,7 @@ export default function AdminPage() {
     try {
       if (t === 'overview') setStats((await adminAPI.getDashboard()).data);
       else if (t === 'users') setUsers((await adminAPI.getUsers(searchQuery || undefined)).data.users);
+      else if (t === 'mailer') setUsers((await adminAPI.getUsers(mailerSearch || undefined)).data.users);
       else if (t === 'transactions') setTransactions((await adminAPI.getTransactions()).data.transactions);
       else if (t === 'deposits') setDeposits((await adminAPI.getDeposits()).data.deposits);
       else if (t === 'withdrawals') setWithdrawals((await adminAPI.getWithdrawals()).data.withdrawals);
@@ -95,6 +103,32 @@ export default function AdminPage() {
   const searchUsers = async () => {
     setLoading(true);
     try { setUsers((await adminAPI.getUsers(searchQuery || undefined)).data.users); } catch (e) { console.error(e); } finally { setLoading(false); }
+  };
+
+  const searchMailerUsers = async () => {
+    setLoading(true);
+    try { setUsers((await adminAPI.getUsers(mailerSearch || undefined)).data.users); } catch (e) { console.error(e); } finally { setLoading(false); }
+  };
+
+  const sendMailerMessage = async () => {
+    if (!mailerAllUsers && !mailerUserId) { alert('Choose a user to receive this email.'); return; }
+    if (!mailerSubject.trim() || !mailerBody.trim()) { alert('Enter an email subject and message.'); return; }
+    if (mailerAllUsers && !window.confirm('Send this email individually to every user account?')) return;
+    setMailerSending(true);
+    setMailerNotice('');
+    try {
+      const result = await adminAPI.sendMailerMessage({
+        userId: mailerAllUsers ? undefined : mailerUserId,
+        allUsers: mailerAllUsers,
+        subject: mailerSubject,
+        body: mailerBody,
+      });
+      const { sentCount, failedCount } = result.data;
+      setMailerNotice(`Sent to ${sentCount} user${sentCount === 1 ? '' : 's'}${failedCount ? `; ${failedCount} failed.` : '.'}`);
+      if (!failedCount) { setMailerSubject(''); setMailerBody(''); }
+    } catch (err: any) {
+      setMailerNotice(err.response?.data?.error || 'Could not send email. Check the server email configuration.');
+    } finally { setMailerSending(false); }
   };
 
   const handleApproveDeposit = async (id: string) => {
@@ -218,6 +252,7 @@ export default function AdminPage() {
     { id: 'transactions', label: 'Transactions', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> },
     { id: 'kyc', label: 'KYC', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
     { id: 'chats', label: 'Chats', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
+    { id: 'mailer', label: 'Mailer', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg> },
     { id: 'settings', label: 'Settings', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
     { id: 'logs', label: 'Logs', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
   ];
@@ -603,6 +638,58 @@ export default function AdminPage() {
                     </>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* MAILER */}
+            {tab === 'mailer' && (
+              <div className="max-w-3xl bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4">
+                <div>
+                  <h3 className="font-semibold text-white">Email users</h3>
+                  <p className="text-xs text-zinc-500 mt-1">Send a plain text message to one user or individually to all user accounts.</p>
+                </div>
+
+                <label className="flex items-center gap-2 text-sm text-zinc-300">
+                  <input type="checkbox" checked={mailerAllUsers} onChange={(e) => setMailerAllUsers(e.target.checked)} className="accent-yellow-500" />
+                  Send to all users
+                </label>
+
+                {!mailerAllUsers && (
+                  <div className="space-y-2">
+                    <label className="block text-xs text-zinc-500">Recipient</label>
+                    <div className="flex gap-2">
+                      <input type="text" value={mailerSearch} onChange={(e) => setMailerSearch(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && searchMailerUsers()} placeholder="Search users by name or email"
+                        className="flex-1 min-w-0 px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-gold-500" />
+                      <button onClick={searchMailerUsers} className="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm hover:bg-zinc-700">Search</button>
+                    </div>
+                    <select value={mailerUserId} onChange={(e) => setMailerUserId(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-gold-500">
+                      <option value="">Select a user</option>
+                      {users.map((u) => <option key={u.id} value={u.id}>{u.email}{u.first_name ? ` — ${u.first_name} ${u.last_name || ''}` : ''}</option>)}
+                    </select>
+                  </div>
+                )}
+
+                {mailerAllUsers && <p className="text-xs text-amber-400">Each recipient gets a separate email; their addresses are not shown to other users.</p>}
+
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1.5">Subject</label>
+                  <input type="text" maxLength={160} value={mailerSubject} onChange={(e) => setMailerSubject(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-gold-500" />
+                </div>
+                <div>
+                  <label className="block text-xs text-zinc-500 mb-1.5">Message</label>
+                  <textarea rows={9} maxLength={10000} value={mailerBody} onChange={(e) => setMailerBody(e.target.value)}
+                    placeholder="Write your email message..."
+                    className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-gold-500 resize-y" />
+                  <p className="text-right text-[10px] text-zinc-600">{mailerBody.length}/10000</p>
+                </div>
+                {mailerNotice && <p role="status" className="text-sm text-zinc-300">{mailerNotice}</p>}
+                <button onClick={sendMailerMessage} disabled={mailerSending || !mailerSubject.trim() || !mailerBody.trim() || (!mailerAllUsers && !mailerUserId)}
+                  className="px-5 py-2.5 bg-gold-500 text-black rounded-lg text-sm font-semibold hover:bg-gold-400 disabled:opacity-50">
+                  {mailerSending ? 'Sending…' : 'Send Email'}
+                </button>
               </div>
             )}
 

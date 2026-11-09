@@ -69,6 +69,75 @@ async function updateUserExpectedProfit(userId, expectedProfitRate, adminId) {
   };
 }
 
+async function sendMailerMessage({ userId, allUsers, subject, body }, adminId) {
+  const cleanSubject = String(subject || '').trim().replace(/[\r\n]+/g, ' ');
+  const cleanBody = String(body || '').trim();
+  if (!cleanSubject || cleanSubject.length > 160) {
+    throw Object.assign(new Error('Subject is required and must be 160 characters or fewer.'), { status: 400 });
+  }
+  if (!cleanBody || cleanBody.length > 10000) {
+    throw Object.assign(new Error('Message is required and must be 10,000 characters or fewer.'), { status: 400 });
+  }
+
+  let recipients;
+  if (allUsers) {
+    const { data, error, count } = await supabase
+      .from('users')
+      .select('id, email', { count: 'exact' })
+      .eq('role', 'user')
+      .not('email', 'is', null)
+      .order('created_at', { ascending: true })
+      .limit(500);
+    if (error) throw error;
+    if (count > 500) {
+      throw Object.assign(new Error('There are more than 500 users. Narrow the recipient list and send in smaller groups.'), { status: 400 });
+    }
+    recipients = data || [];
+  } else {
+    if (!userId) throw Object.assign(new Error('Choose a recipient or select all users.'), { status: 400 });
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, email')
+      .eq('id', userId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data?.email) throw Object.assign(new Error('User or email address not found.'), { status: 404 });
+    recipients = [data];
+  }
+
+  if (!recipients.length) throw Object.assign(new Error('No email recipients found.'), { status: 400 });
+
+  const { sendAdminEmail } = require('./emailService');
+  let sentCount = 0;
+  let failedCount = 0;
+  let firstFailure = null;
+  for (const recipient of recipients) {
+    try {
+      await sendAdminEmail(recipient.email, cleanSubject, cleanBody);
+      sentCount += 1;
+    } catch (err) {
+      failedCount += 1;
+      firstFailure ||= err;
+    }
+  }
+
+  await AdminLog.create({
+    adminId,
+    action: 'admin_mailer_send',
+    targetType: allUsers ? 'system' : 'user',
+    targetId: allUsers ? null : userId,
+    details: { allUsers: Boolean(allUsers), recipientCount: recipients.length, sentCount, failedCount, subject: cleanSubject },
+  });
+
+  if (sentCount === 0 && firstFailure) {
+    throw Object.assign(new Error(firstFailure.code === 'EMAIL_NOT_CONFIGURED'
+      ? firstFailure.message
+      : 'Email could not be sent. Check the server email configuration.'), { status: 503 });
+  }
+
+  return { recipientCount: recipients.length, sentCount, failedCount };
+}
+
 async function fundWallet(userId, amount, adminId, note) {
   if (!amount || amount <= 0) throw Object.assign(new Error('Invalid amount'), { status: 400 });
 
@@ -328,6 +397,7 @@ module.exports = {
   getDashboard,
   getUsers,
   updateUserExpectedProfit,
+  sendMailerMessage,
   fundWallet,
   updateUserRole,
   getTransactions,

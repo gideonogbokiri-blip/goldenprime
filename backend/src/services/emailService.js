@@ -108,4 +108,26 @@ async function sendWithdrawalStatusEmail(email, { amount, status, reason }) {
   });
 }
 
-module.exports = { sendVerificationEmail, sendResetPasswordEmail, sendDepositApprovedEmail, sendWithdrawalStatusEmail };
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+async function sendAdminEmail(email, subject, body) {
+  const safeBody = escapeHtml(body).replace(/\r?\n/g, '<br/>');
+  const result = await sendEmail({
+    to: email,
+    subject,
+    html: layout(`<p style="color:#e5e5e5; line-height:1.6;">${safeBody}</p>`),
+  });
+  if (result.skipped) {
+    throw Object.assign(new Error('Email delivery is not configured on the server.'), { code: 'EMAIL_NOT_CONFIGURED' });
+  }
+  return result;
+}
+
+module.exports = { sendVerificationEmail, sendResetPasswordEmail, sendDepositApprovedEmail, sendWithdrawalStatusEmail, sendAdminEmail };

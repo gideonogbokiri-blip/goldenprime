@@ -41,6 +41,17 @@ async function updateUserExpectedProfit(req, res, next) {
   } catch (err) { next(err); }
 }
 
+async function sendMailerMessage(req, res, next) {
+  try {
+    const { userId, allUsers, subject, body } = req.body || {};
+    if (allUsers !== true && !userId) {
+      return res.status(400).json({ error: 'Choose a recipient or select all users.' });
+    }
+    const result = await adminService.sendMailerMessage({ userId, allUsers, subject, body }, req.user.id);
+    res.json({ message: `Email sent to ${result.sentCount} user${result.sentCount === 1 ? '' : 's'}.`, ...result });
+  } catch (err) { next(err); }
+}
+
 async function getTransactions(req, res, next) {
   try {
     const txs = await adminService.getTransactions({ status: req.query.status, type: req.query.type });
@@ -245,7 +256,7 @@ async function adminReply(req, res, next) {
 }
 
 module.exports = {
-  dashboard, getUsers, updateUserRole, updateUserExpectedProfit,
+  dashboard, getUsers, updateUserRole, updateUserExpectedProfit, sendMailerMessage,
   fundWallet,
   getTransactions, updateTransactionStatus,
   getWithdrawals, approveWithdrawal, rejectWithdrawal,
