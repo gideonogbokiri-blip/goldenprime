@@ -265,7 +265,11 @@ async function getUserOrders(userId, options) {
 }
 
 async function getUserTrades(userId, options) {
-  return TradeOrder.getUserTrades(userId, options);
+  const trades = await TradeOrder.getUserTrades(userId, options);
+  for (const trade of trades) {
+    if (trade.status === 'completed') await settleCompletedTrade(trade);
+  }
+  return trades;
 }
 
 async function getTrade(tradeId, userId) {
