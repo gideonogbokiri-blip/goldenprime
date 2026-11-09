@@ -114,10 +114,31 @@ function escapeHtml(value) {
 
 async function sendAdminEmail(email, subject, body) {
   const safeBody = escapeHtml(body).replace(/\r?\n/g, '<br/>');
+  const html = `
+    <div style="margin:0;padding:32px 12px;background:#090909;font-family:Arial,Helvetica,sans-serif;color:#f4f4f5;">
+      <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:640px;margin:0 auto;border-collapse:collapse;background:#111113;border:1px solid #29292d;border-radius:14px;overflow:hidden;">
+        <tr>
+          <td style="padding:24px 30px;border-bottom:1px solid #29292d;">
+            <div style="font-size:22px;font-weight:700;letter-spacing:-0.3px;color:#f4f4f5;">
+              <span style="display:inline-block;width:30px;height:30px;line-height:30px;margin-right:9px;border-radius:50%;text-align:center;vertical-align:middle;background:#d4af37;color:#111113;font-size:12px;font-weight:800;">GP</span>
+              <span style="vertical-align:middle;">Golden<span style="color:#d4af37;">Prime</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:30px;font-size:16px;line-height:1.75;color:#e4e4e7;word-break:break-word;">${safeBody}</td>
+        </tr>
+        <tr>
+          <td style="padding:18px 30px;border-top:1px solid #29292d;color:#71717a;font-size:12px;line-height:1.5;">
+            GoldenPrime · Account communication
+          </td>
+        </tr>
+      </table>
+    </div>`;
   const result = await sendEmail({
     to: email,
     subject,
-    html: `<div style="font-family:Arial,sans-serif;white-space:normal;line-height:1.6;color:#222;">${safeBody}</div>`,
+    html,
     text: body,
   });
   if (result.skipped) {
