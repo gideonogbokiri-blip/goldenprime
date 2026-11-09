@@ -111,13 +111,16 @@ async function sendMailerMessage({ userId, allUsers, subject, body }, adminId) {
   let sentCount = 0;
   let failedCount = 0;
   let firstFailure = null;
+  const recipientResults = [];
   for (const recipient of recipients) {
     try {
       await sendAdminEmail(recipient.email, cleanSubject, cleanBody);
       sentCount += 1;
+      recipientResults.push({ email: recipient.email, status: 'sent' });
     } catch (err) {
       failedCount += 1;
       firstFailure ||= err;
+      recipientResults.push({ email: recipient.email, status: 'failed' });
     }
   }
 
@@ -126,7 +129,7 @@ async function sendMailerMessage({ userId, allUsers, subject, body }, adminId) {
     action: 'admin_mailer_send',
     targetType: allUsers ? 'system' : 'user',
     targetId: allUsers ? null : userId,
-    details: { allUsers: Boolean(allUsers), recipientCount: recipients.length, sentCount, failedCount, subject: cleanSubject },
+    details: { allUsers: Boolean(allUsers), recipientCount: recipients.length, sentCount, failedCount, subject: cleanSubject, body: cleanBody, recipients: recipientResults },
   });
 
   if (sentCount === 0 && firstFailure) {
@@ -136,6 +139,10 @@ async function sendMailerMessage({ userId, allUsers, subject, body }, adminId) {
   }
 
   return { recipientCount: recipients.length, sentCount, failedCount };
+}
+
+async function getMailerHistory() {
+  return AdminLog.getMailerHistory();
 }
 
 async function fundWallet(userId, amount, adminId, note) {
@@ -398,6 +405,7 @@ module.exports = {
   getUsers,
   updateUserExpectedProfit,
   sendMailerMessage,
+  getMailerHistory,
   fundWallet,
   updateUserRole,
   getTransactions,

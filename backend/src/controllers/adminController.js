@@ -52,6 +52,13 @@ async function sendMailerMessage(req, res, next) {
   } catch (err) { next(err); }
 }
 
+async function getMailerHistory(req, res, next) {
+  try {
+    const messages = await adminService.getMailerHistory();
+    res.json({ messages });
+  } catch (err) { next(err); }
+}
+
 async function getTransactions(req, res, next) {
   try {
     const txs = await adminService.getTransactions({ status: req.query.status, type: req.query.type });
@@ -256,7 +263,7 @@ async function adminReply(req, res, next) {
 }
 
 module.exports = {
-  dashboard, getUsers, updateUserRole, updateUserExpectedProfit, sendMailerMessage,
+  dashboard, getUsers, updateUserRole, updateUserExpectedProfit, sendMailerMessage, getMailerHistory,
   fundWallet,
   getTransactions, updateTransactionStatus,
   getWithdrawals, approveWithdrawal, rejectWithdrawal,

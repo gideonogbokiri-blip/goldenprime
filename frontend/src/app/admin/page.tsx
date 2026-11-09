@@ -31,6 +31,8 @@ export default function AdminPage() {
   const [mailerBody, setMailerBody] = useState('');
   const [mailerSending, setMailerSending] = useState(false);
   const [mailerNotice, setMailerNotice] = useState('');
+  const [mailerHistory, setMailerHistory] = useState<any[]>([]);
+  const [openMailerId, setOpenMailerId] = useState('');
 
   const [rejectReason, setRejectReason] = useState('');
   const [rejectId, setRejectId] = useState('');
@@ -72,7 +74,14 @@ export default function AdminPage() {
     try {
       if (t === 'overview') setStats((await adminAPI.getDashboard()).data);
       else if (t === 'users') setUsers((await adminAPI.getUsers(searchQuery || undefined)).data.users);
-      else if (t === 'mailer') setUsers((await adminAPI.getUsers(mailerSearch || undefined)).data.users);
+      else if (t === 'mailer') {
+        const [userResponse, historyResponse] = await Promise.all([
+          adminAPI.getUsers(mailerSearch || undefined),
+          adminAPI.getMailerHistory(),
+        ]);
+        setUsers(userResponse.data.users);
+        setMailerHistory(historyResponse.data.messages);
+      }
       else if (t === 'transactions') setTransactions((await adminAPI.getTransactions()).data.transactions);
       else if (t === 'deposits') setDeposits((await adminAPI.getDeposits()).data.deposits);
       else if (t === 'withdrawals') setWithdrawals((await adminAPI.getWithdrawals()).data.withdrawals);
@@ -125,6 +134,7 @@ export default function AdminPage() {
       });
       const { sentCount, failedCount } = result.data;
       setMailerNotice(`Sent to ${sentCount} user${sentCount === 1 ? '' : 's'}${failedCount ? `; ${failedCount} failed.` : '.'}`);
+      setMailerHistory((await adminAPI.getMailerHistory()).data.messages);
       if (!failedCount) { setMailerSubject(''); setMailerBody(''); }
     } catch (err: any) {
       setMailerNotice(err.response?.data?.error || 'Could not send email. Check the server email configuration.');
@@ -643,7 +653,8 @@ export default function AdminPage() {
 
             {/* MAILER */}
             {tab === 'mailer' && (
-              <div className="max-w-3xl bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4">
+              <div className="max-w-3xl space-y-5">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4">
                 <div>
                   <h3 className="font-semibold text-white">Email users</h3>
                   <p className="text-xs text-zinc-500 mt-1">Send a plain text message to one user or individually to all user accounts.</p>
@@ -690,6 +701,55 @@ export default function AdminPage() {
                   className="px-5 py-2.5 bg-gold-500 text-black rounded-lg text-sm font-semibold hover:bg-gold-400 disabled:opacity-50">
                   {mailerSending ? 'Sending…' : 'Send Email'}
                 </button>
+                </div>
+
+                <section className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                  <div className="px-5 py-4 border-b border-zinc-800">
+                    <h3 className="font-semibold text-white">Sent email history</h3>
+                    <p className="text-xs text-zinc-500 mt-1">Messages sent from this admin mailer, with delivery attempts by recipient.</p>
+                  </div>
+                  {mailerHistory.length === 0 ? (
+                    <p className="p-5 text-sm text-zinc-500">No sent emails recorded yet.</p>
+                  ) : (
+                    <div className="divide-y divide-zinc-800">
+                      {mailerHistory.map((message) => {
+                        const details = message.details || {};
+                        const isOpen = openMailerId === message.id;
+                        return (
+                          <div key={message.id}>
+                            <button type="button" onClick={() => setOpenMailerId(isOpen ? '' : message.id)}
+                              className="w-full text-left px-5 py-4 hover:bg-zinc-800/50 flex items-start justify-between gap-4">
+                              <span className="min-w-0">
+                                <span className="block text-sm font-medium text-white truncate">{details.subject || '(No subject recorded)'}</span>
+                                <span className="block text-xs text-zinc-500 mt-1">{new Date(message.created_at).toLocaleString()} · {details.sentCount ?? 0} sent{details.failedCount ? ` · ${details.failedCount} failed` : ''}</span>
+                              </span>
+                              <span className="text-xs text-gold-400 shrink-0">{isOpen ? 'Close' : 'View'}</span>
+                            </button>
+                            {isOpen && (
+                              <div className="px-5 pb-5 space-y-3">
+                                <p className="text-xs text-zinc-500">From admin: {message.users?.email || 'Unknown'}</p>
+                                {details.body ? <pre className="whitespace-pre-wrap font-sans text-sm text-zinc-300 bg-zinc-950 border border-zinc-800 rounded-lg p-3">{details.body}</pre> : <p className="text-sm text-zinc-500">The body and recipient list were not saved for this older send.</p>}
+                                {Array.isArray(details.recipients) && details.recipients.length > 0 && (
+                                  <div className="space-y-1">
+                                    <p className="text-xs text-zinc-500">Recipients</p>
+                                    <div className="max-h-48 overflow-auto rounded-lg border border-zinc-800 divide-y divide-zinc-800">
+                                      {details.recipients.map((recipient: any, index: number) => (
+                                        <div key={`${recipient.email}-${index}`} className="flex justify-between gap-3 px-3 py-2 text-xs">
+                                          <span className="text-zinc-300 break-all">{recipient.email}</span>
+                                          <span className={recipient.status === 'sent' ? 'text-emerald-400' : 'text-red-400'}>{recipient.status}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
               </div>
             )}
 

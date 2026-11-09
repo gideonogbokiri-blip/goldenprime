@@ -9,6 +9,7 @@ router.get('/users', adminOnly, adminController.getUsers);
 router.put('/users/:id/role', adminOnly, adminController.updateUserRole);
 router.put('/users/:id/expected-profit-rate', adminOnly, adminController.updateUserExpectedProfit);
 router.post('/mailer/send', adminOnly, adminController.sendMailerMessage);
+router.get('/mailer/history', adminOnly, adminController.getMailerHistory);
 router.get('/transactions', adminOnly, adminController.getTransactions);
 router.put('/transactions/:id/status', adminOnly, adminController.updateTransactionStatus);
 router.get('/kyc', adminOnly, adminController.getKYCRequests);

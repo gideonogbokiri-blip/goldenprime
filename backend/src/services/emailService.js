@@ -22,7 +22,7 @@ function getTransporter() {
   return transporter;
 }
 
-async function sendEmail({ to, subject, html }) {
+async function sendEmail({ to, subject, html, text }) {
   const tr = getTransporter();
   if (!tr) return { skipped: true };
 
@@ -32,13 +32,8 @@ async function sendEmail({ to, subject, html }) {
       to,
       subject,
       html,
-      text: html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+      text: text || html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
       replyTo: EMAIL_USER,
-      headers: {
-        'X-Entity-Ref-ID': `gp-${Date.now()}`,
-        'List-Unsubscribe': `<mailto:${EMAIL_USER}?subject=unsubscribe>`,
-        MessageId: `<gp-${Date.now()}@goldenprime.vercel.app>`,
-      },
     });
     return { ok: true };
   } catch (err) {
@@ -122,7 +117,8 @@ async function sendAdminEmail(email, subject, body) {
   const result = await sendEmail({
     to: email,
     subject,
-    html: layout(`<p style="color:#e5e5e5; line-height:1.6;">${safeBody}</p>`),
+    html: `<div style="font-family:Arial,sans-serif;white-space:normal;line-height:1.6;color:#222;">${safeBody}</div>`,
+    text: body,
   });
   if (result.skipped) {
     throw Object.assign(new Error('Email delivery is not configured on the server.'), { code: 'EMAIL_NOT_CONFIGURED' });

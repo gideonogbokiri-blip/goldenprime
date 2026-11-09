@@ -29,6 +29,18 @@ class AdminLog {
     return data || [];
   }
 
+  static async getMailerHistory({ limit = 100 } = {}) {
+    const { data, error } = await supabase
+      .from('admin_logs')
+      .select('id, admin_id, details, created_at, users:admin_id(email, first_name, last_name)')
+      .eq('action', 'admin_mailer_send')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
+  }
+
   static async getStats() {
     const [users, transactions, kycPending, kycApproved, pendingDeposits, pendingWithdrawals, verifiedUsers] = await Promise.all([
       supabase.from('users').select('id', { count: 'exact', head: true }),

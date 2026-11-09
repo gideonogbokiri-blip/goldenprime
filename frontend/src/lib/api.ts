@@ -110,6 +110,7 @@ export const adminAPI = {
     api.put(`/admin/users/${id}/expected-profit-rate`, { expectedProfitRate }),
   sendMailerMessage: (data: { userId?: string; allUsers?: boolean; subject: string; body: string }) =>
     api.post('/admin/mailer/send', data),
+  getMailerHistory: () => api.get('/admin/mailer/history'),
   getTransactions: (status?: string, type?: string) => api.get('/admin/transactions', { params: { status, type } }),
   updateTransactionStatus: (id: string, status: string) => api.put(`/admin/transactions/${id}/status`, { status }),
   getKYC: (status?: string) => api.get('/admin/kyc', { params: { status } }),
