@@ -96,7 +96,7 @@ async function getReply(message) {
 
   // Email verification
   if (has(text, ['verify email', 'email verification', 'confirm email', 'did not get email', 'verification link', 'verify my'])) {
-    return `When you registered, a verification email was sent to your inbox. Click the "Verify Email" button in that message to activate your account. If you didn't receive it, check your spam folder or use the "Resend verification" option — you can also ask me to have our admin resend it.`;
+    return `Email verification is not required to create or access your account. You can sign in with the email address and password you registered with.`;
   }
 
   // Reset password

@@ -73,25 +73,13 @@ async function register({ email, password, firstName, lastName, referralCode }) 
     console.error('Failed to create default wallet:', err.message);
   }
 
-  // Set verification token (best-effort)
-  let verificationToken = null;
-  try {
-    verificationToken = await User.setVerificationToken(user.id);
-  } catch (err) {
-    console.error('Failed to set verification token:', err.message);
-  }
-
-  // Send verification email (best-effort, non-blocking)
-  if (verificationToken) {
-    try {
-      const { sendVerificationEmail } = require('../services/emailService');
-      await sendVerificationEmail(email, verificationToken);
-    } catch (err) {
-      console.error('Failed to send verification email:', err.message);
-    }
-  }
-
-  return { user: { ...user, referralCode: myRefCode } };
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+  return {
+    user: { ...user, referralCode: myRefCode },
+    accessToken,
+    refreshToken,
+  };
 }
 
 async function login({ email, password }) {
@@ -103,14 +91,6 @@ async function login({ email, password }) {
   const valid = await bcrypt.compare(password, user.password_hash);
   if (!valid) {
     throw Object.assign(new Error('Invalid email or password'), { status: 401 });
-  }
-
-  if (!user.is_verified) {
-    throw Object.assign(new Error('Please verify your email before logging in.'), {
-      status: 403,
-      needsVerification: true,
-      email,
-    });
   }
 
   const accessToken = generateAccessToken(user);

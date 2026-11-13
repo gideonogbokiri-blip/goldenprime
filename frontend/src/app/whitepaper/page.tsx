@@ -147,7 +147,7 @@ export default function WhitepaperPage() {
               <h3 className="text-xl font-semibold mb-4">Your Journey</h3>
               <div className="space-y-4">
                 {[
-                  { step: '1', title: 'Create Account', desc: 'Sign up and verify your email address to activate your account.' },
+                  { step: '1', title: 'Create Account', desc: 'Sign up and access your account immediately.' },
                   { step: '2', title: 'Fund Your Wallet', desc: 'Deposit via bank transfer or crypto, then upload your payment slip for review.' },
                   { step: '3', title: 'Start Earning', desc: 'Once your deposit is approved, your balance grows with the expected profit rate.' },
                   { step: '4', title: 'Withdraw Anytime', desc: 'Request a withdrawal to your bank account. Our team approves it and sends the funds.' },

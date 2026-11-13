@@ -67,9 +67,9 @@ export default function ProfilePage() {
               <p className="font-semibold">{user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-400">Account Verified</p>
-              <p className={`font-semibold ${user?.is_verified ? 'text-green-500' : 'text-yellow-500'}`}>
-                {user?.is_verified ? 'Yes' : 'No'}
+              <p className="text-sm text-gray-400">Email Verification</p>
+              <p className="font-semibold text-green-500">
+                Not required
               </p>
             </div>
           </div>

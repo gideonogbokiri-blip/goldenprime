@@ -5,7 +5,7 @@ async function register(req, res, next) {
     const { email, password, firstName, lastName, referralCode } = req.body;
     const result = await authService.register({ email, password, firstName, lastName, referralCode });
     res.status(201).json({
-      message: 'Registration successful. Please check your email to verify your account.',
+      message: 'Registration successful.',
       user: result.user,
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
