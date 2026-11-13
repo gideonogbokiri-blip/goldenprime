@@ -47,6 +47,70 @@ async function getUsers({ limit = 50, offset = 0, search = null } = {}) {
   return withBalance;
 }
 
+async function deleteUser(userId, adminId) {
+  if (userId === adminId) {
+    throw Object.assign(new Error('You cannot delete your own admin account.'), { status: 400 });
+  }
+
+  const { data: user, error: lookupError } = await supabase
+    .from('users')
+    .select('id, email, role')
+    .eq('id', userId)
+    .maybeSingle();
+  if (lookupError) throw lookupError;
+  if (!user) throw Object.assign(new Error('User not found.'), { status: 404 });
+  if (user.role !== 'user') {
+    throw Object.assign(new Error('Admin accounts cannot be deleted from this action.'), { status: 403 });
+  }
+
+  const { data: referrals, error: referralLookupError } = await supabase
+    .from('user_settings')
+    .select('user_id')
+    .eq('referred_by', userId);
+  if (referralLookupError) throw referralLookupError;
+  const referredUserIds = (referrals || []).map((referral) => referral.user_id);
+  if (referredUserIds.length) {
+    const { error } = await supabase
+      .from('user_settings')
+      .update({ referred_by: null })
+      .in('user_id', referredUserIds);
+    if (error) throw error;
+  }
+
+  const { data: deleted, error: deleteError } = await supabase
+    .from('users')
+    .delete()
+    .eq('id', userId)
+    .eq('role', 'user')
+    .select('id, email')
+    .maybeSingle();
+  if (deleteError || !deleted) {
+    if (referredUserIds.length) {
+      await supabase.from('user_settings').update({ referred_by: userId }).in('user_id', referredUserIds);
+    }
+    if (deleteError) throw deleteError;
+    throw Object.assign(new Error('User not found or is no longer eligible for deletion.'), { status: 404 });
+  }
+
+  const { error: profitRateCleanupError } = await supabase
+    .from('settings')
+    .delete()
+    .eq('key', Setting.userExpectedProfitRateKey(userId));
+  if (profitRateCleanupError) {
+    console.error('Failed to remove deleted user expected-profit setting:', profitRateCleanupError.message);
+  }
+
+  await AdminLog.create({
+    adminId,
+    action: 'delete_user_account',
+    targetType: 'user',
+    targetId: userId,
+    details: { email: user.email },
+  });
+
+  return deleted;
+}
+
 async function updateUserExpectedProfit(userId, expectedProfitRate, adminId) {
   const { data: user, error } = await supabase.from('users').select('id').eq('id', userId).maybeSingle();
   if (error) throw error;
@@ -403,6 +467,7 @@ async function getLogs({ limit = 100, offset = 0 } = {}) {
 module.exports = {
   getDashboard,
   getUsers,
+  deleteUser,
   updateUserExpectedProfit,
   sendMailerMessage,
   getMailerHistory,

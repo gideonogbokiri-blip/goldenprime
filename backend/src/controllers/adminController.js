@@ -17,6 +17,13 @@ async function getUsers(req, res, next) {
   } catch (err) { next(err); }
 }
 
+async function deleteUser(req, res, next) {
+  try {
+    const user = await adminService.deleteUser(req.params.id, req.user.id);
+    res.json({ message: 'User account deleted.', user });
+  } catch (err) { next(err); }
+}
+
 async function updateUserRole(req, res, next) {
   try {
     const { role } = req.body;
@@ -263,7 +270,7 @@ async function adminReply(req, res, next) {
 }
 
 module.exports = {
-  dashboard, getUsers, updateUserRole, updateUserExpectedProfit, sendMailerMessage, getMailerHistory,
+  dashboard, getUsers, deleteUser, updateUserRole, updateUserExpectedProfit, sendMailerMessage, getMailerHistory,
   fundWallet,
   getTransactions, updateTransactionStatus,
   getWithdrawals, approveWithdrawal, rejectWithdrawal,

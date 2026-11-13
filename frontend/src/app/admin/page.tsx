@@ -114,6 +114,25 @@ export default function AdminPage() {
     try { setUsers((await adminAPI.getUsers(searchQuery || undefined)).data.users); } catch (e) { console.error(e); } finally { setLoading(false); }
   };
 
+  const handleDeleteUser = async (user: any) => {
+    const confirmed = window.confirm(
+      `Permanently delete ${user.email}? This will remove the customer account and related records, including its wallet and transaction history. This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await adminAPI.deleteUser(user.id);
+      setUsers((current) => current.filter((item) => item.id !== user.id));
+      setProfitRateDrafts((current) => {
+        const next = { ...current };
+        delete next[user.id];
+        return next;
+      });
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Could not delete this user account.');
+    }
+  };
+
   const searchMailerUsers = async () => {
     setLoading(true);
     try { setUsers((await adminAPI.getUsers(mailerSearch || undefined)).data.users); } catch (e) { console.error(e); } finally { setLoading(false); }
@@ -394,10 +413,18 @@ export default function AdminPage() {
                             </select>
                           </td>
                           <td className="p-4">
-                            <button onClick={() => { setFundUserId(u.id); setFundUserName(u.email); setFundAmount(''); setFundNote(''); }}
-                              className="text-xs bg-gold-500/15 border border-gold-500/30 text-gold-400 px-3 py-1.5 rounded-lg font-semibold hover:bg-gold-500/25 transition-colors">
-                              Fund Wallet
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => { setFundUserId(u.id); setFundUserName(u.email); setFundAmount(''); setFundNote(''); }}
+                                className="text-xs bg-gold-500/15 border border-gold-500/30 text-gold-400 px-3 py-1.5 rounded-lg font-semibold hover:bg-gold-500/25 transition-colors">
+                                Fund Wallet
+                              </button>
+                              {u.role === 'user' && (
+                                <button onClick={() => handleDeleteUser(u)}
+                                  className="text-xs bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-1.5 rounded-lg font-semibold hover:bg-red-500/20 transition-colors">
+                                  Delete
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}

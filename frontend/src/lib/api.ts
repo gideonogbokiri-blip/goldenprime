@@ -105,6 +105,7 @@ export const kycAPI = {
 export const adminAPI = {
   getDashboard: () => api.get('/admin/dashboard'),
   getUsers: (search?: string) => api.get('/admin/users', { params: { search } }),
+  deleteUser: (id: string) => api.delete(`/admin/users/${id}`),
   updateUserRole: (id: string, role: string) => api.put(`/admin/users/${id}/role`, { role }),
   updateUserExpectedProfit: (id: string, expectedProfitRate: number | null) =>
     api.put(`/admin/users/${id}/expected-profit-rate`, { expectedProfitRate }),
