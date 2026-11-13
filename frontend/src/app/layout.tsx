@@ -39,9 +39,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function () {
-                  navigator.serviceWorker.register('/sw.js').catch(function (err) {
-                    console.error('SW registration failed:', err);
+                  var refreshing = false;
+                  navigator.serviceWorker.addEventListener('controllerchange', function () {
+                    if (refreshing) return;
+                    refreshing = true;
+                    window.location.reload();
                   });
+                  navigator.serviceWorker.register('/sw.js?v=2', { updateViaCache: 'none' })
+                    .then(function (registration) { return registration.update(); })
+                    .catch(function (err) { console.error('SW update failed:', err); });
                 });
               }
             `,
