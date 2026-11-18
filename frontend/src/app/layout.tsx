@@ -37,19 +37,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function () {
-                  var refreshing = false;
-                  navigator.serviceWorker.addEventListener('controllerchange', function () {
-                    if (refreshing) return;
-                    refreshing = true;
-                    window.location.reload();
-                  });
-                  navigator.serviceWorker.register('/sw.js?v=2', { updateViaCache: 'none' })
-                    .then(function (registration) { return registration.update(); })
-                    .catch(function (err) { console.error('SW update failed:', err); });
-                });
-              }
+              // The old service worker cached pages and served stale HTML/JS on
+              // subsequent visits (especially outside Chrome). The app no longer
+              // needs a service worker, so unregister any old ones and drop their
+              // caches to make sure every browser loads fresh assets.
+              window.addEventListener('load', function () {
+                if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                    registrations.forEach(function (registration) { registration.unregister(); });
+                  }).catch(function () {});
+                }
+                if (window.caches && caches.keys) {
+                  caches.keys().then(function (keys) {
+                    keys.filter(function (key) { return key.indexOf('goldenprime') === 0; })
+                      .forEach(function (key) { caches.delete(key); });
+                  }).catch(function () {});
+                }
+              });
             `,
           }}
         />
