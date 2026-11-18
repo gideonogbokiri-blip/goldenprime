@@ -9,6 +9,7 @@ import SuccessAnimation from '@/components/ui/SuccessAnimation';
 import { fireGoldConfetti, fireBigCelebration } from '@/lib/confetti';
 import { SkeletonTable } from '@/components/ui/Skeleton';
 import BrandLogo from '@/components/ui/BrandLogo';
+import { storage } from '@/lib/storage';
 
 type Step = 'amount' | 'payment' | 'confirm' | 'done';
 type PayMethod = 'bank_transfer' | 'card';
@@ -33,7 +34,7 @@ export default function PreorderPage() {
   const [expiryYear, setExpiryYear] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = storage.get('accessToken');
     if (!token) { router.push('/login'); return; }
     Promise.all([
       goldAPI.getCoinInfo().then(r => setCoinInfo(r.data)),

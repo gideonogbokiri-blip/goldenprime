@@ -10,6 +10,7 @@ import { SkeletonCard } from '@/components/ui/Skeleton';
 import { StaggerContainer, StaggerItem } from '@/components/ui/Animations';
 import CryptoIcon from '@/components/CryptoIcon';
 import BrandLogo from '@/components/ui/BrandLogo';
+import { storage } from '@/lib/storage';
 
 const COINS = [
   { symbol: 'BTC', name: 'Bitcoin', color: 'text-orange-500' },
@@ -59,7 +60,7 @@ export default function TradePage() {
   const [expandedTrade, setExpandedTrade] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = storage.get('accessToken');
     if (!token) { router.push('/login'); return; }
     loadData();
   }, [router, selectedCoin]);

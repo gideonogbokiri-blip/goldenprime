@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { adminAPI, authAPI } from '@/lib/api';
 import BrandLogo from '@/components/ui/BrandLogo';
+import { storage } from '@/lib/storage';
 
 type Tab = 'overview' | 'users' | 'deposits' | 'withdrawals' | 'transactions' | 'kyc' | 'chats' | 'mailer' | 'settings' | 'logs';
 
@@ -52,7 +53,7 @@ export default function AdminPage() {
   const [profitRateDrafts, setProfitRateDrafts] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = storage.get('accessToken');
     if (!token) { router.push('/admin/login'); return; }
     authAPI.getMe().then((r) => {
       if (r.data.user?.role !== 'admin') {
@@ -292,8 +293,8 @@ export default function AdminPage() {
   const verifiedUsers = users.filter((u: any) => u.is_verified).length;
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    storage.remove('accessToken');
+    storage.remove('refreshToken');
     router.push('/login');
   };
 

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { authAPI } from '@/lib/api';
 import BrandLogo from '@/components/ui/BrandLogo';
 import { FloatingTokens, AuthCard } from '@/components/ui/AuthLayout';
+import { storage } from '@/lib/storage';
 
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input {...props}
@@ -54,8 +55,8 @@ function RegisterForm() {
         email: form.email, password: form.password, firstName: form.firstName,
         lastName: form.lastName, referralCode: form.referralCode || undefined,
       });
-      localStorage.setItem('accessToken', res.data.accessToken);
-      localStorage.setItem('refreshToken', res.data.refreshToken);
+      storage.set('accessToken', res.data.accessToken);
+      storage.set('refreshToken', res.data.refreshToken);
       router.push('/dashboard');
     } catch (err: any) {
       const status = err.response?.status;

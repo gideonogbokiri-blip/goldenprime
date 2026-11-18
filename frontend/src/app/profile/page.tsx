@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authAPI, goldAPI, kycAPI } from '@/lib/api';
 import BrandLogo from '@/components/ui/BrandLogo';
+import { storage } from '@/lib/storage';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = storage.get('accessToken');
     if (!token) { router.push('/login'); return; }
     Promise.all([
       authAPI.getMe().then(r => setUser(r.data.user)),

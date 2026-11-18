@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { storage } from '@/lib/storage';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://goldenprime-api.vercel.app/api';
 
@@ -10,7 +11,7 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('accessToken');
+    const token = storage.get('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -24,8 +25,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && typeof window !== 'undefined') {
       const path = window.location.pathname;
       if (path !== '/login' && path !== '/register') {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        storage.remove('accessToken');
+        storage.remove('refreshToken');
         window.location.href = '/login';
       }
     }

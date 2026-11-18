@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { chatAPI } from '@/lib/api';
+import { storage } from '@/lib/storage';
 
 interface ChatMessage {
   id: string;
@@ -96,7 +97,7 @@ export default function ChatBot() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setAuthenticated(!!localStorage.getItem('accessToken'));
+      setAuthenticated(!!storage.get('accessToken'));
     }
   }, []);
 

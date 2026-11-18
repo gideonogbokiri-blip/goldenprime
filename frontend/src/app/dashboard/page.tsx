@@ -11,6 +11,7 @@ import { SkeletonCard } from '@/components/ui/Skeleton';
 import BrandLogo from '@/components/ui/BrandLogo';
 import DepositFeed from '@/components/DepositFeed';
 import WithdrawFeed from '@/components/WithdrawFeed';
+import { storage } from '@/lib/storage';
 
 const TxIcon = ({ type }: { type: string }) => {
   const c = "w-4 h-4"; const b = "w-8 h-8 rounded-lg flex items-center justify-center shrink-0";
@@ -87,7 +88,7 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = storage.get('accessToken');
     if (!token) { router.push('/login'); return; }
     Promise.all([
       authAPI.getMe().then(r => setUser(r.data.user)),
@@ -100,7 +101,7 @@ export default function DashboardPage() {
   }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken'); localStorage.removeItem('refreshToken');
+    storage.remove('accessToken'); storage.remove('refreshToken');
     router.push('/login');
   };
 

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { authAPI } from '@/lib/api';
 import BrandLogo from '@/components/ui/BrandLogo';
+import { storage } from '@/lib/storage';
 
 export default function SecurityPage() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export default function SecurityPage() {
   const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = storage.get('accessToken');
     if (!token) { router.push('/login'); return; }
     authAPI.getMe().then(r => setUser(r.data.user)).catch(() => {}).finally(() => setLoading(false));
   }, [router]);

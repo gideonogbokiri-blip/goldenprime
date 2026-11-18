@@ -8,6 +8,7 @@ import { walletAPI, depositAPI, settingsAPI, tradingAPI } from '@/lib/api';
 import { SkeletonCard, SkeletonTable } from '@/components/ui/Skeleton';
 import { StaggerContainer, StaggerItem } from '@/components/ui/Animations';
 import BrandLogo from '@/components/ui/BrandLogo';
+import { storage } from '@/lib/storage';
 
 interface Wallet {
   id: string;
@@ -78,7 +79,7 @@ export default function WalletPage() {
   const slipRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = storage.get('accessToken');
     if (!token) { router.push('/login'); return; }
     fetchData();
   }, [router]);

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { authAPI } from '@/lib/api';
 import BrandLogo from '@/components/ui/BrandLogo';
 import { AuthCard } from '@/components/ui/AuthLayout';
+import { storage } from '@/lib/storage';
 
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input {...props}
@@ -31,8 +32,8 @@ export default function AdminLoginPage() {
         setLoading(false);
         return;
       }
-      localStorage.setItem('accessToken', res.data.accessToken);
-      localStorage.setItem('refreshToken', res.data.refreshToken);
+      storage.set('accessToken', res.data.accessToken);
+      storage.set('refreshToken', res.data.refreshToken);
       router.push('/admin');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Login failed. Check your credentials.');

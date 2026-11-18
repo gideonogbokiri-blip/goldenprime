@@ -9,6 +9,7 @@ import { StaggerContainer, StaggerItem } from '@/components/ui/Animations';
 import { fireReferralConfetti } from '@/lib/confetti';
 import TierBadge, { TierProgress, TierCard } from '@/components/ui/TierBadge';
 import BrandLogo from '@/components/ui/BrandLogo';
+import { storage } from '@/lib/storage';
 
 export default function ReferralsPage() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function ReferralsPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = storage.get('accessToken');
     if (!token) { router.push('/login'); return; }
     Promise.all([
       goldAPI.getReferralInfo().then(r => setReferral(r.data)),

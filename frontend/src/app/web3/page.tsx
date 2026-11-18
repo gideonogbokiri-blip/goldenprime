@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { useWeb3 } from '@/lib/web3';
 import { authAPI } from '@/lib/api';
 import BrandLogo from '@/components/ui/BrandLogo';
+import { storage } from '@/lib/storage';
 
 export default function Web3Page() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export default function Web3Page() {
   const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = storage.get('accessToken');
     if (!token) { router.push('/login'); return; }
     authAPI.getMe().then(r => setUser(r.data.user)).catch(() => {});
   }, [router]);

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { kycAPI } from '@/lib/api';
 import BrandLogo from '@/components/ui/BrandLogo';
+import { storage } from '@/lib/storage';
 
 export default function KYCPage() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function KYCPage() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = storage.get('accessToken');
     if (!token) { router.push('/login'); return; }
     kycAPI.getStatus().then((res) => { setKyc(res.data.kyc); setLoading(false); }).catch(() => setLoading(false));
   }, [router]);
